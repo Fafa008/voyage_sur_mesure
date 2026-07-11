@@ -1,0 +1,265 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id           Int           @id @default(autoincrement())
+  nom          RoleNom       @unique
+  utilisateurs Utilisateur[]
+}
+
+model Utilisateur {
+  id              Int            @id @default(autoincrement())
+  nom             String
+  prenom          String?
+  email           String         @unique
+  motDePasseHash  String
+  telephone       String?        @unique
+  dateInscription DateTime       @default(now())
+  roleId          Int
+  avis            Avis[]
+  devis           Devis[]
+  favoris         Favori[]
+  notifications   Notification[]
+  paiements       Paiement[]
+  role            Role           @relation(fields: [roleId], references: [id])
+}
+
+model Theme {
+  id       Int       @id @default(autoincrement())
+  nom      String    @unique
+  circuits Circuit[]
+}
+
+model Region {
+  id       Int       @id @default(autoincrement())
+  nom      String    @unique
+  circuits Circuit[]
+}
+
+model Circuit {
+  id                  Int            @id @default(autoincrement())
+  titre               String
+  slug                String         @unique
+  description         String?
+  dureeJours          Int?
+  prixEstime          Decimal?       @db.Decimal(10, 2)
+  nbPlacesDisponibles Int            @default(0)
+  dateDebut           DateTime?
+  estGroupe           Boolean        @default(false)
+  themeId             Int?
+  regionId            Int?
+  avis                Avis[]
+  region              Region?        @relation(fields: [regionId], references: [id])
+  theme               Theme?         @relation(fields: [themeId], references: [id])
+  devis               Devis[]
+  etapes              Etape[]
+  favoris             Favori[]
+  images              ImageCircuit[]
+}
+
+model ImageCircuit {
+  id        Int     @id @default(autoincrement())
+  url       String
+  legende   String?
+  ordre     Int?
+  circuitId Int
+  circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+}
+
+model Hebergement {
+  id      Int     @id @default(autoincrement())
+  nom     String
+  type    String?
+  etoiles Int?
+  adresse String?
+  etape   Etape?
+}
+
+model Etape {
+  id            Int         @id @default(autoincrement())
+  ordre         Int
+  ville         String?
+  description   String?
+  circuitId     Int
+  hebergementId Int         @unique
+  activites     Activite[]
+  circuit       Circuit     @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  hebergement   Hebergement @relation(fields: [hebergementId], references: [id])
+}
+
+model Activite {
+  id          Int      @id @default(autoincrement())
+  nom         String
+  description String?
+  duree       Int?
+  prix        Decimal? @db.Decimal(10, 2)
+  etapeId     Int
+  etape       Etape    @relation(fields: [etapeId], references: [id], onDelete: Cascade)
+}
+
+model Devis {
+  id                    Int          @id @default(autoincrement())
+  dateDemande           DateTime     @default(now())
+  nombrePersonnes       Int          @default(1)
+  commentaireClient     String?
+  commentaireConseiller String?
+  montantTotal          Decimal?     @db.Decimal(10, 2)
+  statut                StatutDevis  @default(en_cours)
+  utilisateurId         Int
+  circuitId             Int?
+  circuit               Circuit?     @relation(fields: [circuitId], references: [id])
+  utilisateur           Utilisateur  @relation(fields: [utilisateurId], references: [id])
+  reservation           Reservation?
+}
+
+model Reservation {
+  id              Int               @id @default(autoincrement())
+  dateReservation DateTime          @default(now())
+  montantFinal    Decimal?          @db.Decimal(10, 2)
+  statut          StatutReservation @default(confirmee)
+  devisId         Int               @unique
+  paiement        Paiement?
+  devis           Devis             @relation(fields: [devisId], references: [id], onDelete: Cascade)
+}
+
+model ModePaiement {
+  id        Int        @id @default(autoincrement())
+  nom       String     @unique
+  paiements Paiement[]
+}
+
+model Paiement {
+  id                   Int          @id @default(autoincrement())
+  montant              Decimal      @db.Decimal(10, 2)
+  datePaiement         DateTime     @default(now())
+  referenceTransaction String?      @unique
+  reservationId        Int?         @unique
+  utilisateurId        Int
+  modeId               Int
+  mode                 ModePaiement @relation(fields: [modeId], references: [id])
+  reservation          Reservation? @relation(fields: [reservationId], references: [id])
+  utilisateur          Utilisateur  @relation(fields: [utilisateurId], references: [id])
+}
+
+model Avis {
+  id            Int         @id @default(autoincrement())
+  note          Int
+  commentaire   String?
+  dateAvis      DateTime    @default(now())
+  estModere     Boolean     @default(false)
+  utilisateurId Int
+  circuitId     Int
+  circuit       Circuit     @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+}
+
+model Favori {
+  id            Int         @id @default(autoincrement())
+  dateAjout     DateTime    @default(now())
+  utilisateurId Int
+  circuitId     Int
+  circuit       Circuit     @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+
+  @@unique([utilisateurId, circuitId])
+}
+
+model Notification {
+  id            Int         @id @default(autoincrement())
+  titre         String
+  message       String?
+  dateEnvoi     DateTime    @default(now())
+  lu            Boolean     @default(false)
+  utilisateurId Int
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+}
+
+enum RoleNom {
+  client
+  conseiller
+  admin
+}
+
+enum StatutDevis {
+  en_cours
+  en_modification
+  valide
+  accepte
+  refuse
+  reserve
+}
+
+enum StatutReservation {
+  confirmee
+  annulee
+  terminee
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
