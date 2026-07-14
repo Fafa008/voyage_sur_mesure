@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,26 +7,42 @@ datasource db {
 }
 
 model Role {
-  id           Int           @id @default(autoincrement())
-  nom          RoleNom       @unique
-  utilisateurs Utilisateur[]
+  id   Int     @id @default(autoincrement())
+  nom  RoleNom @unique
+  user User[]
 }
 
-model Utilisateur {
-  id              Int            @id @default(autoincrement())
-  nom             String
+model User {
+  // 🔐 Champs Better Auth (obligatoires)
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique @db.VarChar(255)
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 🧑‍💼 Champs métier (ex-`Utilisateur`)
   prenom          String?
-  email           String         @unique
-  motDePasseHash  String
-  telephone       String?        @unique
-  dateInscription DateTime       @default(now())
-  roleId          Int
-  avis            Avis[]
-  devis           Devis[]
-  favoris         Favori[]
-  notifications   Notification[]
-  paiements       Paiement[]
-  role            Role           @relation(fields: [roleId], references: [id])
+  telephone       String?  @unique
+  dateInscription DateTime @default(now())
+
+  // 🔗 Rôle (relation vers Role)
+  roleId Int?
+  role   Role? @relation(fields: [roleId], references: [id])
+
+  // 🔗 Relations métier
+  devis         Devis[]
+  paiements     Paiement[]
+  avis          Avis[]
+  favoris       Favori[]
+  notifications Notification[]
+
+  // 🔗 Relations Better Auth
+  sessions Session[]
+  accounts Account[]
+
+  @@map("user")
 }
 
 model Theme {
@@ -111,10 +126,10 @@ model Devis {
   commentaireConseiller String?
   montantTotal          Decimal?     @db.Decimal(10, 2)
   statut                StatutDevis  @default(en_cours)
-  utilisateurId         Int
+  userId                String
   circuitId             Int?
   circuit               Circuit?     @relation(fields: [circuitId], references: [id])
-  utilisateur           Utilisateur  @relation(fields: [utilisateurId], references: [id])
+  user                  User         @relation(fields: [userId], references: [id])
   reservation           Reservation?
 }
 
@@ -140,44 +155,44 @@ model Paiement {
   datePaiement         DateTime     @default(now())
   referenceTransaction String?      @unique
   reservationId        Int?         @unique
-  utilisateurId        Int
+  userId               String
   modeId               Int
   mode                 ModePaiement @relation(fields: [modeId], references: [id])
   reservation          Reservation? @relation(fields: [reservationId], references: [id])
-  utilisateur          Utilisateur  @relation(fields: [utilisateurId], references: [id])
+  user                 User         @relation(fields: [userId], references: [id])
 }
 
 model Avis {
-  id            Int         @id @default(autoincrement())
-  note          Int
-  commentaire   String?
-  dateAvis      DateTime    @default(now())
-  estModere     Boolean     @default(false)
-  utilisateurId Int
-  circuitId     Int
-  circuit       Circuit     @relation(fields: [circuitId], references: [id], onDelete: Cascade)
-  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  id          Int      @id @default(autoincrement())
+  note        Int
+  commentaire String?
+  dateAvis    DateTime @default(now())
+  estModere   Boolean  @default(false)
+  userId      String
+  circuitId   Int
+  circuit     Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Favori {
-  id            Int         @id @default(autoincrement())
-  dateAjout     DateTime    @default(now())
-  utilisateurId Int
-  circuitId     Int
-  circuit       Circuit     @relation(fields: [circuitId], references: [id], onDelete: Cascade)
-  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  dateAjout DateTime @default(now())
+  userId    String
+  circuitId Int
+  circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@unique([utilisateurId, circuitId])
+  @@unique([userId, circuitId])
 }
 
 model Notification {
-  id            Int         @id @default(autoincrement())
-  titre         String
-  message       String?
-  dateEnvoi     DateTime    @default(now())
-  lu            Boolean     @default(false)
-  utilisateurId Int
-  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  titre     String
+  message   String?
+  dateEnvoi DateTime @default(now())
+  lu        Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 enum RoleNom {
@@ -201,23 +216,8 @@ enum StatutReservation {
   terminee
 }
 
-model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-
-  @@unique([email])
-  @@map("user")
-}
-
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
@@ -233,7 +233,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid())
   accountId             String
   providerId            String
   userId                String
@@ -253,7 +253,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
