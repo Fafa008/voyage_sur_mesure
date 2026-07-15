@@ -5,6 +5,7 @@ import type { NextRequest } from 'next/server';
 // Routes publiques (sans authentification)
 const publicRoutes = [
   '/',
+  '/home',
   '/circuits',
   '/circuits/(.*)',
   '/login',
