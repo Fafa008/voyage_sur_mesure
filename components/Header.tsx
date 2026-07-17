@@ -20,9 +20,19 @@ export default async function Header() {
       <nav className="flex items-center gap-4">
         <Link href="/">Accueil</Link>
 
-        <Link href="/circuits">Circuits</Link>
+        <Link href="/circuits" className="text-sm hover:underline">
+          Circuits
+        </Link>
 
-        <Link href="/contact">Contact</Link>
+        <Link href="/contact" className="text-sm hover:underline">
+          Contact
+        </Link>
+        <Link href="/devis/nouveau" className="text-sm hover:underline">
+          Demander un devis
+        </Link>
+        <Link href="/devis/historique" className="text-sm hover:underline">
+          Mes devis
+        </Link>
 
         {session ? (
           <>
