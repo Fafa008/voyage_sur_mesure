@@ -119,18 +119,48 @@ model Activite {
 }
 
 model Devis {
-  id                    Int          @id @default(autoincrement())
-  dateDemande           DateTime     @default(now())
-  nombrePersonnes       Int          @default(1)
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  circuitId Int?
+  circuit   Circuit? @relation(fields: [circuitId], references: [id])
+
+  // Champs existants
+  dateDemande           DateTime    @default(now())
+  statut                StatutDevis @default(en_cours)
+  nombrePersonnes       Int         @default(1)
   commentaireClient     String?
   commentaireConseiller String?
-  montantTotal          Decimal?     @db.Decimal(10, 2)
-  statut                StatutDevis  @default(en_cours)
-  userId                String
-  circuitId             Int?
-  circuit               Circuit?     @relation(fields: [circuitId], references: [id])
-  user                  User         @relation(fields: [userId], references: [id])
-  reservation           Reservation?
+  montantTotal          Decimal?    @db.Decimal(10, 2)
+
+  // Nouveaux champs pour le formulaire enrichi
+  prenom             String?
+  nom                String?
+  telephone          String?
+  dateDebutSouhaitee DateTime?
+  dateFinSouhaitee   DateTime?
+  dureeFlexible      Boolean?  @default(false)
+  adultes            Int       @default(1)
+  enfants            Int       @default(0)
+  ados               Int       @default(0)
+  enfantsAge         String? // ex: "4, 7, 10"
+  typeHebergement    String? // hotel, luxe, lodge, etc.
+  regime             String? // vegetarien, vegan, etc.
+  regimePrecision    String?
+  budgetMin          Decimal?  @db.Decimal(10, 2)
+  budgetMax          Decimal?  @db.Decimal(10, 2)
+  source             String? // moteur, reseau, ami, etc.
+  newsletter         Boolean?  @default(false)
+
+  // Pour stocker les listes (thèmes, régions, activités, transport, type voyage)
+  // PostgreSQL supporte les tableaux, on peut les utiliser
+  themeIds   Int[]    @default([])
+  regionIds  Int[]    @default([])
+  typeVoyage String[] @default([]) // ["Aventure", "Détente"]
+  activites  String[] @default([]) // ["Randonnée", "Plongée"]
+  transport  String[] @default([]) // ["4x4", "Avion"]
+
+  reservation Reservation?
 }
 
 model Reservation {
