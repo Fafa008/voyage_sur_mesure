@@ -1,7 +1,22 @@
+// components/devis/sections/AccommodationSection.tsx
+"use client";
+
 import { SelectField } from "@/components/ui/SelectField";
 import { InputField } from "@/components/ui/InputField";
 
-export function AccommodationSection() {
+interface AccommodationSectionProps {
+  data: {
+    typeHebergement: string;
+    regime: string;
+    regimePrecision: string;
+  };
+  onChange: (field: string, value: string) => void;
+}
+
+export function AccommodationSection({
+  data,
+  onChange,
+}: AccommodationSectionProps) {
   return (
     <section className="border rounded-lg p-6 bg-gray-50">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -10,7 +25,6 @@ export function AccommodationSection() {
         </span>
         Hébergement & Restauration
       </h2>
-
       <div className="space-y-4">
         <SelectField
           label="Type d'hébergement souhaité"
@@ -24,6 +38,8 @@ export function AccommodationSection() {
             { value: "gite", label: "Gîte / Chambre d'hôtes" },
             { value: "mixte", label: "Mixte (plusieurs types)" },
           ]}
+          value={data.typeHebergement}
+          onChange={(e) => onChange("typeHebergement", e.target.value)}
         />
 
         <SelectField
@@ -37,9 +53,16 @@ export function AccommodationSection() {
             { value: "allergie", label: "Allergie alimentaire" },
             { value: "autre", label: "Autre" },
           ]}
+          value={data.regime}
+          onChange={(e) => onChange("regime", e.target.value)}
         />
 
-        <InputField label="Précisions (allergies, etc.)" id="regimePrecision" />
+        <InputField
+          label="Précisions (allergies, etc.)"
+          id="regimePrecision"
+          value={data.regimePrecision}
+          onChange={(e) => onChange("regimePrecision", e.target.value)}
+        />
       </div>
     </section>
   );

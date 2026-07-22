@@ -1,15 +1,22 @@
+// components/devis/sections/PersonalInfoSection.tsx
+"use client";
+
 import { InputField } from "@/components/ui/InputField";
 
 interface PersonalInfoSectionProps {
-  user: {
-    name: string;
-    prenom?: string;
+  data: {
+    prenom: string;
+    nom: string;
     email: string;
-    telephone?: string;
+    telephone: string;
   };
+  onChange: (field: string, value: string) => void;
 }
 
-export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
+export function PersonalInfoSection({
+  data,
+  onChange,
+}: PersonalInfoSectionProps) {
   return (
     <section className="border rounded-lg p-6 bg-gray-50">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -22,26 +29,29 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
         <InputField
           label="Prénom *"
           id="prenom"
-          defaultValue={user.prenom || ""}
+          value={data.prenom}
+          onChange={(e) => onChange("prenom", e.target.value)}
           required
         />
         <InputField
           label="Nom *"
           id="nom"
-          defaultValue={user.name || ""}
+          value={data.nom}
+          onChange={(e) => onChange("nom", e.target.value)}
           required
         />
         <InputField
           label="Email *"
           id="email"
-          defaultValue={user.email}
+          value={data.email}
           readOnly
           className="bg-gray-100"
         />
         <InputField
           label="Téléphone *"
           id="telephone"
-          defaultValue={user.telephone || ""}
+          value={data.telephone}
+          onChange={(e) => onChange("telephone", e.target.value)}
           required
         />
       </div>

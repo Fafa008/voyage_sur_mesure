@@ -1,7 +1,22 @@
+// components/devis/sections/ComplementarySection.tsx
+"use client";
+
 import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
 
-export function ComplementarySection() {
+interface ComplementarySectionProps {
+  data: {
+    commentaire: string;
+    source: string;
+    newsletter: boolean;
+  };
+  onChange: (field: string, value: string | boolean) => void;
+}
+
+export function ComplementarySection({
+  data,
+  onChange,
+}: ComplementarySectionProps) {
   return (
     <section className="border rounded-lg p-6 bg-white">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -10,7 +25,6 @@ export function ComplementarySection() {
         </span>
         Informations complémentaires
       </h2>
-
       <div className="space-y-4">
         <div>
           <label
@@ -23,6 +37,8 @@ export function ComplementarySection() {
             id="commentaire"
             name="commentaire"
             rows={6}
+            value={data.commentaire}
+            onChange={(e) => onChange("commentaire", e.target.value)}
             className="w-full p-2 border rounded bg-white"
             placeholder="Décrivez votre voyage idéal, vos souhaits particuliers, vos contraintes médicales, etc."
           />
@@ -40,6 +56,8 @@ export function ComplementarySection() {
             { value: "foire", label: "Foire / Salon" },
             { value: "autre", label: "Autre" },
           ]}
+          value={data.source}
+          onChange={(e) => onChange("source", e.target.value)}
         />
 
         <div>
@@ -47,7 +65,8 @@ export function ComplementarySection() {
             <input
               type="checkbox"
               name="newsletter"
-              value="true"
+              checked={data.newsletter}
+              onChange={(e) => onChange("newsletter", e.target.checked)}
               className="rounded"
             />
             Je souhaite recevoir la newsletter et les offres spéciales
