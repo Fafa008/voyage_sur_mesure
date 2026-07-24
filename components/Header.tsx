@@ -1,13 +1,15 @@
+// components/layout/Header.tsx
 import Link from "next/link";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { RoleNom } from "@prisma/client";
 
 import LoginButton from "@/components/auth/LoginButton";
 import LogoutButton from "@/components/auth/LogoutButton";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +20,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { FileText, LayoutDashboard, LogOut, User } from "lucide-react";
-
-import { prisma } from "@/lib/prisma";
-import { RoleNom } from "@prisma/client";
+import {
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Star,
+  User,
+  PlusCircle,
+} from "lucide-react";
 
 export default async function Header() {
   // ============================
@@ -63,7 +69,7 @@ export default async function Header() {
           href="/"
           className="flex items-center gap-3 text-xl font-bold text-primary"
         >
-          <img src="/Logo.jpeg" alt="Logo" className="h-9 w-10" />
+          <img src="/Logo.png" alt="Logo" className="h-9 w-10" />
 
           <span>Mon Voyage</span>
         </Link>
@@ -71,13 +77,25 @@ export default async function Header() {
         {/* Navigation */}
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/home">Circuits</Link>
+          <Link href="/circuits" className="hover:underline">
+            Circuits
+          </Link>
 
-          <Link href="/devis/nouveau">Demander un devis</Link>
+          <Link href="/devis/nouveau" className="hover:underline">
+            Demander un devis
+          </Link>
 
-          {isConseiller && <Link href="/conseiller/dashboard">Conseiller</Link>}
+          {isConseiller && (
+            <Link href="/conseiller/dashboard" className="hover:underline">
+              Conseiller
+            </Link>
+          )}
 
-          {isAdmin && <Link href="/admin/dashboard">Administration</Link>}
+          {isAdmin && (
+            <Link href="/admin/dashboard" className="hover:underline">
+              Administration
+            </Link>
+          )}
         </nav>
 
         <UserMenu name={session.user.name} email={session.user.email} />
@@ -98,13 +116,15 @@ function GuestHeader() {
           href="/"
           className="flex items-center gap-3 text-xl font-bold text-primary"
         >
-          <img src="/Logo.png" alt="Logo" className="h-9 w-9 rounded-full" />
+          <img src="/Logo.png" alt="Logo" className="h-9 w-10" />
 
           <span>Mon Voyage</span>
         </Link>
 
         <nav className="hidden md:flex gap-6">
-          <Link href="/home">Circuits</Link>
+          <Link href="/circuits" className="hover:underline">
+            Circuits
+          </Link>
         </nav>
 
         <LoginButton />
@@ -141,21 +161,35 @@ function UserMenu({ name, email }: { name: string; email: string }) {
 
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="flex items-center w-full">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Tableau de bord
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <Link href="/devis/historique">
+            <Link href="/devis/nouveau" className="flex items-center w-full">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nouveau devis
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem>
+            <Link href="/devis/historique" className="flex items-center w-full">
               <FileText className="mr-2 h-4 w-4" />
               Mes devis
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <Link href="/dashboard">
+            <Link href="/favoris" className="flex items-center w-full">
+              <Star className="mr-2 h-4 w-4" />
+              Mes favoris
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem>
+            <Link href="/profil" className="flex items-center w-full">
               <User className="mr-2 h-4 w-4" />
               Mon profil
             </Link>
