@@ -31,7 +31,7 @@ export default async function ConseillerLayout({
     !roleNom ||
     (roleNom !== RoleNom.conseiller && roleNom !== RoleNom.admin)
   ) {
-    redirect("/dashboard");
+    redirect("/dashboard/nouveau");
   }
 
   return (
