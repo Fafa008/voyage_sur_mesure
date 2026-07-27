@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RoleNom } from "@prisma/client";
-import LogoutButton from "@/components/ui/logout-button";
+import LogoutButton from "@/components/auth/LogoutButton";
 
 export default async function ConseillerLayout({
   children,

@@ -1,52 +1,56 @@
 // components/layout/Header.tsx
+
 import Link from "next/link";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
 import { RoleNom } from "@prisma/client";
 
 import LoginButton from "@/components/auth/LoginButton";
 import LogoutButton from "@/components/auth/LogoutButton";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import {
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Star,
-  User,
-  PlusCircle,
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default async function Header() {
-  // ============================
-  // Session
-  // ============================
-
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
+  // =============================
+  // Utilisateur non connecté
+  // =============================
+
   if (!session) {
-    return <GuestHeader />;
+    return (
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+        <div className="container-page flex h-16 items-center justify-between">
+          <Logo />
+
+          <Navigation />
+
+          <div className="flex items-center gap-3">
+            <LoginButton />
+
+            <Link
+              href="/register"
+              className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+            >
+              Créer un compte
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
   }
 
-  // ============================
+  // =============================
   // Utilisateur connecté
-  // ============================
+  // =============================
 
-  const dbUser = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: session.user.id,
     },
@@ -55,168 +59,75 @@ export default async function Header() {
     },
   });
 
-  const role = dbUser?.role?.nom;
-
-  const isAdmin = role === RoleNom.admin;
-  const isConseiller = role === RoleNom.conseiller;
+  const role = user?.role?.nom;
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center justify-between px-5">
-        {/* Logo */}
+      <div className="container-page flex h-16 items-center justify-between">
+        <Logo />
 
-        <Link
-          href="/"
-          className="flex items-center gap-3 text-xl font-bold text-primary"
-        >
-          <img src="/Logo.png" alt="Logo" className="h-9 w-10" />
+        <Navigation />
 
-          <span>Mon Voyage</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-primary text-white">
+              {getInitials(session.user.name)}
+            </AvatarFallback>
+          </Avatar>
 
-        {/* Navigation */}
+          <div className="hidden md:flex flex-col">
+            <span className="font-semibold leading-none">
+              {session.user.name}
+            </span>
 
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/circuits" className="hover:underline">
-            Circuits
-          </Link>
+            <span className="text-xs text-muted-foreground">
+              {session.user.email}
+            </span>
+          </div>
 
-          <Link href="/devis/nouveau" className="hover:underline">
-            Demander un devis
-          </Link>
-
-          {isConseiller && (
-            <Link href="/conseiller/dashboard" className="hover:underline">
-              Conseiller
-            </Link>
-          )}
-
-          {isAdmin && (
-            <Link href="/admin/dashboard" className="hover:underline">
-              Administration
-            </Link>
-          )}
-        </nav>
-
-        <UserMenu name={session.user.name} email={session.user.email} />
+          <LogoutButton />
+        </div>
       </div>
     </header>
   );
 }
 
-/* ===================================================== */
-/*                  Header invité                         */
-/* ===================================================== */
-
-function GuestHeader() {
+function Logo() {
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center justify-between px-5">
-        <Link
-          href="/"
-          className="flex items-center gap-3 text-xl font-bold text-primary"
-        >
-          <img src="/Logo.png" alt="Logo" className="h-9 w-10" />
+    <Link href="/home" className="flex items-center gap-3">
+      <img src="/Logo.jpeg" alt="Logo" className="h-10 w-10 object-contain" />
 
-          <span>Mon Voyage</span>
-        </Link>
-
-        <nav className="hidden md:flex gap-6">
-          <Link href="/circuits" className="hover:underline">
-            Circuits
-          </Link>
-        </nav>
-
-        <LoginButton />
-      </div>
-    </header>
+      <span className="text-2xl font-bold text-primary">Mon Voyage</span>
+    </Link>
   );
 }
 
-/* ===================================================== */
-/*                  Menu utilisateur                      */
-/* ===================================================== */
-
-function UserMenu({ name, email }: { name: string; email: string }) {
+function Navigation() {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Avatar className="cursor-pointer">
-          <AvatarFallback>{getInitials(name)}</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
+    <nav className="hidden lg:flex items-center gap-8 text-sm font-medium">
+      <Link href="/home" className="transition hover:text-primary">
+        Accueil
+      </Link>
 
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            <div className="flex flex-col">
-              <span className="font-semibold">{name}</span>
+      <Link href="/circuits" className="transition hover:text-primary">
+        Circuits
+      </Link>
 
-              <span className="text-xs text-muted-foreground">{email}</span>
-            </div>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
+      <Link href="/devis/nouveau" className="transition hover:text-primary">
+        Demander un devis
+      </Link>
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Link href="/dashboard" className="flex items-center w-full">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Tableau de bord
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem>
-            <Link href="/devis/nouveau" className="flex items-center w-full">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Nouveau devis
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem>
-            <Link href="/devis/historique" className="flex items-center w-full">
-              <FileText className="mr-2 h-4 w-4" />
-              Mes devis
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem>
-            <Link href="/favoris" className="flex items-center w-full">
-              <Star className="mr-2 h-4 w-4" />
-              Mes favoris
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem>
-            <Link href="/profil" className="flex items-center w-full">
-              <User className="mr-2 h-4 w-4" />
-              Mon profil
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem>
-          <LogoutButton className="w-full justify-start text-red-600">
-            <LogOut className="mr-2 h-4 w-4" />
-            Déconnexion
-          </LogoutButton>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <Link href="/contact" className="transition hover:text-primary">
+        Contact
+      </Link>
+    </nav>
   );
 }
-
-/* ===================================================== */
-/*                  Helpers                               */
-/* ===================================================== */
 
 function getInitials(name: string) {
   return name
     .split(" ")
-    .map((word) => word[0])
+    .map((part) => part[0])
     .join("")
     .substring(0, 2)
     .toUpperCase();

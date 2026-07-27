@@ -1,39 +1,27 @@
-// components/auth/LogoutButton.tsx
 "use client";
 
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
-interface LogoutButtonProps {
-  asChild?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-}
-
-export default function LogoutButton({
-  asChild = false,
-  className,
-  children,
-}: LogoutButtonProps) {
+export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    console.log("1");
     await authClient.signOut();
-    router.push("/login");
+    console.log("2");
+    router.replace("/home");
+    router.refresh();
   };
 
-  if (asChild) {
-    return (
-      <span onClick={handleLogout} className={className}>
-        {children}
-      </span>
-    );
-  }
-
   return (
-    <Button variant="outline" onClick={handleLogout} className={className}>
-      Se déconnecter
-    </Button>
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-2 rounded-lg border px-4 py-2"
+    >
+      <LogOut size={18} />
+      Déconnexion
+    </button>
   );
 }

@@ -2,7 +2,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { DevisWizard } from "@/components/devis/wizard/DevisWizard";
 
 interface Props {
@@ -12,10 +11,9 @@ interface Props {
 export default async function NouveauDevisPage({ searchParams }: Props) {
   const { circuitId: preselectedCircuitId } = await searchParams;
 
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    redirect("/login");
-  }
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   const [circuits, themes, regions] = await Promise.all([
     prisma.circuit.findMany({
@@ -32,11 +30,13 @@ export default async function NouveauDevisPage({ searchParams }: Props) {
     }),
   ]);
 
-  const user = {
-    id: session.user.id,
-    name: session.user.name || "",
-    email: session.user.email,
-  };
+  const user = session
+    ? {
+        id: session.user.id,
+        name: session.user.name || "",
+        email: session.user.email,
+      }
+    : null;
 
   return (
     <main className="min-h-screen bg-gray-50 py-10">

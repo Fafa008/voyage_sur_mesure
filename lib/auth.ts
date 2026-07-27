@@ -1,5 +1,4 @@
 // auth.ts
-import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
@@ -15,10 +14,12 @@ export const auth = betterAuth({
     },
   },
   secret: process.env.BETTER_AUTH_SECRET!,
-  trustedOrigins: [process.env.NEXTAUTH_URL || "http://localhost:3000"],
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL!
+],
 
   databaseHooks: {
-    user: {
+    user: { 
       create: {
         after: async (user) => {
           const clientRole = await prisma.role.findFirst({ where: { nom: "client" } });
