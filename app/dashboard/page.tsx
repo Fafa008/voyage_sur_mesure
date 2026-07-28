@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -6,7 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -22,14 +21,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  FileText,
+  Clock,
+  Star,
+  Bell,
+  PlusCircle,
+  ArrowRight,
+  Sparkles,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
 
-const statutColors = {
-  [StatutDevis.en_cours]: "bg-yellow-100 text-yellow-800",
-  [StatutDevis.en_modification]: "bg-orange-100 text-orange-800",
-  [StatutDevis.valide]: "bg-blue-100 text-blue-800",
-  [StatutDevis.accepte]: "bg-green-100 text-green-800",
-  [StatutDevis.reserve]: "bg-purple-100 text-purple-800",
-  [StatutDevis.refuse]: "bg-red-100 text-red-800",
+const statutColors: Record<StatutDevis, string> = {
+  [StatutDevis.en_cours]: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  [StatutDevis.en_modification]: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  [StatutDevis.valide]: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  [StatutDevis.accepte]: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  [StatutDevis.reserve]: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  [StatutDevis.refuse]: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
 export default async function DashboardPage() {
@@ -49,7 +59,7 @@ export default async function DashboardPage() {
       },
     },
     orderBy: { dateDemande: "desc" },
-    take: 5, // 5 derniers devis
+    take: 5,
   });
 
   // Récupérer les favoris
@@ -85,94 +95,113 @@ export default async function DashboardPage() {
   const notificationsNonLues = notifications.length;
 
   return (
-    <div className="space-y-6">
-      {/* En-tête de bienvenue */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">
-            👋 Bonjour, {session.user.name}
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Bienvenue sur votre espace personnel
+    <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* Banner / En-tête */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              👋 Bonjour, {session.user.name}
+            </h1>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Bienvenue dans votre espace personnel. Suivez l'avancement de vos demandes de devis et préparez votre séjour.
           </p>
         </div>
+
         <Link
           href="/devis/nouveau"
-          className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className={buttonVariants({ variant: "default", size: "lg" }) + " shrink-0 shadow-md"}
         >
-          ✈️ Demander un devis
+          <PlusCircle className="w-4 h-4 mr-2" />
+          Nouvelle Demande de Devis
         </Link>
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Devis
+      {/* Cartes de statistiques */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Total Devis
             </CardTitle>
+            <FileText className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{totalDevis}</p>
+            <div className="text-2xl font-extrabold">{totalDevis}</div>
+            <p className="text-[11px] text-muted-foreground mt-1">Demande(s) soumise(s)</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              En attente
+
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              En Étude
             </CardTitle>
+            <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{devisEnAttente}</p>
+            <div className="text-2xl font-extrabold text-amber-600">{devisEnAttente}</div>
+            <p className="text-[11px] text-muted-foreground mt-1">En attente de retour</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
+
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Favoris
             </CardTitle>
+            <Star className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{totalFavoris}</p>
+            <div className="text-2xl font-extrabold">{totalFavoris}</div>
+            <p className="text-[11px] text-muted-foreground mt-1">Circuits sauvegardés</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Notifications
+
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Alertes
             </CardTitle>
+            <Bell className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <div className="text-2xl font-extrabold">
               {notificationsNonLues > 0 ? (
-                <span className="text-red-500">{notificationsNonLues}</span>
+                <span className="text-rose-500 font-bold">{notificationsNonLues}</span>
               ) : (
                 "0"
               )}
-            </p>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">Notification(s) non lue(s)</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Derniers devis */}
-      <Card>
-        <CardHeader className="flex flex-row justify-between items-center">
+      {/* Dernières demandes de devis */}
+      <Card className="border border-border/60">
+        <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>📋 Mes derniers devis</CardTitle>
-            <CardDescription>Suivez l'état de vos demandes</CardDescription>
+            <CardTitle className="text-lg font-bold">📋 Vos dernières demandes</CardTitle>
+            <CardDescription className="text-xs">
+              Consultez l'historique et l'état d'avancement de vos dossiers
+            </CardDescription>
           </div>
           <Link
             href="/devis/historique"
-            className="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            Voir tout →
+            Voir tout
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Link>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Circuit</TableHead>
+                <TableHead>Itinéraire / Demande</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -183,38 +212,42 @@ export default async function DashboardPage() {
                 <TableRow>
                   <TableCell
                     colSpan={4}
-                    className="text-center text-gray-500 py-6"
+                    className="text-center text-muted-foreground py-8"
                   >
-                    Vous n'avez pas encore de devis.
-                    <br />
-                    <Link
-                      href="/devis/nouveau"
-                      className="mt-1 inline-flex text-primary underline-offset-4 hover:underline"
-                    >
-                      Créer ma première demande
-                    </Link>
+                    Vous n'avez pas encore de demande de devis.
+                    <div className="mt-2">
+                      <Link
+                        href="/devis/nouveau"
+                        className="text-primary hover:underline text-xs font-medium"
+                      >
+                        + Créer ma première demande sur mesure
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 devisList.map((devis) => (
-                  <TableRow key={devis.id}>
-                    <TableCell>
-                      {devis.circuit?.titre || "Demande personnalisée"}
+                  <TableRow key={devis.id} className="hover:bg-muted/40">
+                    <TableCell className="font-semibold text-foreground">
+                      {devis.circuit?.titre || "Voyage sur-mesure"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
                     </TableCell>
                     <TableCell>
-                      <Badge className={statutColors[devis.statut]}>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs px-2.5 py-0.5 font-medium ${statutColors[devis.statut]}`}
+                      >
                         {devis.statut.replace("_", " ")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
                         href={`/devis/${devis.id}`}
-                        className="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                        className={buttonVariants({ variant: "outline", size: "sm" })}
                       >
-                        Voir →
+                        Détail
                       </Link>
                     </TableCell>
                   </TableRow>
@@ -225,44 +258,54 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Favoris et notifications */}
+      {/* Grille 2 colonnes : Favoris & Notifications */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Favoris */}
-        <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
+        <Card className="border border-border/60 flex flex-col justify-between">
+          <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>⭐ Mes favoris</CardTitle>
-              <CardDescription>Circuits que vous avez aimés</CardDescription>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                Mes Circuits Favoris
+              </CardTitle>
+              <CardDescription className="text-xs">Itinéraires sauvegardés</CardDescription>
             </div>
             <Link
               href="/favoris"
-              className="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              Voir tout →
+              Voir tout
             </Link>
           </CardHeader>
           <CardContent>
             {favoris.length === 0 ? (
-              <p className="text-gray-500 text-sm">
-                Vous n'avez pas encore de favoris. Parcourez les circuits et
-                ajoutez-les en favori.
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Aucun favori sauvegardé pour le moment. Explorez nos circuits et cliquez sur la star !
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {favoris.map((fav) => (
                   <li
                     key={fav.id}
-                    className="flex justify-between items-center border-b pb-2 last:border-0"
+                    className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/20 hover:bg-muted/50 transition-colors"
                   >
+                    <div className="space-y-0.5">
+                      <Link
+                        href={`/circuits/${fav.circuit.slug}`}
+                        className="font-semibold text-sm hover:text-primary transition-colors block"
+                      >
+                        {fav.circuit.titre}
+                      </Link>
+                      <span className="text-xs text-muted-foreground">
+                        À partir de {fav.circuit.prixEstime ? `${fav.circuit.prixEstime.toString()} €` : "Sur devis"}
+                      </span>
+                    </div>
                     <Link
                       href={`/circuits/${fav.circuit.slug}`}
-                      className="hover:underline"
+                      className={buttonVariants({ variant: "ghost", size: "sm" })}
                     >
-                      {fav.circuit.titre}
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
-                    <span className="text-sm text-gray-500">
-                      {fav.circuit.prixEstime?.toString() ?? "0"} €
-                    </span>
                   </li>
                 ))}
               </ul>
@@ -271,25 +314,33 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Notifications */}
-        <Card>
+        <Card className="border border-border/60 flex flex-col justify-between">
           <CardHeader>
-            <CardTitle>🔔 Notifications</CardTitle>
-            <CardDescription>Les dernières alertes</CardDescription>
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <Bell className="w-4 h-4 text-primary" />
+              Notifications & Suivi
+            </CardTitle>
+            <CardDescription className="text-xs">Derniers messages de vos conseillers</CardDescription>
           </CardHeader>
           <CardContent>
             {notifications.length === 0 ? (
-              <p className="text-gray-500 text-sm">
-                Aucune nouvelle notification
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Aucune nouvelle notification pour le moment.
               </p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {notifications.map((notif) => (
-                  <li key={notif.id} className="border-b pb-2 last:border-0">
-                    <p className="font-medium">{notif.titre}</p>
-                    <p className="text-sm text-gray-500">{notif.message}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(notif.dateEnvoi).toLocaleDateString("fr-FR")}
-                    </p>
+                  <li
+                    key={notif.id}
+                    className="p-3 rounded-lg border border-border/40 bg-muted/20 space-y-1"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm text-foreground">{notif.titre}</h4>
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(notif.dateEnvoi).toLocaleDateString("fr-FR")}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{notif.message}</p>
                   </li>
                 ))}
               </ul>
@@ -297,6 +348,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }

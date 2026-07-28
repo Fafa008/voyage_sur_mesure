@@ -1,10 +1,12 @@
-// app/conseiller/layout.tsx
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RoleNom } from "@prisma/client";
 import LogoutButton from "@/components/auth/LogoutButton";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Compass, User as UserIcon, LayoutDashboard, FileCheck } from "lucide-react";
 
 export default async function ConseillerLayout({
   children,
@@ -31,34 +33,42 @@ export default async function ConseillerLayout({
     !roleNom ||
     (roleNom !== RoleNom.conseiller && roleNom !== RoleNom.admin)
   ) {
-    redirect("/dashboard/nouveau");
+    redirect("/dashboard");
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <span className="text-xl font-bold text-blue-600">
-                📋 Espace Conseiller
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Link href="/conseiller/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
+                <FileCheck className="w-4 h-4" />
+              </div>
+              <span className="font-extrabold text-lg tracking-tight">
+                Espace Conseiller
               </span>
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                {roleNom}
+            </Link>
+            <Badge variant="secondary" className="text-xs uppercase font-semibold">
+              {roleNom}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+              <UserIcon className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-foreground">
+                {user.prenom} {user.name}
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                👤 {user.prenom} {user.name}
-              </span>
-              <LogoutButton />
-            </div>
+            <LogoutButton />
           </div>
         </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      </header>
+
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
-      </main>
+      </div>
     </div>
   );
 }
