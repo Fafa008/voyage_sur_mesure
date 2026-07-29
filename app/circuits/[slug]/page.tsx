@@ -1,9 +1,55 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { FavoriteButton } from "@/components/favori/FavoriteButton";
+import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
+import type { Metadata } from "next";
+
+// Revalidation ISR : les pages de circuit sont régénérées toutes les heures
+export const revalidate = 3600;
+
+// Pré-génération statique de toutes les pages de circuits au build
+export async function generateStaticParams() {
+  const circuits = await prisma.circuit.findMany({
+    select: { slug: true },
+  });
+  return circuits.map((circuit) => ({ slug: circuit.slug }));
+}
+
+// Metadata dynamique pour le SEO
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const circuit = await prisma.circuit.findUnique({
+    where: { slug },
+    select: {
+      titre: true,
+      description: true,
+      dureeJours: true,
+      region: { select: { nom: true } },
+    },
+  });
+
+  if (!circuit) {
+    return { title: "Circuit introuvable | Mon Voyage" };
+  }
+
+  return {
+    title: `${circuit.titre} | Mon Voyage — Voyages Sur Mesure à Madagascar`,
+    description:
+      circuit.description ??
+      `Découvrez le circuit ${circuit.titre}${circuit.region ? ` dans la région ${circuit.region.nom}` : ""}${circuit.dureeJours ? ` en ${circuit.dureeJours} jours` : ""}. Voyage sur mesure à Madagascar.`,
+  };
+}
 
 interface CircuitDetailPageProps {
   params: Promise<{
@@ -34,6 +80,10 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
     notFound();
   }
 
+  const session = await auth.api.getSession({ headers: await headers() });
+  const favoriteIds = await getUserFavoriteCircuitIds(session?.user.id);
+  const isFavori = favoriteIds.has(circuit.id);
+
   return (
     <main className="max-w-5xl mx-auto py-10 px-4 space-y-8">
       {/* Bouton retour */}
@@ -49,7 +99,10 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
           {circuit.dureeJours && <Badge variant="secondary">{circuit.dureeJours} jours</Badge>}
         </div>
 
-        <h1 className="text-4xl font-extrabold tracking-tight">{circuit.titre}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-4xl font-extrabold tracking-tight">{circuit.titre}</h1>
+          <FavoriteButton circuitId={circuit.id} initialIsFavori={isFavori} />
+        </div>
         <p className="text-lg text-muted-foreground">{circuit.description}</p>
       </div>
 
@@ -57,12 +110,16 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
       {circuit.images.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-md">
           {circuit.images.map((img, idx) => (
-            <img
-              key={img.id || idx}
-              src={img.url}
-              alt={img.legende || circuit.titre}
-              className="w-full h-72 object-cover"
-            />
+            <div key={img.id || idx} className="relative h-72 w-full overflow-hidden">
+              <Image
+                src={img.url}
+                alt={img.legende || circuit.titre}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={idx === 0}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -87,7 +144,7 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
 
       {/* Programme des étapes */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold">📍 Itinéraire & Étapes</h2>
+        <h2 className="text-2xl font-bold">📍 Itinéraire &amp; Étapes</h2>
 
         {circuit.etapes.length === 0 ? (
           <p className="text-muted-foreground">Le détail des étapes pour ce circuit est en cours de finalisation.</p>
@@ -110,7 +167,10 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                   {etape.hebergement && (
                     <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
                       <span className="font-semibold block">🏨 Hébergement :</span>
-                      <p>{etape.hebergement.nom} {etape.hebergement.etoiles ? `(${etape.hebergement.etoiles}★)` : ""}</p>
+                      <p>
+                        {etape.hebergement.nom}{" "}
+                        {etape.hebergement.etoiles ? `(${etape.hebergement.etoiles}★)` : ""}
+                      </p>
                     </div>
                   )}
 

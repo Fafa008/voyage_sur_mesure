@@ -15,14 +15,20 @@ export default function SmoothScrollProvider({
       touchMultiplier: 2,
     });
 
+    // Stocker l'ID du frame pour pouvoir l'annuler proprement au démontage
+    let rafId: number;
+
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      // Annuler la boucle rAF avant de détruire Lenis
+      // Évite la fuite mémoire et la boucle infinie après navigation
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);

@@ -30,8 +30,9 @@ import {
   ArrowRight,
   Sparkles,
   MapPin,
-  CheckCircle2,
+  CalendarCheck,
 } from "lucide-react";
+import { MarkNotificationReadButton } from "@/components/notifications/MarkNotificationReadButton";
 
 const statutColors: Record<StatutDevis, string> = {
   [StatutDevis.en_cours]: "bg-amber-500/10 text-amber-600 border-amber-500/20",
@@ -86,13 +87,35 @@ export default async function DashboardPage() {
     take: 3,
   });
 
+  // Récupérer les réservations récentes
+  const reservations = await prisma.reservation.findMany({
+    where: { devis: { userId } },
+    include: {
+      devis: {
+        include: {
+          circuit: { select: { titre: true } },
+        },
+      },
+    },
+    orderBy: { dateReservation: "desc" },
+    take: 3,
+  });
+
   // Statistiques
   const totalDevis = await prisma.devis.count({ where: { userId } });
   const devisEnAttente = await prisma.devis.count({
     where: { userId, statut: StatutDevis.en_cours },
   });
+  const totalReservations = await prisma.reservation.count({
+    where: { devis: { userId } },
+  });
+  const devisAPayer = await prisma.devis.count({
+    where: { userId, statut: StatutDevis.accepte },
+  });
   const totalFavoris = await prisma.favori.count({ where: { userId } });
-  const notificationsNonLues = notifications.length;
+  const notificationsNonLues = await prisma.notification.count({
+    where: { userId, lu: false },
+  });
 
   return (
     <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
@@ -149,6 +172,23 @@ export default async function DashboardPage() {
         <Card className="border border-border/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Réservations
+            </CardTitle>
+            <CalendarCheck className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-extrabold text-emerald-600">{totalReservations}</div>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {devisAPayer > 0
+                ? `${devisAPayer} devis en attente de paiement`
+                : "Voyage(s) confirmé(s)"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Favoris
             </CardTitle>
             <Star className="h-4 w-4 text-primary" />
@@ -178,6 +218,53 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Réservations récentes */}
+      {reservations.length > 0 && (
+        <Card className="border border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-bold">Mes réservations</CardTitle>
+              <CardDescription className="text-xs">
+                Vos voyages confirmés et leurs détails
+              </CardDescription>
+            </div>
+            <Link
+              href="/reservations"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              Voir tout
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {reservations.map((res) => (
+                <li
+                  key={res.id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/20"
+                >
+                  <div>
+                    <p className="font-semibold text-sm">
+                      {res.devis.circuit?.titre ?? `Devis #${res.devis.id}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(res.dateReservation).toLocaleDateString("fr-FR")} —{" "}
+                      {res.montantFinal?.toString()} €
+                    </p>
+                  </div>
+                  <Link
+                    href={`/reservations/${res.id}`}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                  >
+                    Détail
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dernières demandes de devis */}
       <Card className="border border-border/60">
@@ -315,12 +402,20 @@ export default async function DashboardPage() {
 
         {/* Notifications */}
         <Card className="border border-border/60 flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
-              Notifications & Suivi
-            </CardTitle>
-            <CardDescription className="text-xs">Derniers messages de vos conseillers</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Notifications & Suivi
+              </CardTitle>
+              <CardDescription className="text-xs">Derniers messages de vos conseillers</CardDescription>
+            </div>
+            <Link
+              href="/notifications"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              Voir tout
+            </Link>
           </CardHeader>
           <CardContent>
             {notifications.length === 0 ? (
@@ -334,11 +429,14 @@ export default async function DashboardPage() {
                     key={notif.id}
                     className="p-3 rounded-lg border border-border/40 bg-muted/20 space-y-1"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <h4 className="font-semibold text-sm text-foreground">{notif.titre}</h4>
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(notif.dateEnvoi).toLocaleDateString("fr-FR")}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(notif.dateEnvoi).toLocaleDateString("fr-FR")}
+                        </span>
+                        <MarkNotificationReadButton notificationId={notif.id} />
+                      </div>
                     </div>
                     <p className="text-xs text-muted-foreground">{notif.message}</p>
                   </li>

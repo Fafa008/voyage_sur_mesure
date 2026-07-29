@@ -35,7 +35,10 @@ export default async function AdminLayout({
   });
 
   if (!user || !user.role || user.role.nom !== RoleNom.admin) {
-    redirect("/admin/dashboard");
+    if (user?.role?.nom === RoleNom.conseiller) {
+      redirect("/conseiller/dashboard");
+    }
+    redirect("/dashboard");
   }
 
   return (

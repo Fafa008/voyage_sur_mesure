@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,9 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Clock, MapPin, Heart, Star, Route } from "lucide-react";
+import { FavoriteButton } from "@/components/favori/FavoriteButton";
+import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
+import { ArrowRight, Clock, MapPin, Star, Route } from "lucide-react";
 
 export default async function CircuitsPreview() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const favoriteIds = await getUserFavoriteCircuitIds(session?.user.id);
+
   const circuits = await prisma.circuit.findMany({
     take: 4,
     include: {
@@ -70,19 +77,18 @@ export default async function CircuitsPreview() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {circuits.map((circuit, index) => (
-              <Link
-                key={circuit.id}
-                href={`/circuits/${circuit.slug}`}
-                className="group"
-              >
+              <div key={circuit.id} className="group relative">
+                <Link href={`/circuits/${circuit.slug}`}>
                 <Card className="overflow-hidden border border-border/60 bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                   {/* Image */}
                   <div className="relative h-52 w-full overflow-hidden bg-muted">
                     {circuit.images[0] ? (
-                      <img
+                      <Image
                         src={circuit.images[0].url}
                         alt={circuit.titre}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
@@ -109,9 +115,13 @@ export default async function CircuitsPreview() {
                     )}
 
                     {/* Heart icon */}
-                    <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-white transition-all shadow-sm">
-                      <Heart className="w-4 h-4" />
-                    </button>
+                    <div className="absolute top-3 right-3 z-10">
+                      <FavoriteButton
+                        circuitId={circuit.id}
+                        initialIsFavori={favoriteIds.has(circuit.id)}
+                        size="sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Content */}
@@ -166,7 +176,8 @@ export default async function CircuitsPreview() {
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         )}

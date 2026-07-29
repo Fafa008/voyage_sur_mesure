@@ -1,6 +1,5 @@
-// app/conseiller/devis/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +9,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { updateDevisStatus } from "@/app/actions/devis/update-devis-status.action";
+import { ConseillerPricingForm } from "@/components/devis/ConseillerPricingForm";
+import { CalendarCheck } from "lucide-react";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -42,28 +41,25 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
           telephone: true,
         },
       },
-      circuit: {
-        select: {
-          titre: true,
-          slug: true,
+      circuit: { select: { titre: true, slug: true } },
+      reservation: {
+        include: {
+          paiement: { include: { mode: true } },
         },
       },
     },
   });
 
-  if (!devis) {
-    notFound();
-  }
+  if (!devis) notFound();
 
   const commentaire = devis.commentaireClient || "Aucun commentaire";
 
   return (
     <div className="space-y-6">
-      {/* En-tête */}
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
           <h1 className="text-2xl font-bold">Devis #{devis.id}</h1>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Demandé le {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
           </p>
         </div>
@@ -72,133 +68,164 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
         </Badge>
       </div>
 
+      {devis.reservation && (
+        <Card className="border-purple-200 bg-purple-50/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CalendarCheck className="w-5 h-5" />
+              Réservation #{devis.reservation.id}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm space-y-2">
+            <p>
+              Statut : <strong className="capitalize">{devis.reservation.statut}</strong>
+            </p>
+            <p>
+              Montant : <strong>{devis.reservation.montantFinal?.toString()} €</strong>
+            </p>
+            {devis.reservation.paiement && (
+              <p>
+                Paiement : {devis.reservation.paiement.mode.nom} —{" "}
+                <span className="font-mono text-xs">
+                  {devis.reservation.paiement.referenceTransaction}
+                </span>
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Informations client */}
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>👤 Client</CardTitle>
+            <CardTitle>Client</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 text-sm">
             <div>
-              <p className="text-sm text-gray-500">Nom</p>
+              <p className="text-muted-foreground">Nom</p>
               <p className="font-medium">
                 {devis.user.prenom} {devis.user.name}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="text-sm">{devis.user.email}</p>
+              <p className="text-muted-foreground">Email</p>
+              <p>{devis.user.email}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Téléphone</p>
-              <p className="text-sm">
-                {devis.user.telephone || "Non renseigné"}
-              </p>
+              <p className="text-muted-foreground">Téléphone</p>
+              <p>{devis.user.telephone || "Non renseigné"}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Circuit</p>
-              <p className="text-sm">
-                {devis.circuit?.titre || "Personnalisé"}
-              </p>
+              <p className="text-muted-foreground">Circuit</p>
+              <p>{devis.circuit?.titre || "Personnalisé"}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Détails du voyage */}
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>✈️ Détails du voyage</CardTitle>
+            <CardTitle>Détails du voyage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-sm text-gray-500">Dates souhaitées</p>
+                <p className="text-muted-foreground">Dates souhaitées</p>
                 <p>
                   {devis.dateDebutSouhaitee
-                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
-                        "fr-FR",
-                      )
+                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
                     : "Non renseigné"}{" "}
                   →{" "}
                   {devis.dateFinSouhaitee
-                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
-                        "fr-FR",
-                      )
+                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
                     : "Non renseigné"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Nombre de personnes</p>
+                <p className="text-muted-foreground">Nombre de personnes</p>
                 <p>{devis.nombrePersonnes}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Adultes</p>
+                <p className="text-muted-foreground">Adultes</p>
                 <p>{devis.adultes || 0}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Enfants / Ados</p>
+                <p className="text-muted-foreground">Enfants / Ados</p>
                 <p>
                   {devis.enfants || 0} / {devis.ados || 0}
                 </p>
               </div>
-              {devis.budgetMin || devis.budgetMax ? (
+              {(devis.budgetMin || devis.budgetMax) && (
                 <div className="col-span-2">
-                  <p className="text-sm text-gray-500">Budget</p>
+                  <p className="text-muted-foreground">Budget client</p>
                   <p>
                     {devis.budgetMin ? `${devis.budgetMin} €` : "—"} →{" "}
                     {devis.budgetMax ? `${devis.budgetMax} €` : "—"}
                   </p>
                 </div>
-              ) : null}
+              )}
+              {devis.montantTotal && (
+                <div className="col-span-2">
+                  <p className="text-muted-foreground">Montant proposé</p>
+                  <p className="text-xl font-bold text-primary">
+                    {devis.montantTotal.toString()} €
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Commentaire */}
       <Card>
         <CardHeader>
-          <CardTitle>📝 Commentaire du client</CardTitle>
+          <CardTitle>Commentaire du client</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap text-sm">
+          <div className="bg-muted/50 p-4 rounded-lg whitespace-pre-wrap text-sm">
             {commentaire}
           </div>
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="flex flex-wrap gap-4 pt-4 border-t">
-        {devis.statut === StatutDevis.en_cours && (
-          <form action={updateDevisStatus}>
-            <input type="hidden" name="devisId" value={devis.id} />
-            <input type="hidden" name="statut" value={StatutDevis.valide} />
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
-              ✅ Valider ce devis
+      {devis.commentaireConseiller && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Votre message au client</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">{devis.commentaireConseiller}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardContent className="pt-6">
+          <ConseillerPricingForm
+            devisId={devis.id}
+            statut={devis.statut}
+            defaultMontant={devis.montantTotal?.toString()}
+            defaultCommentaire={devis.commentaireConseiller}
+          />
+
+          {devis.statut === StatutDevis.valide && (
+            <p className="text-sm text-muted-foreground mt-4 pt-4 border-t">
+              Devis validé — en attente de la réponse du client.
+            </p>
+          )}
+
+          {devis.statut === StatutDevis.accepte && !devis.reservation && (
+            <p className="text-sm text-amber-600 mt-4 pt-4 border-t">
+              Devis accepté par le client — en attente du paiement.
+            </p>
+          )}
+
+          <div className="mt-6">
+            <Button variant="outline">
+              <Link href="/conseiller/dashboard">← Retour</Link>
             </Button>
-          </form>
-        )}
-
-        {devis.statut === StatutDevis.en_modification && (
-          <form action={updateDevisStatus}>
-            <input type="hidden" name="devisId" value={devis.id} />
-            <input type="hidden" name="statut" value={StatutDevis.valide} />
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              🔄 Proposer une nouvelle version
-            </Button>
-          </form>
-        )}
-
-        {devis.statut === StatutDevis.valide && (
-          <span className="text-sm text-gray-500 self-center">
-            ✅ Devis validé — en attente de la réponse du client
-          </span>
-        )}
-
-        <Button variant="outline">
-          <Link href="/conseiller/dashboard">← Retour</Link>
-        </Button>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

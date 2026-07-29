@@ -85,6 +85,8 @@ model ImageCircuit {
   ordre     Int?
   circuitId Int
   circuit   Circuit @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+
+  @@index([circuitId])
 }
 
 model Hebergement {
@@ -202,6 +204,9 @@ model Avis {
   circuitId   Int
   circuit     Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id])
+
+  @@index([circuitId])
+  @@index([userId])
 }
 
 model Favori {
@@ -223,6 +228,9 @@ model Notification {
   lu        Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([lu])
 }
 
 enum RoleNom {

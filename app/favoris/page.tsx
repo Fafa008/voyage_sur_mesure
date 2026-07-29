@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { RemoveFavoriButton } from "@/components/favori/RemoveFavoriButton";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -77,13 +78,16 @@ export default async function FavorisPage() {
                     </CardDescription>
                   </CardHeader>
                 </div>
-                <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4">
+                <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4 gap-3">
                   <span className="text-lg font-bold text-primary">
                     {circuit.prixEstime ? `${circuit.prixEstime.toString()} €` : "Sur devis"}
                   </span>
-                  <Link href={`/circuits/${circuit.slug}`} className={buttonVariants({ variant: "default" })}>
-                    Voir le circuit
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <RemoveFavoriButton circuitId={circuit.id} />
+                    <Link href={`/circuits/${circuit.slug}`} className={buttonVariants({ variant: "default" })}>
+                      Voir le circuit
+                    </Link>
+                  </div>
                 </div>
               </Card>
             );

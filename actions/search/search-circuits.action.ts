@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { searchFiltersSchema } from "@/schemas/search.schema";
 import type {
   SearchFilters,
@@ -8,7 +9,6 @@ import type {
   SearchOptionsData,
   CircuitSearchResultItem,
 } from "@/types/search";
-import { Prisma } from "@prisma/client";
 
 export async function searchCircuitsAction(
   rawFilters: SearchFilters

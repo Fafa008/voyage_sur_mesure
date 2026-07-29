@@ -6,10 +6,12 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Compass, User as UserIcon, LayoutDashboard, Send } from "lucide-react";
+import { Compass, User as UserIcon, LayoutDashboard, Send, Star } from "lucide-react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 import { getCachedUserWithRole } from "@/lib/auth-utils";
+import { getUnreadNotificationCount } from "@/lib/notifications-utils";
 
 export default async function Header() {
   const session = await auth.api.getSession({
@@ -17,9 +19,11 @@ export default async function Header() {
   });
 
   let userRole: string | undefined;
+  let unreadNotifications = 0;
   if (session) {
     const user = await getCachedUserWithRole(session.user.id);
     userRole = user?.role?.nom;
+    unreadNotifications = await getUnreadNotificationCount(session.user.id);
   }
 
   const getDashboardLink = () => {
@@ -98,6 +102,14 @@ export default async function Header() {
             </>
           ) : (
             <div className="flex items-center gap-3">
+              <NotificationBell unreadCount={unreadNotifications} />
+              <Link
+                href="/favoris"
+                className={buttonVariants({ variant: "ghost", size: "icon" })}
+                aria-label="Mes favoris"
+              >
+                <Star className="w-4 h-4" />
+              </Link>
               <Link
                 href={getDashboardLink()}
                 className={buttonVariants({ variant: "outline", size: "sm" })}

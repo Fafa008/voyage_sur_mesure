@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { z } from 'zod';
-import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 // Schéma complet
 const createDevisSchema = z.object({
@@ -93,7 +93,7 @@ export async function createDevis(prevState: any, formData: FormData) {
   const data = parsed.data;
 
   // 4. Création du devis avec tous les champs
-  await prisma.devis.create({
+  const devis = await prisma.devis.create({
     data: {
       userId: session.user.id,
       circuitId: data.circuitId ? parseInt(data.circuitId) : null,
@@ -126,6 +126,17 @@ export async function createDevis(prevState: any, formData: FormData) {
       nombrePersonnes: data.adultes + data.enfants + data.ados,
     },
   });
+
+  await prisma.notification.create({
+    data: {
+      userId: session.user.id,
+      titre: "Demande enregistrée",
+      message: `Votre demande de devis #${devis.id} a bien été reçue. Un conseiller vous répondra sous peu.`,
+    },
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/notifications");
 
   // 5. Redirection côté client via useRouter (gérée dans le formulaire)
   return { success: true };
