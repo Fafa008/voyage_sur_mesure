@@ -1,60 +1,125 @@
 "use client";
 
 import Link from "next/link";
-import { Compass, Mail, Phone, MapPin, Send } from "lucide-react";
+import {
+  Compass,
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const quickLinks = [
+  { label: "Accueil", href: "/home" },
+  { label: "Circuits", href: "/circuits" },
+  { label: "Demander un devis", href: "/devis/nouveau" },
+  { label: "Contact", href: "/contact" },
+];
+
+const services = [
+  { label: "Voyages sur mesure", href: "/circuits" },
+  { label: "Circuits guidés", href: "/circuits" },
+  { label: "Séjours balnéaires", href: "/circuits" },
+  { label: "Aventure & Trekking", href: "/circuits" },
+];
 
 export default function Footer() {
   return (
     <footer className="bg-card text-card-foreground border-t border-border/40 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      {/* Newsletter Strip */}
+      <div className="border-b border-border/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="space-y-1 text-center sm:text-left">
+              <h3 className="text-lg font-bold text-foreground">
+                Inspiration Voyage
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Recevez nos idées d'itinéraires et conseils exclusifs.
+              </p>
+            </div>
+            <form
+              className="flex items-center gap-2 w-full sm:w-auto max-w-md"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <input
+                type="email"
+                placeholder="Votre adresse email"
+                className="flex-1 px-4 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              />
+              <Button type="submit" className="px-5 shrink-0">
+                <Send className="w-4 h-4 mr-1.5" />
+                S'inscrire
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          
-          {/* Col 1: Identité */}
+          {/* Col 1: Identity */}
           <div className="space-y-4">
-            <Link href="/home" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
-                <Compass className="w-4 h-4" />
+            <Link href="/home" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                <Compass className="w-4.5 h-4.5" />
               </div>
-              <span className="font-extrabold text-lg tracking-tight text-foreground">
-                Mon Voyage
-              </span>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-lg tracking-tight text-foreground leading-none">
+                  Mon Voyage
+                </span>
+                <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-widest mt-0.5">
+                  Sur Mesure
+                </span>
+              </div>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Créateur de séjours et circuits sur mesure d'exception à Madagascar. Des voyages authentiques façonnés selon vos envies.
+              Créateur de séjours et circuits sur mesure d'exception à
+              Madagascar. Des voyages authentiques façonnés selon vos envies.
             </p>
           </div>
 
-          {/* Col 2: Navigation rapide */}
+          {/* Col 2: Quick Links */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">
-              Navigation
+              Liens Rapides
             </h4>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li>
-                <Link href="/home" className="hover:text-primary transition-colors">
-                  Accueil
-                </Link>
-              </li>
-              <li>
-                <Link href="/circuits" className="hover:text-primary transition-colors">
-                  Nos circuits sur-mesure
-                </Link>
-              </li>
-              <li>
-                <Link href="/devis/nouveau" className="hover:text-primary transition-colors">
-                  Demander un devis
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </li>
+              {quickLinks.map((link, i) => (
+                <li key={i}>
+                  <Link
+                    href={link.href}
+                    className="hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Col 3: Contact */}
+          {/* Col 3: Services */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">
+              Services
+            </h4>
+            <ul className="space-y-2.5 text-sm text-muted-foreground">
+              {services.map((link, i) => (
+                <li key={i}>
+                  <Link
+                    href={link.href}
+                    className="hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 4: Contact */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">
               Contact & Agence
@@ -74,32 +139,15 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* Col 4: Newsletter */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">
-              Inspiration Voyage
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              Inscrivez-vous pour recevoir nos idées d'itinéraires et conseils de voyage.
-            </p>
-            <form className="flex items-center gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Votre adresse email"
-                className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <Button size="sm" type="submit">
-                <Send className="w-3.5 h-3.5" />
-              </Button>
-            </form>
-          </div>
-
         </div>
+      </div>
 
-        {/* Bas de page */}
-        <div className="pt-12 mt-12 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Mon Voyage. Tous droits réservés.</p>
+      {/* Bottom Bar */}
+      <div className="border-t border-border/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <p>
+            © {new Date().getFullYear()} Mon Voyage. Tous droits réservés.
+          </p>
           <div className="flex items-center gap-6">
             <Link href="#" className="hover:text-primary transition-colors">
               Mentions Légales

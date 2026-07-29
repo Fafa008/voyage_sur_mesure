@@ -35,50 +35,21 @@ export default async function AdminLayout({
   });
 
   if (!user || !user.role || user.role.nom !== RoleNom.admin) {
-    redirect("/dashboard");
+    redirect("/admin/dashboard");
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link href="/admin/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <span className="font-extrabold text-lg tracking-tight">
-                Administration
-              </span>
-            </Link>
-            <Badge variant="destructive" className="text-xs uppercase font-semibold">
-              Admin
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-              <UserIcon className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-foreground">
-                {user.prenom || ""} {user.name}
-              </span>
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      </header>
-
       {/* Main Layout avec Sidebar */}
       <div className="flex-1 max-w-7xl w-full mx-auto flex">
-        <aside className="w-64 border-r border-border/40 p-4 hidden md:block space-y-2 shrink-0">
+        <aside className="w-64 border-r border-border/40 p-4 hidden md:block shrink-0 sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto">
           <nav className="space-y-1 text-sm font-medium">
             <Link
-              href="/admin/dashboard"
+              href="/dashboard"
               className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-primary/10 text-primary font-semibold transition-colors"
             >
               <LayoutDashboard className="w-4 h-4" />
-              Tableau de bord
+              Mes Devis
             </Link>
 
             <Link

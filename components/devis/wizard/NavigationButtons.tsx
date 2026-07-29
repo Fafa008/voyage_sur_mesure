@@ -1,4 +1,7 @@
-import { useFormStatus } from "react-dom";
+// components/devis/wizard/NavigationButtons.tsx
+"use client";
+
+import { ArrowLeft, ArrowRight, Send, Loader2 } from "lucide-react";
 
 interface NavigationButtonsProps {
   currentStep: number;
@@ -20,14 +23,15 @@ export function NavigationButtons({
   const isLastStep = currentStep === totalSteps - 1;
 
   return (
-    <div className="flex justify-between items-center mt-8 pt-4 border-t">
+    <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
       <button
         type="button"
         onClick={onPrevious}
         disabled={currentStep === 0}
-        className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-foreground font-semibold text-sm bg-card hover:bg-accent transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card shadow-xs active:scale-98"
       >
-        ← Précédent
+        <ArrowLeft className="w-4 h-4" />
+        Précédent
       </button>
 
       {isLastStep ? (
@@ -35,17 +39,28 @@ export function NavigationButtons({
           type="button"
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200 shadow-md disabled:opacity-60 disabled:cursor-not-allowed active:scale-98"
         >
-          {isSubmitting ? "Envoi..." : "📩 Soumettre ma demande"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Traitement...
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              Vérifier ma demande
+            </>
+          )}
         </button>
       ) : (
         <button
           type="button"
           onClick={onNext}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200 shadow-md active:scale-98"
         >
-          Suivant →
+          Suivant
+          <ArrowRight className="w-4 h-4" />
         </button>
       )}
     </div>

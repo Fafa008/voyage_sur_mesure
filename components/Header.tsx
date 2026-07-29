@@ -7,6 +7,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Compass, User as UserIcon, LayoutDashboard, Send } from "lucide-react";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+
+import { getCachedUserWithRole } from "@/lib/auth-utils";
 
 export default async function Header() {
   const session = await auth.api.getSession({
@@ -15,10 +18,7 @@ export default async function Header() {
 
   let userRole: string | undefined;
   if (session) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { role: true },
-    });
+    const user = await getCachedUserWithRole(session.user.id);
     userRole = user?.role?.nom;
   }
 
@@ -79,6 +79,7 @@ export default async function Header() {
 
         {/* Action / Auth */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {!session ? (
             <>
               <Link

@@ -39,8 +39,8 @@ export default async function NouveauDevisPage({ searchParams }: Props) {
     : null;
 
   return (
-    <main className="min-h-screen bg-gray-50 py-10">
-      <div className="container mx-auto">
+    <main className="min-h-screen bg-gradient-to-b from-background via-muted/30 to-background py-10 sm:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <DevisWizard
           user={user}
           circuits={circuits}

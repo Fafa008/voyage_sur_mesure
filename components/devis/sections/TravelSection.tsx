@@ -4,7 +4,9 @@
 import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { CounterInput } from "@/components/ui/CounterInput";
 import type { DevisFormData, DevisOption } from "@/types/devis";
+import { Compass, Calendar, Users, Sparkles, MapPin, Tag } from "lucide-react";
 
 interface TravelSectionProps {
   data: DevisFormData;
@@ -38,114 +40,153 @@ export function TravelSection({
     updateData({ [field]: newArray });
   };
 
-  // Construire les options pour les checkbox
   const typeOptions = [
-    "Aventure",
-    "Détente",
-    "Culturel",
-    "Nature",
-    "Romantique",
-    "Familial",
-    "Sportif",
-    "Gastronomique",
-  ].map((v) => ({ value: v, label: v }));
+    { value: "Aventure", label: "Aventure" },
+    { value: "Détente", label: "Détente & Playa" },
+    { value: "Culturel", label: "Culture & Histoire" },
+    { value: "Nature", label: "Espaces Naturels" },
+    { value: "Romantique", label: "Lune de Miel" },
+    { value: "Familial", label: "En Famille" },
+    { value: "Sportif", label: "Sport & Rando" },
+    { value: "Gastronomique", label: "Saveurs & Terroir" },
+  ];
 
   const themeOptions = themes.map((t) => ({
     value: String(t.id),
     label: t.nom ?? "Thème",
   }));
+
   const regionOptions = regions.map((r) => ({
     value: String(r.id),
     label: r.nom ?? "Région",
   }));
 
   return (
-    <section className="border rounded-lg p-6 bg-white">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-        <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">
+    <div className="space-y-8">
+      {/* En-tête */}
+      <div className="flex items-center gap-3 pb-4 border-b border-border">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
           2
-        </span>
-        Votre voyage
-      </h2>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-foreground tracking-tight">
+            Votre Projet de Voyage
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Définissez l'inspiration, le style, les dates et la composition de votre groupe
+          </p>
+        </div>
+      </div>
 
-      <div className="mb-4">
+      {/* 1. Circuit d'inspiration */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Compass className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Point de départ
+          </h3>
+        </div>
+
         <SelectField
-          label="Circuit d'inspiration (optionnel)"
+          label="Circuit d'inspiration (facultatif)"
           id="circuitId"
+          icon={<Compass className="w-4 h-4" />}
           options={[
-            { value: "", label: "-- Je construis mon voyage sur mesure --" },
+            { value: "", label: "✨ Création 100% sur-mesure (sans circuit modèle)" },
             ...circuits.map((c) => ({
               value: String(c.id),
-              label: c.titre ?? "Circuit",
+              label: `Inspiration : ${c.titre}`,
             })),
           ]}
           value={data.circuitId}
           onChange={(e) => updateData({ circuitId: e.target.value })}
-        />
-        <p className="text-xs text-gray-400 mt-1">
-          Vous pouvez vous inspirer d'un circuit existant ou créer le vôtre.
-        </p>
-      </div>
-
-      <CheckboxGroup
-        label="Type de voyage *"
-        name="typeVoyage"
-        options={typeOptions}
-        values={data.typeVoyage}
-        onChange={(value, checked) =>
-          handleArrayChange("typeVoyage", value, checked)
-        }
-        className="mb-4"
-      />
-
-      <CheckboxGroup
-        label="Thèmes qui vous intéressent"
-        name="themeIds"
-        options={themeOptions}
-        values={data.themeIds}
-        onChange={(value, checked) =>
-          handleArrayChange("themeIds", value, checked)
-        }
-        className="mb-4"
-      />
-
-      <CheckboxGroup
-        label="Régions à visiter"
-        name="regionIds"
-        options={regionOptions}
-        values={data.regionIds}
-        onChange={(value, checked) =>
-          handleArrayChange("regionIds", value, checked)
-        }
-        className="mb-4"
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InputField
-          label="Date de début souhaitée *"
-          id="dateDebut"
-          type="date"
-          value={data.dateDebut}
-          onChange={(e) => updateData({ dateDebut: e.target.value })}
-          required
-        />
-        <InputField
-          label="Date de fin souhaitée *"
-          id="dateFin"
-          type="date"
-          value={data.dateFin}
-          onChange={(e) => updateData({ dateFin: e.target.value })}
-          required
+          sublabel="Choisissez un circuit pour adapter un itinéraire existant"
         />
       </div>
 
-      <div className="mt-4">
+      {/* 2. Type de voyage & Thèmes */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-6 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Style & Environnement
+          </h3>
+        </div>
+
+        <CheckboxGroup
+          label="Style de voyage *"
+          sublabel="Sélectionnez une ou plusieurs ambiances"
+          name="typeVoyage"
+          options={typeOptions}
+          values={data.typeVoyage}
+          onChange={(value, checked) =>
+            handleArrayChange("typeVoyage", value, checked)
+          }
+        />
+
+        {themeOptions.length > 0 && (
+          <CheckboxGroup
+            label="Thèmes préférés"
+            sublabel="Centres d'intérêt prioritaires"
+            name="themeIds"
+            options={themeOptions}
+            values={data.themeIds}
+            onChange={(value, checked) =>
+              handleArrayChange("themeIds", value, checked)
+            }
+          />
+        )}
+
+        {regionOptions.length > 0 && (
+          <CheckboxGroup
+            label="Régions d'intérêt"
+            sublabel="Invisages privilégiés"
+            name="regionIds"
+            options={regionOptions}
+            values={data.regionIds}
+            onChange={(value, checked) =>
+              handleArrayChange("regionIds", value, checked)
+            }
+          />
+        )}
+      </div>
+
+      {/* 3. Dates & Durée */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Période & Durée
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <InputField
+            label="Date de départ souhaitée *"
+            id="dateDebut"
+            type="date"
+            icon={<Calendar className="w-4 h-4" />}
+            value={data.dateDebut}
+            onChange={(e) => updateData({ dateDebut: e.target.value })}
+            required
+          />
+          <InputField
+            label="Date de retour estimée *"
+            id="dateFin"
+            type="date"
+            icon={<Calendar className="w-4 h-4" />}
+            value={data.dateFin}
+            onChange={(e) => updateData({ dateFin: e.target.value })}
+            required
+          />
+        </div>
+
         <SelectField
-          label="La durée est-elle flexible ?"
+          label="Vos dates sont-elles flexibles ?"
           id="dureeFlexible"
           options={[
-            { value: "false", label: "Non, dates fixes" },
-            { value: "true", label: "Oui, je peux adapter" },
+            { value: "false", label: "Non, mes dates de vacances sont fixes" },
+            { value: "true", label: "Oui, je peux me décaler de quelques jours" },
           ]}
           value={data.dureeFlexible ? "true" : "false"}
           onChange={(e) =>
@@ -154,44 +195,57 @@ export function TravelSection({
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <InputField
-          label="Adultes *"
-          id="adultes"
-          type="number"
-          min="1"
-          value={String(data.adultes)}
-          onChange={(e) =>
-            updateData({ adultes: parseInt(e.target.value) || 1 })
-          }
-          required
-        />
-        <InputField
-          label="Enfants (0-12 ans)"
-          id="enfants"
-          type="number"
-          min="0"
-          value={String(data.enfants)}
-          onChange={(e) =>
-            updateData({ enfants: parseInt(e.target.value) || 0 })
-          }
-        />
-        <InputField
-          label="Ados (13-17 ans)"
-          id="ados"
-          type="number"
-          min="0"
-          value={String(data.ados)}
-          onChange={(e) => updateData({ ados: parseInt(e.target.value) || 0 })}
-        />
-        <InputField
-          label="Âges des enfants"
-          id="enfantsAge"
-          placeholder="ex: 4, 7, 10"
-          value={data.enfantsAge}
-          onChange={(e) => updateData({ enfantsAge: e.target.value })}
-        />
+      {/* 4. Composition des voyageurs */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+              Les Voyageurs
+            </h3>
+          </div>
+          <span className="text-xs font-bold text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+            Total : {data.adultes + data.enfants + data.ados} personne(s)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <CounterInput
+            label="Adultes"
+            sublabel="18 ans et plus"
+            value={data.adultes}
+            min={1}
+            onChange={(val) => updateData({ adultes: val })}
+          />
+
+          <CounterInput
+            label="Enfants"
+            sublabel="2 à 12 ans"
+            value={data.enfants}
+            min={0}
+            onChange={(val) => updateData({ enfants: val })}
+          />
+
+          <CounterInput
+            label="Ados"
+            sublabel="13 à 17 ans"
+            value={data.ados}
+            min={0}
+            onChange={(val) => updateData({ ados: val })}
+          />
+        </div>
+
+        {(data.enfants > 0 || data.ados > 0) && (
+          <InputField
+            label="Âges des enfants / ados lors du voyage"
+            id="enfantsAge"
+            placeholder="Ex: 4, 8 et 15 ans"
+            value={data.enfantsAge}
+            onChange={(e) => updateData({ enfantsAge: e.target.value })}
+            sublabel="Permet d'adapter les tarifs hôteliers et activités"
+          />
+        )}
       </div>
-    </section>
+    </div>
   );
 }

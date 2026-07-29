@@ -1,3 +1,4 @@
+// components/devis/wizard/DevisWizard.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,12 +10,43 @@ import type { DevisFormData, DevisOption } from "@/types/devis";
 
 import { ProgressBar } from "./ProgressBar";
 import { NavigationButtons } from "./NavigationButtons";
-import { Step1PersonalInfo } from "./steps/Step1PersonalInfo";
-import { Step2Travel } from "./steps/Step2Travel";
-import { Step3Accommodation } from "./steps/Step3Accommodation";
-import { Step4Activities } from "./steps/Step4Activities";
-import { Step5Budget } from "./steps/Step5Budget";
-import { Step6Complementary } from "./steps/Step6Complementary";
+import dynamic from "next/dynamic";
+
+const Step1PersonalInfo = dynamic(() =>
+  import("./steps/Step1PersonalInfo").then((m) => m.Step1PersonalInfo)
+);
+const Step2Travel = dynamic(() =>
+  import("./steps/Step2Travel").then((m) => m.Step2Travel)
+);
+const Step3Accommodation = dynamic(() =>
+  import("./steps/Step3Accommodation").then((m) => m.Step3Accommodation)
+);
+const Step4Activities = dynamic(() =>
+  import("./steps/Step4Activities").then((m) => m.Step4Activities)
+);
+const Step5Budget = dynamic(() =>
+  import("./steps/Step5Budget").then((m) => m.Step5Budget)
+);
+const Step6Complementary = dynamic(() =>
+  import("./steps/Step6Complementary").then((m) => m.Step6Complementary)
+);
+
+import {
+  CheckCircle2,
+  AlertCircle,
+  Compass,
+  User,
+  Calendar,
+  Users,
+  Building,
+  Activity,
+  Coins,
+  Send,
+  ArrowLeft,
+  LogIn,
+  UserPlus,
+  Edit3,
+} from "lucide-react";
 
 const DRAFT_KEY = "mon-voyage-devis-draft";
 const STEP_KEY = "mon-voyage-devis-step";
@@ -148,12 +180,17 @@ export function DevisWizard({
         return;
       }
 
+      if (currentStep === 1 && (!formData.dateDebut || !formData.dateFin)) {
+        setError("Veuillez indiquer vos dates de voyage estimées.");
+        return;
+      }
+
       setError(null);
 
       if (currentStep < contentSteps.length - 1) {
         setCurrentStep((prev) => prev + 1);
       } else {
-        // Dernière étape du formulaire -> étape de connexion / validation
+        // Dernière étape du formulaire -> récapitulatif
         setCurrentStep(contentSteps.length);
       }
     }
@@ -212,24 +249,40 @@ export function DevisWizard({
     : null;
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-2 text-3xl font-bold">✈️ Demander un devis</h1>
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+      {/* En-tête du Wizard */}
+      <div className="mb-6 text-center space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wider uppercase border border-primary/20">
+          <Compass className="w-3.5 h-3.5" />
+          Conception Sur Mesure
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          Demande de Devis Personnalisé
+        </h1>
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
+          {isAuthStep
+            ? "Vérifiez le récapitulatif de votre dossier avant de nous le transmettre."
+            : "Complétez les détails de votre séjour pour recevoir une proposition adaptée sous 24h."}
+        </p>
+      </div>
 
-      <p className="mb-6 text-muted-foreground">
-        {isAuthStep
-          ? "Dernière étape : connectez-vous pour envoyer votre demande."
-          : `Étape ${currentStep + 1} sur ${totalSteps}`}
-      </p>
+      {/* Stepper avec progression */}
+      <ProgressBar
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        onStepClick={(stepIdx) => setCurrentStep(stepIdx)}
+      />
 
-      <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
-
+      {/* Message d'erreur */}
       {error && (
-        <div className="my-4 rounded-lg bg-red-100 p-3 text-red-700">
-          {error}
+        <div className="my-5 p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm font-semibold flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      <div className="mt-6">
+      {/* Conteneur de l'étape active */}
+      <div className="mt-6 p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-sm transition-all duration-300">
         {!isAuthStep && StepComponent && (
           <StepComponent
             data={formData}
@@ -244,12 +297,15 @@ export function DevisWizard({
           <FinalStep
             user={user}
             formData={formData}
+            circuits={circuits}
+            onEditStep={(stepIdx) => setCurrentStep(stepIdx)}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
           />
         )}
       </div>
 
+      {/* Navigation entre étapes */}
       {!isAuthStep ? (
         <NavigationButtons
           currentStep={currentStep}
@@ -260,13 +316,14 @@ export function DevisWizard({
           isSubmitting={isSubmitting}
         />
       ) : (
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             type="button"
             onClick={goToPrevious}
-            className="rounded-lg border px-5 py-3 font-medium transition hover:bg-accent"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-all shadow-xs"
           >
-            Précédent
+            <ArrowLeft className="w-4 h-4" />
+            Modifier mes choix
           </button>
 
           {user ? (
@@ -274,23 +331,25 @@ export function DevisWizard({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-extrabold text-sm hover:brightness-95 transition-all shadow-md disabled:opacity-60"
             >
-              {isSubmitting ? "Envoi..." : "Confirmer la demande"}
+              {isSubmitting ? "Transmission en cours..." : "🚀 Confirmer et Envoyer ma Demande"}
             </button>
           ) : (
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
               <Link
                 href="/login?redirect=/devis/nouveau"
-                className="rounded-lg bg-primary px-5 py-3 text-center font-medium text-white transition hover:opacity-90"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all shadow-sm"
               >
-                Se connecter
+                <LogIn className="w-4 h-4" />
+                Se connecter pour envoyer
               </Link>
 
               <Link
                 href="/register?redirect=/devis/nouveau"
-                className="rounded-lg border px-5 py-3 text-center font-medium transition hover:bg-accent"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-border bg-card text-foreground font-semibold text-sm hover:bg-accent transition-all shadow-xs"
               >
+                <UserPlus className="w-4 h-4" />
                 Créer un compte
               </Link>
             </div>
@@ -304,74 +363,185 @@ export function DevisWizard({
 function FinalStep({
   user,
   formData,
+  circuits,
+  onEditStep,
   onSubmit,
   isSubmitting,
 }: {
   user: DevisWizardProps["user"];
   formData: DevisFormData;
+  circuits: DevisOption[];
+  onEditStep: (stepIdx: number) => void;
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
 }) {
+  const selectedCircuit = circuits.find((c) => String(c.id) === formData.circuitId);
+
   return (
-    <div className="space-y-6 rounded-2xl border bg-card p-6 shadow-sm">
-      <div>
-        <h2 className="text-2xl font-semibold">Résumé de votre demande</h2>
-        <p className="text-sm text-muted-foreground">
-          Vérifiez les informations avant l’envoi final.
-        </p>
+    <div className="space-y-8">
+      {/* En-tête */}
+      <div className="flex items-center justify-between pb-4 border-b border-border">
+        <div>
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight flex items-center gap-2">
+            <CheckCircle2 className="w-6 h-6 text-primary" />
+            Récapitulatif de votre Demande
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Vérifiez l'ensemble des éléments avant la transmission définitive à nos spécialistes.
+          </p>
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <SummaryItem label="Nom" value={`${formData.prenom} ${formData.nom}`} />
-        <SummaryItem label="Email" value={formData.email} />
-        <SummaryItem label="Téléphone" value={formData.telephone || "-"} />
-        <SummaryItem label="Circuit" value={formData.circuitId || "-"} />
-        <SummaryItem
-          label="Période"
-          value={
-            formData.dateDebut && formData.dateFin
-              ? `${formData.dateDebut} → ${formData.dateFin}`
-              : "Non définie"
-          }
-        />
-        <SummaryItem
-          label="Budget"
-          value={
-            formData.budgetMax
-              ? `${formData.budgetMin} - ${formData.budgetMax}`
-              : "Non défini"
-          }
-        />
+      {/* Grille de cartes récapitulatives */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1 : Voyageur */}
+        <SummaryCard
+          title="Demandeur"
+          icon={<User className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(0)}
+        >
+          <p className="font-semibold text-foreground">
+            {formData.prenom} {formData.nom}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">{formData.email}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{formData.telephone || "Non renseigné"}</p>
+        </SummaryCard>
+
+        {/* Card 2 : Projet & Inspiration */}
+        <SummaryCard
+          title="Circuit & Intention"
+          icon={<Compass className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(1)}
+        >
+          <p className="font-semibold text-foreground">
+            {selectedCircuit ? `Basé sur : ${selectedCircuit.titre}` : "Création 100% sur-mesure"}
+          </p>
+          {formData.typeVoyage.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Styles : <span className="font-medium text-foreground">{formData.typeVoyage.join(", ")}</span>
+            </p>
+          )}
+        </SummaryCard>
+
+        {/* Card 3 : Dates & Groupe */}
+        <SummaryCard
+          title="Dates & Voyageurs"
+          icon={<Calendar className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(1)}
+        >
+          <p className="font-semibold text-foreground">
+            {formData.dateDebut && formData.dateFin
+              ? `Du ${new Date(formData.dateDebut).toLocaleDateString("fr-FR")} au ${new Date(formData.dateFin).toLocaleDateString("fr-FR")}`
+              : "Dates non définies"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {formData.adultes} Adulte(s)
+            {formData.enfants > 0 ? `, ${formData.enfants} Enfant(s)` : ""}
+            {formData.ados > 0 ? `, ${formData.ados} Ados(s)` : ""}
+          </p>
+        </SummaryCard>
+
+        {/* Card 4 : Hébergement & Restauration */}
+        <SummaryCard
+          title="Hébergement & Régime"
+          icon={<Building className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(2)}
+        >
+          <p className="font-semibold text-foreground capitalize">
+            {formData.typeHebergement || "Non spécifié"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Régime : <span className="font-medium text-foreground">{formData.regime || "Standard"}</span>
+          </p>
+        </SummaryCard>
+
+        {/* Card 5 : Activités & Transport */}
+        <SummaryCard
+          title="Activités & Transport"
+          icon={<Activity className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(3)}
+        >
+          <p className="text-xs text-foreground font-medium">
+            {formData.activites.length > 0
+              ? formData.activites.slice(0, 3).join(", ") + (formData.activites.length > 3 ? "..." : "")
+              : "Aucune activité sélectionnée"}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Transports : {formData.transport.length > 0 ? formData.transport.join(", ") : "Non spécifié"}
+          </p>
+        </SummaryCard>
+
+        {/* Card 6 : Budget */}
+        <SummaryCard
+          title="Budget Indicatif"
+          icon={<Coins className="w-4 h-4 text-primary" />}
+          onEdit={() => onEditStep(4)}
+        >
+          <p className="font-extrabold text-primary text-base">
+            {formData.budgetMin || formData.budgetMax
+              ? `${formData.budgetMin || 0} € - ${formData.budgetMax || 0} € / personne`
+              : "Non défini"}
+          </p>
+        </SummaryCard>
       </div>
 
-      {!user && (
-        <div className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">
-          Vous avez presque terminé. Connectez-vous pour envoyer votre demande
-          sans perdre vos informations.
+      {/* Commentaire optionnel */}
+      {formData.commentaire && (
+        <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Remarques particulières :
+          </span>
+          <p className="text-xs text-foreground italic">"{formData.commentaire}"</p>
         </div>
       )}
 
-      {user && (
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? "Envoi..." : "Confirmer la demande"}
-        </button>
+      {/* Alerte si déconnecté */}
+      {!user && (
+        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-sm space-y-2">
+          <p className="font-bold flex items-center gap-2">
+            🔒 Inscription ou connexion nécessaire
+          </p>
+          <p className="text-xs leading-relaxed opacity-90">
+            Afin que nous puissions rattacher ce devis à votre espace client et vous notifier dès sa validation, veuillez vous connecter ou créer un compte. Vos réponses actuelles sont automatiquement conservées.
+          </p>
+        </div>
       )}
     </div>
   );
 }
 
-function SummaryItem({ label, value }: { label: string; value: string }) {
+function SummaryCard({
+  title,
+  icon,
+  children,
+  onEdit,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onEdit: () => void;
+}) {
   return (
-    <div className="rounded-xl border bg-background p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1 font-medium">{value}</p>
+    <div className="p-4 rounded-2xl border border-border bg-card shadow-xs flex flex-col justify-between space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {title}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={onEdit}
+          className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+        >
+          <Edit3 className="w-3 h-3" />
+          Modifier
+        </button>
+      </div>
+
+      <div className="text-sm">{children}</div>
     </div>
   );
 }

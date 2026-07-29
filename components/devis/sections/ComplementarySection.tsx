@@ -1,8 +1,8 @@
 // components/devis/sections/ComplementarySection.tsx
 "use client";
 
-import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
+import { MessageSquare, Share2, Mail, CheckCircle2 } from "lucide-react";
 
 interface ComplementarySectionProps {
   data: {
@@ -18,61 +18,84 @@ export function ComplementarySection({
   onChange,
 }: ComplementarySectionProps) {
   return (
-    <section className="border rounded-lg p-6 bg-white">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-        <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">
+    <div className="space-y-8">
+      {/* En-tête */}
+      <div className="flex items-center gap-3 pb-4 border-b border-border">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
           6
-        </span>
-        Informations complémentaires
-      </h2>
-      <div className="space-y-4">
+        </div>
         <div>
-          <label
-            htmlFor="commentaire"
-            className="block text-sm font-medium mb-1"
-          >
-            Vos envies, contraintes ou remarques
+          <h2 className="text-xl font-bold text-foreground tracking-tight">
+            Précisions Complémentaires
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Dernières remarques pour créer votre devis sur-mesure idéal
+          </p>
+        </div>
+      </div>
+
+      {/* Commentaire libre */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-3 shadow-xs">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-primary" />
+          <label htmlFor="commentaire" className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Vos souhaits particuliers, envies ou contraintes
           </label>
-          <textarea
-            id="commentaire"
-            name="commentaire"
-            rows={6}
-            value={data.commentaire}
-            onChange={(e) => onChange("commentaire", e.target.value)}
-            className="w-full p-2 border rounded bg-white"
-            placeholder="Décrivez votre voyage idéal, vos souhaits particuliers, vos contraintes médicales, etc."
-          />
         </div>
 
+        <textarea
+          id="commentaire"
+          name="commentaire"
+          rows={5}
+          value={data.commentaire}
+          onChange={(e) => onChange("commentaire", e.target.value)}
+          className="w-full p-3.5 text-sm text-foreground bg-card border border-border rounded-xl shadow-xs transition-all duration-200 focus:outline-hidden focus:ring-2 focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground/60 resize-none hover:border-primary/40"
+          placeholder="Ex: Nous célébrons nos 10 ans de mariage. Nous aimerions une nuit insolite sous les étoiles, et un guide francophone pour les visites."
+        />
+        <p className="text-[11px] text-muted-foreground">
+          Indiquez ici tout élément utile (rythme souhaité, étape incontournable, événements spéciaux...).
+        </p>
+      </div>
+
+      {/* Source & Newsletter */}
+      <div className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-xs">
         <SelectField
-          label="Comment nous avez-vous connu ?"
+          label="Comment avez-vous découvert Mon Voyage Sur Mesure ?"
           id="source"
+          icon={<Share2 className="w-4 h-4" />}
           options={[
-            { value: "", label: "-- Choisissez --" },
-            { value: "moteur", label: "Moteur de recherche" },
-            { value: "reseau", label: "Réseaux sociaux" },
-            { value: "ami", label: "Recommandation d'un ami" },
-            { value: "blog", label: "Blog / Article" },
-            { value: "foire", label: "Foire / Salon" },
+            { value: "", label: "-- Sélectionnez une option --" },
+            { value: "moteur", label: "🔍 Moteur de recherche (Google, Bing...)" },
+            { value: "reseau", label: "📱 Réseaux sociaux (Instagram, Facebook...)" },
+            { value: "ami", label: "👥 Recommandation d'un proche ou ami" },
+            { value: "blog", label: "📰 Blog de voyage ou article de presse" },
+            { value: "foire", label: "🎪 Foire / Salon du Voyage" },
             { value: "autre", label: "Autre" },
           ]}
           value={data.source}
           onChange={(e) => onChange("source", e.target.value)}
         />
 
-        <div>
-          <label className="flex items-center gap-2 text-sm">
+        <div className="pt-2 border-t border-border/60">
+          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/30 cursor-pointer hover:bg-accent/40 transition-colors">
             <input
               type="checkbox"
               name="newsletter"
               checked={data.newsletter}
               onChange={(e) => onChange("newsletter", e.target.checked)}
-              className="rounded"
+              className="mt-0.5 w-4 h-4 rounded text-primary border-border focus:ring-primary/40"
             />
-            Je souhaite recevoir la newsletter et les offres spéciales
+            <div>
+              <span className="block text-sm font-semibold text-foreground">
+                S'abonner aux offres exclusives & inspirations de voyage
+              </span>
+              <span className="block text-xs text-muted-foreground mt-0.5">
+                Recevez nos meilleures idées d'itinéraires sur-mesure (max 1 mail/mois, désinscription en 1 clic).
+              </span>
+            </div>
           </label>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
