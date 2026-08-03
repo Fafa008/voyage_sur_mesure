@@ -3,7 +3,13 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
@@ -20,7 +26,9 @@ interface CircuitsPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export default async function CircuitsPage({ searchParams }: CircuitsPageProps) {
+export default async function CircuitsPage({
+  searchParams,
+}: CircuitsPageProps) {
   const { page } = await searchParams;
   const currentPage = Math.max(1, parseInt(page ?? "1", 10));
   const skip = (currentPage - 1) * CIRCUITS_PER_PAGE;
@@ -48,13 +56,17 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
   return (
     <main className="max-w-7xl mx-auto py-12 px-4 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">🌍 Nos Circuits de Voyage</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          🌍 Nos Circuits de Voyage
+        </h1>
         <p className="text-muted-foreground mt-2">
-          Découvrez nos itinéraires phares et laissez-vous inspirer pour créer votre voyage sur-mesure.
+          Découvrez nos itinéraires phares et laissez-vous inspirer pour créer
+          votre voyage sur-mesure.
         </p>
         {total > 0 && (
           <p className="text-sm text-muted-foreground mt-1">
-            {total} circuit{total > 1 ? "s" : ""} disponible{total > 1 ? "s" : ""}
+            {total} circuit{total > 1 ? "s" : ""} disponible
+            {total > 1 ? "s" : ""}
           </p>
         )}
       </div>
@@ -62,8 +74,13 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
       {circuits.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground">Aucun circuit n&apos;est disponible pour le moment.</p>
-            <Link href="/devis/nouveau" className={buttonVariants({ variant: "default" })}>
+            <p className="text-muted-foreground">
+              Aucun circuit n&apos;est disponible pour le moment.
+            </p>
+            <Link
+              href="/devis/nouveau"
+              className={buttonVariants({ variant: "default" })}
+            >
               Demander un devis sur-mesure
             </Link>
           </CardContent>
@@ -72,7 +89,10 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {circuits.map((circuit) => (
-              <Card key={circuit.id} className="overflow-hidden flex flex-col justify-between hover:shadow-lg transition">
+              <Card
+                key={circuit.id}
+                className="overflow-hidden flex flex-col justify-between hover:shadow-lg transition"
+              >
                 <div>
                   <div className="h-48 bg-muted relative overflow-hidden">
                     {circuit.images[0] ? (
@@ -109,7 +129,9 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
                       )}
                     </div>
                     <CardDescription>
-                      {circuit.dureeJours ? `${circuit.dureeJours} jours` : "Durée flexible"}
+                      {circuit.dureeJours
+                        ? `${circuit.dureeJours} jours`
+                        : "Durée flexible"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -118,14 +140,21 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
                     </p>
                   </CardContent>
                 </div>
-                <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4">
+                <div className="p-6 flex items-center justify-between mt-4 border-t pt-4">
                   <div>
-                    <span className="text-xs text-muted-foreground block">À partir de</span>
+                    <span className="text-xs text-muted-foreground block">
+                      À partir de
+                    </span>
                     <span className="text-lg font-bold text-primary">
-                      {circuit.prixEstime ? `${circuit.prixEstime.toString()} €` : "Sur devis"}
+                      {circuit.prixEstime
+                        ? `${circuit.prixEstime.toString()} €`
+                        : "Sur devis"}
                     </span>
                   </div>
-                  <Link href={`/circuits/${circuit.slug}`} className={buttonVariants({ variant: "default" })}>
+                  <Link
+                    href={`/circuits/${circuit.slug}`}
+                    className={buttonVariants({ variant: "default" })}
+                  >
                     Voir le circuit
                   </Link>
                 </div>
@@ -135,13 +164,16 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <nav className="flex items-center justify-center gap-2 pt-4" aria-label="Pagination des circuits">
+            <nav
+              className="flex items-center justify-center gap-2 pt-4"
+              aria-label="Pagination des circuits"
+            >
               <Link
                 href={`/circuits?page=${currentPage - 1}`}
                 aria-disabled={currentPage <= 1}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
-                  currentPage <= 1 && "pointer-events-none opacity-50"
+                  currentPage <= 1 && "pointer-events-none opacity-50",
                 )}
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
@@ -157,7 +189,7 @@ export default async function CircuitsPage({ searchParams }: CircuitsPageProps) 
                 aria-disabled={currentPage >= totalPages}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
-                  currentPage >= totalPages && "pointer-events-none opacity-50"
+                  currentPage >= totalPages && "pointer-events-none opacity-50",
                 )}
               >
                 Suivant

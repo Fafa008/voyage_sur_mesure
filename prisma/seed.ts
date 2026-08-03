@@ -173,7 +173,7 @@ await prisma.circuit.upsert({
 
     images: {
       create: {
-        url: "https://example.com/tsingy.jpg",
+        url: "/uploads/circuits/tsingy-placeholder.jpg",
         legende: "Les Tsingy",
         ordre: 1,
       },
