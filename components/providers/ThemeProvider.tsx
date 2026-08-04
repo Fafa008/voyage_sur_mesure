@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -36,12 +42,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    setMounted(true);
     const stored = (localStorage.getItem("theme") as Theme) || "system";
     setThemeState(stored);
     const resolved = stored === "system" ? getSystemTheme() : stored;
     setResolvedTheme(resolved);
     applyTheme(stored);
+    setMounted(true);
   }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {

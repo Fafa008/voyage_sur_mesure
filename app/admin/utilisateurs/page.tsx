@@ -133,10 +133,10 @@ export default async function AdminUtilisateursPage() {
                             <select
                               name="roleId"
                               defaultValue={user.roleId ?? undefined}
-                              className="h-7 rounded-md border border-input bg-input/20 px-2 text-xs"
+                              className="h-8 rounded-lg border border-border bg-card text-foreground px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
                             >
                               {roles.map((role) => (
-                                <option key={role.id} value={role.id}>
+                                <option key={role.id} value={role.id} className="bg-card text-foreground">
                                   {roleLabels[role.nom]}
                                 </option>
                               ))}

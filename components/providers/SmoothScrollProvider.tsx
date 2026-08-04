@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 export default function SmoothScrollProvider({
@@ -8,14 +9,22 @@ export default function SmoothScrollProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   useEffect(() => {
+    // Activer Lenis uniquement sur la landing page ("/" et "/home")
+    const isLandingPage = pathname === "/" || pathname === "/home";
+
+    if (!isLandingPage) {
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 2,
     });
 
-    // Stocker l'ID du frame pour pouvoir l'annuler proprement au démontage
     let rafId: number;
 
     function raf(time: number) {
@@ -26,12 +35,11 @@ export default function SmoothScrollProvider({
     rafId = requestAnimationFrame(raf);
 
     return () => {
-      // Annuler la boucle rAF avant de détruire Lenis
-      // Évite la fuite mémoire et la boucle infinie après navigation
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return <>{children}</>;
 }
+

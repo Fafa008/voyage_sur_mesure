@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
+import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { createCircuit } from "@/app/admin/circuits/actions/create-circuit.action";
 
 function formatDateInput(value: Date | null | undefined) {
@@ -21,7 +22,9 @@ export default async function NewCircuitPage() {
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">Ajouter un nouveau circuit</h1>
-          <p className="text-gray-500">Creer un circuit pour l'administration.</p>
+          <p className="text-muted-foreground text-sm">
+            Créer un circuit pour l&apos;administration.
+          </p>
         </div>
         <Button variant="outline">
           <Link href="/admin/circuits">← Retour à la liste</Link>
@@ -34,14 +37,14 @@ export default async function NewCircuitPage() {
           <InputField id="slug" label="Slug" required />
           <InputField
             id="dureeJours"
-            label="Duree (jours)"
+            label="Durée (jours)"
             type="number"
             min={1}
             required
           />
           <InputField
             id="prixEstime"
-            label="Prix estime"
+            label="Prix estimé"
             type="number"
             min={0}
             step="0.01"
@@ -55,7 +58,7 @@ export default async function NewCircuitPage() {
           />
           <InputField
             id="dateDebut"
-            label="Date de debut"
+            label="Date de début"
             type="date"
             defaultValue={formatDateInput(undefined)}
           />
@@ -73,7 +76,7 @@ export default async function NewCircuitPage() {
           />
           <SelectField
             id="themeId"
-            label="Theme"
+            label="Thème"
             options={[
               { value: "", label: "Aucun" },
               ...themes.map((theme) => ({
@@ -84,7 +87,7 @@ export default async function NewCircuitPage() {
           />
           <SelectField
             id="regionId"
-            label="Region"
+            label="Région"
             options={[
               { value: "", label: "Aucune" },
               ...regions.map((region) => ({
@@ -95,16 +98,24 @@ export default async function NewCircuitPage() {
           />
         </div>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium">
+        <div className="space-y-1.5">
+          <label
+            htmlFor="description"
+            className="block text-sm font-semibold text-foreground"
+          >
             Description
           </label>
           <textarea
             id="description"
             name="description"
             rows={5}
-            className="w-full p-2 border rounded bg-white"
+            placeholder="Décrivez l'itinéraire, les points forts et le programme du circuit..."
+            className="w-full p-3 border border-border rounded-xl bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all text-sm placeholder:text-muted-foreground/60"
           />
+        </div>
+
+        <div className="border border-border/60 p-5 rounded-2xl bg-card/60">
+          <ImageManager />
         </div>
 
         <div className="flex flex-wrap gap-3 justify-end">

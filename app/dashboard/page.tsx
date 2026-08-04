@@ -36,10 +36,13 @@ import { MarkNotificationReadButton } from "@/components/notifications/MarkNotif
 
 const statutColors: Record<StatutDevis, string> = {
   [StatutDevis.en_cours]: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  [StatutDevis.en_modification]: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  [StatutDevis.en_modification]:
+    "bg-orange-500/10 text-orange-600 border-orange-500/20",
   [StatutDevis.valide]: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  [StatutDevis.accepte]: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  [StatutDevis.reserve]: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+  [StatutDevis.accepte]:
+    "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  [StatutDevis.reserve]:
+    "bg-purple-500/10 text-purple-600 border-purple-500/20",
   [StatutDevis.refuse]: "bg-rose-500/10 text-rose-600 border-rose-500/20",
 };
 
@@ -128,13 +131,17 @@ export default async function DashboardPage() {
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            Bienvenue dans votre espace personnel. Suivez l'avancement de vos demandes de devis et préparez votre séjour.
+            Bienvenue dans votre espace personnel. Suivez l'avancement de vos
+            demandes de devis et préparez votre séjour.
           </p>
         </div>
 
         <Link
           href="/devis/nouveau"
-          className={buttonVariants({ variant: "default", size: "lg" }) + " shrink-0 shadow-md"}
+          className={
+            buttonVariants({ variant: "default", size: "lg" }) +
+            " shrink-0 shadow-md"
+          }
         >
           <PlusCircle className="w-4 h-4 mr-2" />
           Nouvelle Demande de Devis
@@ -152,7 +159,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-extrabold">{totalDevis}</div>
-            <p className="text-[11px] text-muted-foreground mt-1">Demande(s) soumise(s)</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Demande(s) soumise(s)
+            </p>
           </CardContent>
         </Card>
 
@@ -164,8 +173,12 @@ export default async function DashboardPage() {
             <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-amber-600">{devisEnAttente}</div>
-            <p className="text-[11px] text-muted-foreground mt-1">En attente de retour</p>
+            <div className="text-2xl font-extrabold text-amber-600">
+              {devisEnAttente}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              En attente de retour
+            </p>
           </CardContent>
         </Card>
 
@@ -177,7 +190,9 @@ export default async function DashboardPage() {
             <CalendarCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-emerald-600">{totalReservations}</div>
+            <div className="text-2xl font-extrabold text-emerald-600">
+              {totalReservations}
+            </div>
             <p className="text-[11px] text-muted-foreground mt-1">
               {devisAPayer > 0
                 ? `${devisAPayer} devis en attente de paiement`
@@ -195,7 +210,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-extrabold">{totalFavoris}</div>
-            <p className="text-[11px] text-muted-foreground mt-1">Circuits sauvegardés</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Circuits sauvegardés
+            </p>
           </CardContent>
         </Card>
 
@@ -209,12 +226,16 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-extrabold">
               {notificationsNonLues > 0 ? (
-                <span className="text-rose-500 font-bold">{notificationsNonLues}</span>
+                <span className="text-rose-500 font-bold">
+                  {notificationsNonLues}
+                </span>
               ) : (
                 "0"
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">Notification(s) non lue(s)</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Notification(s) non lue(s)
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -224,7 +245,9 @@ export default async function DashboardPage() {
         <Card className="border border-border/60">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-bold">Mes réservations</CardTitle>
+              <CardTitle className="text-lg font-bold">
+                Mes réservations
+              </CardTitle>
               <CardDescription className="text-xs">
                 Vos voyages confirmés et leurs détails
               </CardDescription>
@@ -249,13 +272,18 @@ export default async function DashboardPage() {
                       {res.devis.circuit?.titre ?? `Devis #${res.devis.id}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(res.dateReservation).toLocaleDateString("fr-FR")} —{" "}
-                      {res.montantFinal?.toString()} €
+                      {new Date(res.dateReservation).toLocaleDateString(
+                        "fr-FR",
+                      )}{" "}
+                      — {res.montantFinal?.toString()} €
                     </p>
                   </div>
                   <Link
                     href={`/reservations/${res.id}`}
-                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                    className={buttonVariants({
+                      variant: "outline",
+                      size: "sm",
+                    })}
                   >
                     Détail
                   </Link>
@@ -270,9 +298,12 @@ export default async function DashboardPage() {
       <Card className="border border-border/60">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-lg font-bold">📋 Vos dernières demandes</CardTitle>
+            <CardTitle className="text-lg font-bold">
+              📋 Vos dernières demandes
+            </CardTitle>
             <CardDescription className="text-xs">
-              Consultez l'historique et l'état d'avancement de vos dossiers
+              Consultez l&apos;historique et l&apos;état d&apos;avancement de
+              vos dossiers
             </CardDescription>
           </div>
           <Link
@@ -332,7 +363,10 @@ export default async function DashboardPage() {
                     <TableCell className="text-right">
                       <Link
                         href={`/devis/${devis.id}`}
-                        className={buttonVariants({ variant: "outline", size: "sm" })}
+                        className={buttonVariants({
+                          variant: "outline",
+                          size: "sm",
+                        })}
                       >
                         Détail
                       </Link>
@@ -355,7 +389,9 @@ export default async function DashboardPage() {
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 Mes Circuits Favoris
               </CardTitle>
-              <CardDescription className="text-xs">Itinéraires sauvegardés</CardDescription>
+              <CardDescription className="text-xs">
+                Itinéraires sauvegardés
+              </CardDescription>
             </div>
             <Link
               href="/favoris"
@@ -367,7 +403,8 @@ export default async function DashboardPage() {
           <CardContent>
             {favoris.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
-                Aucun favori sauvegardé pour le moment. Explorez nos circuits et cliquez sur la star !
+                Aucun favori sauvegardé pour le moment. Explorez nos circuits et
+                cliquez sur la star !
               </p>
             ) : (
               <ul className="space-y-3">
@@ -384,12 +421,18 @@ export default async function DashboardPage() {
                         {fav.circuit.titre}
                       </Link>
                       <span className="text-xs text-muted-foreground">
-                        À partir de {fav.circuit.prixEstime ? `${fav.circuit.prixEstime.toString()} €` : "Sur devis"}
+                        À partir de{" "}
+                        {fav.circuit.prixEstime
+                          ? `${fav.circuit.prixEstime.toString()} €`
+                          : "Sur devis"}
                       </span>
                     </div>
                     <Link
                       href={`/circuits/${fav.circuit.slug}`}
-                      className={buttonVariants({ variant: "ghost", size: "sm" })}
+                      className={buttonVariants({
+                        variant: "ghost",
+                        size: "sm",
+                      })}
                     >
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
@@ -408,7 +451,9 @@ export default async function DashboardPage() {
                 <Bell className="w-4 h-4 text-primary" />
                 Notifications & Suivi
               </CardTitle>
-              <CardDescription className="text-xs">Derniers messages de vos conseillers</CardDescription>
+              <CardDescription className="text-xs">
+                Derniers messages de vos conseillers
+              </CardDescription>
             </div>
             <Link
               href="/notifications"
@@ -430,15 +475,21 @@ export default async function DashboardPage() {
                     className="p-3 rounded-lg border border-border/40 bg-muted/20 space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-semibold text-sm text-foreground">{notif.titre}</h4>
+                      <h4 className="font-semibold text-sm text-foreground">
+                        {notif.titre}
+                      </h4>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-[10px] text-muted-foreground">
-                          {new Date(notif.dateEnvoi).toLocaleDateString("fr-FR")}
+                          {new Date(notif.dateEnvoi).toLocaleDateString(
+                            "fr-FR",
+                          )}
                         </span>
                         <MarkNotificationReadButton notificationId={notif.id} />
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">{notif.message}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {notif.message}
+                    </p>
                   </li>
                 ))}
               </ul>

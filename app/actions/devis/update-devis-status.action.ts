@@ -18,7 +18,7 @@ export async function updateDevisStatus(formData: FormData) {
 
   await prisma.devis.update({
     where: { id: devisId },
-    data: { statut: statut as any },
+    data: { statut: statut as "en_cours" | "en_modification" | "valide" | "accepte" | "reserve" | "refuse" },
   });
 
   revalidatePath('/conseiller/dashboard');

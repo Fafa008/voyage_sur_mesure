@@ -37,6 +37,9 @@ model User {
   avis          Avis[]
   favoris       Favori[]
   notifications Notification[]
+  reservations  Reservation[]
+  transactions  PaymentTransaction[]
+  factures      Invoice[]
 
   // 🔗 Relations Better Auth
   sessions Session[]
@@ -76,6 +79,7 @@ model Circuit {
   etapes              Etape[]
   favoris             Favori[]
   images              ImageCircuit[]
+  reservations        Reservation[]
 }
 
 model ImageCircuit {
@@ -166,13 +170,33 @@ model Devis {
 }
 
 model Reservation {
-  id              Int               @id @default(autoincrement())
-  dateReservation DateTime          @default(now())
-  montantFinal    Decimal?          @db.Decimal(10, 2)
-  statut          StatutReservation @default(confirmee)
-  devisId         Int               @unique
-  paiement        Paiement?
-  devis           Devis             @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement())
+  dateReservation DateTime @default(now())
+  montantFinal    Decimal? @db.Decimal(10, 2)
+
+  // Compatibilité et Nouveaux statuts
+  status ReservationStatus @default(BROUILLON)
+  statut StatutReservation @default(confirmee)
+
+  // Devis optionnel
+  devisId Int?   @unique
+  devis   Devis? @relation(fields: [devisId], references: [id], onDelete: Cascade)
+
+  // Nouveaux champs
+  circuitId   Int?
+  circuit     Circuit?  @relation(fields: [circuitId], references: [id])
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  dateDebut   DateTime?
+  dateFin     DateTime?
+  nbVoyageurs Int       @default(1)
+
+  paiement  Paiement?
+  paiements PaymentTransaction[]
+  factures  Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ModePaiement {
@@ -300,4 +324,137 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// ==========================================
+// NOUVEAUX MODÈLES (RESERVATION & PAIEMENT)
+// ==========================================
+
+enum ReservationStatus {
+  BROUILLON
+  EN_ATTENTE
+  CONFIRMEE
+  PAYEE
+  TERMINEE
+  ANNULEE
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BINANCE_PAY
+  BANK_TRANSFER
+  STRIPE
+  PAYPAL
+  MOBILE_MONEY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum RefundStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model PaymentProvider {
+  id           String               @id @default(cuid())
+  name         String               @unique // ex: 'binance', 'bank_transfer', 'stripe'
+  isActive     Boolean              @default(true)
+  config       Json?
+  transactions PaymentTransaction[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model PaymentTransaction {
+  id          String          @id @default(cuid())
+  amount      Decimal         @db.Decimal(10, 2)
+  currency    String          @default("EUR")
+  status      PaymentStatus   @default(PENDING)
+  method      PaymentMethod
+  providerId  String
+  provider    PaymentProvider @relation(fields: [providerId], references: [id])
+  providerRef String?         @unique
+
+  reservationId Int
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+
+  expiresAt DateTime?
+
+  logs     PaymentLog[]
+  webhooks PaymentWebhook[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  numeroFacture String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  amount        Decimal       @db.Decimal(10, 2)
+  taxAmount     Decimal?      @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+
+  reservationId Int
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+
+  fileUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Decimal?  @db.Decimal(5, 2)
+  discountAmount  Decimal?  @db.Decimal(10, 2)
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  isActive        Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PaymentLog {
+  id            String             @id @default(cuid())
+  transactionId String
+  transaction   PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  action        String
+  data          Json?
+  createdAt     DateTime           @default(now())
+}
+
+model PaymentWebhook {
+  id            String              @id @default(cuid())
+  transactionId String?
+  transaction   PaymentTransaction? @relation(fields: [transactionId], references: [id])
+  provider      String
+  payload       Json
+  isProcessed   Boolean             @default(false)
+  error         String?
+  createdAt     DateTime            @default(now())
 }

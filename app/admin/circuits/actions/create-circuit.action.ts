@@ -45,8 +45,8 @@ const createCircuitSchema = z.object({
   ),
   images: z.array(
     z.object({
-      url: z.string().url('URL invalide'),
-      legende: z.string().optional(),
+      url: z.string().min(1, 'URL requise'),
+      legende: z.string().nullable().optional(),
       ordre: z.number().int().min(0).default(0),
     })
   ),
@@ -72,44 +72,62 @@ export async function createCircuit(formData: FormData) {
   const rawData = {
     titre: formData.get('titre')?.toString() || '',
     slug: formData.get('slug')?.toString() || '',
-    description: formData.get('description')?.toString(),
+    description: formData.get('description')?.toString() || undefined,
     dureeJours: parseInt(formData.get('dureeJours')?.toString() || '0'),
     prixEstime: parseFloat(formData.get('prixEstime')?.toString() || '0'),
     nbPlacesDisponibles: parseInt(formData.get('nbPlacesDisponibles')?.toString() || '0'),
-    dateDebut: formData.get('dateDebut')?.toString(),
+    dateDebut: formData.get('dateDebut')?.toString() || undefined,
     estGroupe: formData.get('estGroupe') === 'true',
     themeId: formData.get('themeId') ? parseInt(formData.get('themeId') as string) : undefined,
     regionId: formData.get('regionId') ? parseInt(formData.get('regionId') as string) : undefined,
-    // Les relations nécessitent un traitement particulier (JSON)
+    etapes: (() => {
+      try {
+        const raw = formData.get('etapes') as string;
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    images: (() => {
+      try {
+        const raw = formData.get('images') as string;
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    })(),
   };
 
-  // Pour les relations (étapes, images), on les passe en JSON dans un champ hidden
-  const etapes = JSON.parse(formData.get('etapes') as string || '[]');
-  const images = JSON.parse(formData.get('images') as string || '[]');
+  const parsed = createCircuitSchema.safeParse(rawData);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues?.[0]?.message || 'Erreur de validation');
+  }
+
+  const data = parsed.data;
 
   // 3. Création du circuit avec toutes les relations
   try {
     await prisma.circuit.create({
       data: {
-        titre: rawData.titre,
-        slug: rawData.slug,
-        description: rawData.description,
-        dureeJours: rawData.dureeJours,
-        prixEstime: rawData.prixEstime,
-        nbPlacesDisponibles: rawData.nbPlacesDisponibles,
-        dateDebut: rawData.dateDebut ? new Date(rawData.dateDebut) : null,
-        estGroupe: rawData.estGroupe,
-        themeId: rawData.themeId,
-        regionId: rawData.regionId,
+        titre: data.titre,
+        slug: data.slug,
+        description: data.description || null,
+        dureeJours: data.dureeJours,
+        prixEstime: data.prixEstime,
+        nbPlacesDisponibles: data.nbPlacesDisponibles,
+        dateDebut: data.dateDebut && data.dateDebut.trim() !== "" ? new Date(data.dateDebut) : null,
+        estGroupe: data.estGroupe,
+        themeId: data.themeId ?? null,
+        regionId: data.regionId ?? null,
         images: {
-          create: images.map((img: any, index: number) => ({
+          create: data.images.map((img, index) => ({
             url: img.url,
             legende: img.legende || null,
-            ordre: img.ordre || index,
+            ordre: img.ordre ?? index,
           })),
         },
         etapes: {
-          create: etapes.map((etape: any) => ({
+          create: data.etapes.map((etape) => ({
             ordre: etape.ordre,
             ville: etape.ville || null,
             description: etape.description || null,
@@ -122,7 +140,7 @@ export async function createCircuit(formData: FormData) {
               },
             },
             activites: {
-              create: (etape.activites || []).map((act: any) => ({
+              create: (etape.activites || []).map((act) => ({
                 nom: act.nom,
                 description: act.description || null,
                 duree: act.duree || null,

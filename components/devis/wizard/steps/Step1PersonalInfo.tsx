@@ -3,8 +3,8 @@
 import { PersonalInfoSection } from "@/components/devis/sections/PersonalInfoSection";
 
 interface Step1Props {
-  data: any;
-  updateData: (data: any) => void;
+  data: Record<string, string>;
+  updateData: (data: Record<string, string>) => void;
 }
 
 export function Step1PersonalInfo({ data, updateData }: Step1Props) {

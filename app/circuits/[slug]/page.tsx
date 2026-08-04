@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -111,13 +110,11 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-md">
           {circuit.images.map((img, idx) => (
             <div key={img.id || idx} className="relative h-72 w-full overflow-hidden">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={img.url}
                 alt={img.legende || circuit.titre}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={idx === 0}
+                className="w-full h-full object-cover"
               />
             </div>
           ))}

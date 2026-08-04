@@ -32,7 +32,7 @@ export default async function AdminCircuitsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">🌍 Circuits</h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             {circuits.length} circuit(s) au total
           </p>
         </div>
@@ -63,7 +63,7 @@ export default async function AdminCircuitsPage() {
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="text-center text-gray-500 py-8"
+                    className="text-center text-muted-foreground py-8"
                   >
                     Aucun circuit trouvé.
                   </TableCell>

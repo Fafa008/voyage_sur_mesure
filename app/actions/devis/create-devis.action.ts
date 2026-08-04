@@ -47,7 +47,7 @@ const createDevisSchema = z.object({
   newsletter: z.string().optional(),
 });
 
-export async function createDevis(prevState: any, formData: FormData) {
+export async function createDevis(prevState: unknown, formData: FormData) {
   // 1. Session
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {

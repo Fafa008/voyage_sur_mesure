@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -96,12 +95,11 @@ export default async function CircuitsPage({
                 <div>
                   <div className="h-48 bg-muted relative overflow-hidden">
                     {circuit.images[0] ? (
-                      <Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
                         src={circuit.images[0].url}
                         alt={circuit.titre}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
+import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { updateCircuit } from "@/app/admin/circuits/actions/update-circuit.action";
 
 interface EditCircuitPageProps {
@@ -27,6 +28,9 @@ export default async function EditCircuitPage({
       include: {
         theme: true,
         region: true,
+        images: {
+          orderBy: { ordre: "asc" },
+        },
       },
     }),
     prisma.theme.findMany({ orderBy: { nom: "asc" } }),
@@ -42,7 +46,7 @@ export default async function EditCircuitPage({
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">Modifier le circuit</h1>
-          <p className="text-gray-500">ID #{circuit.id}</p>
+          <p className="text-muted-foreground text-sm">ID #{circuit.id}</p>
         </div>
         <Button variant="outline">
           <Link href="/admin/circuits">← Retour à la liste</Link>
@@ -132,8 +136,8 @@ export default async function EditCircuitPage({
           />
         </div>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium">
+        <div className="space-y-1.5">
+          <label htmlFor="description" className="block text-sm font-semibold text-foreground">
             Description
           </label>
           <textarea
@@ -141,7 +145,18 @@ export default async function EditCircuitPage({
             name="description"
             defaultValue={circuit.description ?? ""}
             rows={5}
-            className="w-full p-2 border rounded bg-white"
+            placeholder="Décrivez l'itinéraire, les points forts et le programme du circuit..."
+            className="w-full p-3 border border-border rounded-xl bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all text-sm placeholder:text-muted-foreground/60"
+          />
+        </div>
+
+        <div className="border border-border/60 p-5 rounded-2xl bg-card/60">
+          <ImageManager
+            initialImages={circuit.images.map((img) => ({
+              url: img.url,
+              legende: img.legende,
+              ordre: img.ordre,
+            }))}
           />
         </div>
 
