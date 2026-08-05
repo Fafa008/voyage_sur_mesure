@@ -1,10 +1,11 @@
 "use client";
 
+import type { DevisFormData } from "@/types/devis";
 import { PersonalInfoSection } from "@/components/devis/sections/PersonalInfoSection";
 
 interface Step1Props {
-  data: Record<string, string>;
-  updateData: (data: Record<string, string>) => void;
+  data: DevisFormData;
+  updateData: (data: Partial<DevisFormData>) => void;
 }
 
 export function Step1PersonalInfo({ data, updateData }: Step1Props) {

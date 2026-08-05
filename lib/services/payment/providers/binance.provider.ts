@@ -23,7 +23,7 @@ export class BinanceProvider implements IPaymentProvider {
     // Simulation de validation d'un webhook (vérifier la signature)
     const { bizId, bizStatus } = payload;
     
-    let status = PaymentStatus.PENDING;
+    let status: PaymentStatus = PaymentStatus.PENDING;
     if (bizStatus === 'PAY_SUCCESS') status = PaymentStatus.PAID;
     if (bizStatus === 'PAY_CLOSED') status = PaymentStatus.CANCELLED;
 

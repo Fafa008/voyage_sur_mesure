@@ -10,6 +10,7 @@ export interface PaymentOptions {
 
 export interface PaymentResult {
   success: boolean;
+  transactionId?: string;
   providerRef?: string;
   checkoutUrl?: string;
   qrCodeUrl?: string;

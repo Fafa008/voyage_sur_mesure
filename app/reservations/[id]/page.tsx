@@ -65,13 +65,15 @@ export default async function ReservationDetailPage({ params }: Props) {
     include: { role: true },
   });
 
-  const isOwner = reservation.devis.userId === session.user.id;
+  const ownerId = reservation.devis?.userId ?? reservation.userId;
+  const isOwner = ownerId === session.user.id;
   const isStaff =
     dbUser?.role?.nom === "admin" || dbUser?.role?.nom === "conseiller";
 
   if (!isOwner && !isStaff) redirect("/dashboard");
 
   const { devis, paiement } = reservation;
+  if (!devis) notFound();
 
   return (
     <main className="max-w-3xl mx-auto py-10 px-4 space-y-6">
@@ -124,67 +126,73 @@ export default async function ReservationDetailPage({ params }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            {devis.circuit ? (
+            {devis ? (
               <>
-                <div>
-                  <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                    Circuit
-                  </span>
-                  <Link
-                    href={`/circuits/${devis.circuit.slug}`}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    {devis.circuit.titre}
-                  </Link>
-                </div>
-                {devis.circuit.dureeJours && (
+                {devis.circuit ? (
+                  <>
+                    <div>
+                      <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                        Circuit
+                      </span>
+                      <Link
+                        href={`/circuits/${devis.circuit.slug}`}
+                        className="font-semibold text-primary hover:underline"
+                      >
+                        {devis.circuit.titre}
+                      </Link>
+                    </div>
+                    {devis.circuit.dureeJours && (
+                      <div>
+                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                          Durée
+                        </span>
+                        <p>{devis.circuit.dureeJours} jours</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">Voyage entièrement personnalisé</p>
+                )}
+
+                {(devis.dateDebutSouhaitee || devis.dateFinSouhaitee) && (
                   <div>
                     <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                      Durée
+                      Dates souhaitées
                     </span>
-                    <p>{devis.circuit.dureeJours} jours</p>
+                    <p>
+                      {devis.dateDebutSouhaitee
+                        ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
+                        : "?"}{" "}
+                      →{" "}
+                      {devis.dateFinSouhaitee
+                        ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
+                        : "?"}
+                    </p>
                   </div>
                 )}
+
+                <div>
+                  <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                    <Users className="w-3 h-3 inline mr-1" />
+                    Voyageurs
+                  </span>
+                  <p>
+                    {devis.adultes} adulte(s)
+                    {devis.enfants > 0 ? `, ${devis.enfants} enfant(s)` : ""}
+                    {devis.ados > 0 ? `, ${devis.ados} ado(s)` : ""}
+                  </p>
+                </div>
+
+                <Link
+                  href={`/devis/${devis.id}`}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  Voir le devis associé
+                </Link>
               </>
             ) : (
-              <p className="text-muted-foreground">Voyage entièrement personnalisé</p>
+              <p className="text-muted-foreground">Réservation directe sans devis associé.</p>
             )}
-
-            {(devis.dateDebutSouhaitee || devis.dateFinSouhaitee) && (
-              <div>
-                <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                  Dates souhaitées
-                </span>
-                <p>
-                  {devis.dateDebutSouhaitee
-                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
-                    : "?"}{" "}
-                  →{" "}
-                  {devis.dateFinSouhaitee
-                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
-                    : "?"}
-                </p>
-              </div>
-            )}
-
-            <div>
-              <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                <Users className="w-3 h-3 inline mr-1" />
-                Voyageurs
-              </span>
-              <p>
-                {devis.adultes} adulte(s)
-                {devis.enfants > 0 ? `, ${devis.enfants} enfant(s)` : ""}
-                {devis.ados > 0 ? `, ${devis.ados} ado(s)` : ""}
-              </p>
-            </div>
-
-            <Link
-              href={`/devis/${devis.id}`}
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
-              Voir le devis associé
-            </Link>
           </CardContent>
         </Card>
 
@@ -238,7 +246,7 @@ export default async function ReservationDetailPage({ params }: Props) {
         </Card>
       </div>
 
-      {isStaff && (
+      {isStaff && devis && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Informations client</CardTitle>

@@ -73,7 +73,7 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
   const showClientActions = isOwner && devis.statut === StatutDevis.valide;
   const showPayment =
     isOwner &&
-    devis.statut === StatutDevis.accepte &&
+    (devis.statut === StatutDevis.accepte || devis.statut === StatutDevis.reserve) &&
     !devis.reservation;
   const hasReservation = !!devis.reservation;
 
@@ -110,7 +110,7 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
         </Card>
       )}
 
-      {/* Paiement */}
+      {/* Formulaire de paiement si aucune réservation créée */}
       {showPayment && devis.montantTotal && (
         <Card className="border-emerald-200 bg-emerald-50/30 dark:bg-emerald-950/20 dark:border-emerald-900">
           <CardHeader>
@@ -119,26 +119,49 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
               Finaliser votre réservation
             </CardTitle>
             <CardDescription>
-              Acceptez les conditions et réglez le montant pour confirmer votre voyage.
+              Choisissez votre mode de paiement pour régler votre voyage.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <PaymentForm
               devisId={devis.id}
               montant={devis.montantTotal.toString()}
-              modesPaiement={modesPaiement}
             />
           </CardContent>
         </Card>
       )}
 
-      {/* Réservation confirmée */}
-      {hasReservation && devis.reservation && (
+      {/* Si réservation existe mais N'EST PAS ENCORE PAYÉE */}
+      {hasReservation && devis.reservation && devis.reservation.status !== "PAYEE" && (
+        <Card className="border-amber-200 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-amber-800 dark:text-amber-300 font-bold">
+              <CreditCard className="w-5 h-5 text-amber-600" />
+              Réservation enregistrée — En attente de paiement
+            </CardTitle>
+            <CardDescription>
+              Votre réservation #{devis.reservation.id} est en attente. Finalisez votre règlement pour valider définitivement votre dossier.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`/paiement/${devis.reservation.id}`}
+              className={buttonVariants({ variant: "default", size: "lg" }) + " font-bold shadow-md"}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Accéder à l'espace de paiement ({devis.reservation.montantFinal?.toString()} €)
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Si réservation PAYÉE */}
+      {hasReservation && devis.reservation && devis.reservation.status === "PAYEE" && (
         <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/20 dark:border-purple-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle2 className="w-5 h-5 text-purple-600" />
-              Réservation confirmée
+              Réservation payée et confirmée
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">

@@ -10,6 +10,7 @@ import {
   Star,
   Tag,
   FileText,
+  CreditCard,
 } from "lucide-react";
 
 export function AdminSidebarNav() {
@@ -44,6 +45,12 @@ export function AdminSidebarNav() {
       title: "Thèmes & Régions",
       href: "/admin/themes",
       icon: Tag,
+      exact: false,
+    },
+    {
+      title: "Paiements & Transactions",
+      href: "/admin/paiements",
+      icon: CreditCard,
       exact: false,
     },
     {

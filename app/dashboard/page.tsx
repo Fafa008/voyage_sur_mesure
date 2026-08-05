@@ -269,7 +269,7 @@ export default async function DashboardPage() {
                 >
                   <div>
                     <p className="font-semibold text-sm">
-                      {res.devis.circuit?.titre ?? `Devis #${res.devis.id}`}
+                      {res.devis?.circuit?.titre ?? (res.devis ? `Devis #${res.devis.id}` : `Réservation #${res.id}`)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(res.dateReservation).toLocaleDateString(

@@ -73,7 +73,7 @@ export default async function ReservationsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <CardTitle className="text-lg">
-                      {res.devis.circuit?.titre ?? `Voyage personnalisé #${res.devis.id}`}
+                      {res.devis?.circuit?.titre ?? (res.devis ? `Voyage personnalisé #${res.devis.id}` : `Réservation #${res.id}`)}
                     </CardTitle>
                     <CardDescription>
                       Réservation #{res.id} —{" "}
@@ -86,7 +86,7 @@ export default async function ReservationsPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                {res.devis.circuit && (
+                {res.devis?.circuit && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="w-4 h-4" />
                     {res.devis.circuit.dureeJours
