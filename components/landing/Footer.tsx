@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Compass,
-  Mail,
-  Phone,
-  MapPin,
-  Send,
-} from "lucide-react";
+import { Compass, Mail, Phone, MapPin, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const quickLinks = [
@@ -36,7 +30,7 @@ export default function Footer() {
                 Inspiration Voyage
               </h3>
               <p className="text-sm text-muted-foreground">
-                Recevez nos idées d'itinéraires et conseils exclusifs.
+                Recevez nos idées d&apos;itinéraires et conseils exclusifs.
               </p>
             </div>
             <form
@@ -145,9 +139,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-border/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>
-            © {new Date().getFullYear()} Mon Voyage. Tous droits réservés.
-          </p>
+          <p>© {new Date().getFullYear()} Mon Voyage. Tous droits réservés.</p>
           <div className="flex items-center gap-6">
             <Link href="#" className="hover:text-primary transition-colors">
               Mentions Légales

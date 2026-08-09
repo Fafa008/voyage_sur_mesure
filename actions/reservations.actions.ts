@@ -9,9 +9,10 @@ export async function createReservationAction(data: CreateReservationDTO) {
     const reservation = await reservationService.create(data);
     revalidatePath("/reservation/history");
     return { success: true, data: reservation };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("Erreur lors de la création de la réservation:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -19,9 +20,10 @@ export async function getReservationAction(id: number) {
   try {
     const reservation = await reservationService.getById(id);
     return { success: true, data: reservation };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("Erreur récupération réservation:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 

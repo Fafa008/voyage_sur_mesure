@@ -1,14 +1,36 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import type { Metadata } from "next";
+
+/**
+ * Mémoïsation au niveau de la requête (React Request Cache).
+ * generateMetadata et la page appellent tous les deux cette fonction :
+ * la DB n'est interrogée qu'UNE seule fois par rendu.
+ */
+const getCircuitBySlug = cache(async (slug: string) =>
+  prisma.circuit.findUnique({
+    where: { slug },
+    include: {
+      theme: true,
+      region: true,
+      images: true,
+      etapes: {
+        include: { hebergement: true, activites: true },
+        orderBy: { ordre: "asc" },
+      },
+    },
+  })
+);
 
 // Revalidation ISR : les pages de circuit sont régénérées toutes les heures
 export const revalidate = 3600;
@@ -28,15 +50,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const circuit = await prisma.circuit.findUnique({
-    where: { slug },
-    select: {
-      titre: true,
-      description: true,
-      dureeJours: true,
-      region: { select: { nom: true } },
-    },
-  });
+  // Réutilise le cache — pas de requête DB supplémentaire
+  const circuit = await getCircuitBySlug(slug);
 
   if (!circuit) {
     return { title: "Circuit introuvable | Mon Voyage" };
@@ -59,21 +74,8 @@ interface CircuitDetailPageProps {
 export default async function CircuitDetailPage({ params }: CircuitDetailPageProps) {
   const { slug } = await params;
 
-  const circuit = await prisma.circuit.findUnique({
-    where: { slug },
-    include: {
-      theme: true,
-      region: true,
-      images: true,
-      etapes: {
-        include: {
-          hebergement: true,
-          activites: true,
-        },
-        orderBy: { ordre: "asc" },
-      },
-    },
-  });
+  // Pas de nouvelle requête DB : récupère le résultat depuis le cache de generateMetadata
+  const circuit = await getCircuitBySlug(slug);
 
   if (!circuit) {
     notFound();
@@ -110,11 +112,13 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-md">
           {circuit.images.map((img, idx) => (
             <div key={img.id || idx} className="relative h-72 w-full overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={img.url}
                 alt={img.legende || circuit.titre}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={idx === 0}
               />
             </div>
           ))}

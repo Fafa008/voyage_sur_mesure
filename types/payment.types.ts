@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentStatus, Reservation, PaymentTransaction, Invoice } from "@prisma/client";
+import { PaymentStatus, type Prisma } from "@prisma/client";
 
 export interface PaymentOptions {
   reservationId: number;
@@ -21,13 +21,13 @@ export interface PaymentResult {
 export interface WebhookResult {
   providerRef: string;
   status: PaymentStatus;
-  raw: any;
+  raw: Prisma.InputJsonValue;
 }
 
 export interface IPaymentProvider {
   createCharge(amount: number, currency: string, options: PaymentOptions): Promise<PaymentResult>;
   verifyPayment(providerRef: string): Promise<{ status: PaymentStatus; amount?: number }>;
-  handleWebhook(payload: any, headers: any): Promise<WebhookResult>;
+  handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult>;
   refund(providerRef: string, amount: number): Promise<boolean>;
 }
 

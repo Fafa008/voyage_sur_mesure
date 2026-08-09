@@ -4,7 +4,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { RemoveFavoriButton } from "@/components/favori/RemoveFavoriButton";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -33,15 +39,21 @@ export default async function FavorisPage() {
       <div>
         <h1 className="text-3xl font-bold">⭐ Mes Circuits Favoris</h1>
         <p className="text-muted-foreground mt-1">
-          Retrouvez les circuits que vous avez sauvegardés pour votre futur voyage.
+          Retrouvez les circuits que vous avez sauvegardés pour votre futur
+          voyage.
         </p>
       </div>
 
       {favoris.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground">Vous n'avez pas encore de circuits favoris.</p>
-            <Link href="/circuits" className={buttonVariants({ variant: "default" })}>
+            <p className="text-muted-foreground">
+              Vous n&apos;avez pas encore de circuits favoris.
+            </p>
+            <Link
+              href="/circuits"
+              className={buttonVariants({ variant: "default" })}
+            >
               Découvrir les circuits
             </Link>
           </CardContent>
@@ -51,7 +63,10 @@ export default async function FavorisPage() {
           {favoris.map((fav) => {
             const { circuit } = fav;
             return (
-              <Card key={fav.id} className="overflow-hidden flex flex-col justify-between hover:shadow-lg transition">
+              <Card
+                key={fav.id}
+                className="overflow-hidden flex flex-col justify-between hover:shadow-lg transition"
+              >
                 <div>
                   <div className="h-48 bg-muted relative overflow-hidden">
                     {circuit.images[0] ? (
@@ -74,17 +89,24 @@ export default async function FavorisPage() {
                   <CardHeader>
                     <CardTitle className="text-xl">{circuit.titre}</CardTitle>
                     <CardDescription>
-                      {circuit.dureeJours ? `${circuit.dureeJours} jours` : "Durée flexible"}
+                      {circuit.dureeJours
+                        ? `${circuit.dureeJours} jours`
+                        : "Durée flexible"}
                     </CardDescription>
                   </CardHeader>
                 </div>
                 <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4 gap-3">
                   <span className="text-lg font-bold text-primary">
-                    {circuit.prixEstime ? `${circuit.prixEstime.toString()} €` : "Sur devis"}
+                    {circuit.prixEstime
+                      ? `${circuit.prixEstime.toString()} €`
+                      : "Sur devis"}
                   </span>
                   <div className="flex items-center gap-2">
                     <RemoveFavoriButton circuitId={circuit.id} />
-                    <Link href={`/circuits/${circuit.slug}`} className={buttonVariants({ variant: "default" })}>
+                    <Link
+                      href={`/circuits/${circuit.slug}`}
+                      className={buttonVariants({ variant: "default" })}
+                    >
                       Voir le circuit
                     </Link>
                   </div>

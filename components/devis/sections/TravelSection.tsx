@@ -73,7 +73,8 @@ export function TravelSection({
             Votre Projet de Voyage
           </h2>
           <p className="text-xs text-muted-foreground">
-            Définissez l'inspiration, le style, les dates et la composition de votre groupe
+            Définissez l&apos;inspiration, le style, les dates et la composition
+            de votre groupe
           </p>
         </div>
       </div>
@@ -92,7 +93,10 @@ export function TravelSection({
           id="circuitId"
           icon={<Compass className="w-4 h-4" />}
           options={[
-            { value: "", label: "✨ Création 100% sur-mesure (sans circuit modèle)" },
+            {
+              value: "",
+              label: "✨ Création 100% sur-mesure (sans circuit modèle)",
+            },
             ...circuits.map((c) => ({
               value: String(c.id),
               label: `Inspiration : ${c.titre}`,
@@ -186,7 +190,10 @@ export function TravelSection({
           id="dureeFlexible"
           options={[
             { value: "false", label: "Non, mes dates de vacances sont fixes" },
-            { value: "true", label: "Oui, je peux me décaler de quelques jours" },
+            {
+              value: "true",
+              label: "Oui, je peux me décaler de quelques jours",
+            },
           ]}
           value={data.dureeFlexible ? "true" : "false"}
           onChange={(e) =>

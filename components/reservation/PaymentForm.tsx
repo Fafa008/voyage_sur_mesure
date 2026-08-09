@@ -16,7 +16,9 @@ interface PaymentFormProps {
 
 export function PaymentForm({ devisId, montant }: PaymentFormProps) {
   const router = useRouter();
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(PaymentMethod.BINANCE_PAY);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(
+    PaymentMethod.BINANCE_PAY,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +35,10 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
       } else {
         router.push(`/paiement/${res.data.reservationId}`);
       }
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Une erreur est survenue";
+      setError(message);
       setLoading(false);
     }
   };
@@ -59,7 +63,7 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
         <label className="text-sm font-bold text-foreground block">
           Choisissez votre mode de paiement
         </label>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <PaymentMethodCard
             method={PaymentMethod.BINANCE_PAY}
@@ -78,8 +82,10 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
       <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 p-3.5 rounded-xl border border-border/50">
         <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
         <p>
-          Transaction 100% sécurisée. Vos données personnelles sont protégées par le chiffrement SSL. 
-          {selectedMethod === PaymentMethod.BINANCE_PAY && " Le taux de conversion crypto/EUR est garanti pendant 15 minutes."}
+          Transaction 100% sécurisée. Vos données personnelles sont protégées
+          par le chiffrement SSL.
+          {selectedMethod === PaymentMethod.BINANCE_PAY &&
+            " Le taux de conversion crypto/EUR est garanti pendant 15 minutes."}
         </p>
       </div>
 
@@ -102,7 +108,11 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
           </>
         ) : (
           <>
-            Procéder au paiement ({selectedMethod === PaymentMethod.BINANCE_PAY ? "Binance Pay" : "Virement"})
+            Procéder au paiement (
+            {selectedMethod === PaymentMethod.BINANCE_PAY
+              ? "Binance Pay"
+              : "Virement"}
+            )
             <ArrowRight className="w-4 h-4 ml-2" />
           </>
         )}

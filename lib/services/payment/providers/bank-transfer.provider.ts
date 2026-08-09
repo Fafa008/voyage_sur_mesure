@@ -19,7 +19,7 @@ export class BankTransferProvider implements IPaymentProvider {
     return { status: PaymentStatus.PENDING };
   }
 
-  async handleWebhook(payload: any, headers: any): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult> {
     // Normalement pas de webhook pour un virement manuel pur.
     throw new Error("Webhook not supported for Bank Transfer");
   }

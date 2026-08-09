@@ -3,7 +3,13 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, MapPin, Calendar, Users, ArrowLeft } from "lucide-react";
 import { PaymentCheckoutForm } from "./PaymentCheckoutForm";
@@ -25,19 +31,21 @@ export default async function PaymentTunnelPage({ params }: Props) {
     include: {
       circuit: true,
       devis: {
-        include: { circuit: true }
+        include: { circuit: true },
       },
       user: { select: { id: true, name: true, email: true } },
       paiements: {
         orderBy: { createdAt: "desc" },
-        take: 1
-      }
-    }
+        take: 1,
+      },
+    },
   });
 
   if (!reservation) notFound();
 
-  const isOwner = reservation.userId === session.user.id || reservation.devis?.userId === session.user.id;
+  const isOwner =
+    reservation.userId === session.user.id ||
+    reservation.devis?.userId === session.user.id;
   if (!isOwner) redirect("/dashboard");
 
   // If already paid, redirect to confirmation
@@ -45,7 +53,10 @@ export default async function PaymentTunnelPage({ params }: Props) {
     redirect(`/paiement/${reservationId}/confirmation`);
   }
 
-  const circuitTitle = reservation.circuit?.titre || reservation.devis?.circuit?.titre || "Voyage sur mesure";
+  const circuitTitle =
+    reservation.circuit?.titre ||
+    reservation.devis?.circuit?.titre ||
+    "Voyage sur mesure";
   const amount = reservation.montantFinal?.toString() || "0";
   const latestTransaction = reservation.paiements[0] || null;
 
@@ -60,7 +71,9 @@ export default async function PaymentTunnelPage({ params }: Props) {
       </Link>
 
       <div className="space-y-2 text-center sm:text-left">
-        <h1 className="text-3xl font-extrabold tracking-tight">Espace de Paiement Sécurisé</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">
+          Espace de Paiement Sécurisé
+        </h1>
         <p className="text-muted-foreground">
           Finalisez le règlement de votre voyage à Madagascar en toute sérénité.
         </p>
@@ -71,10 +84,15 @@ export default async function PaymentTunnelPage({ params }: Props) {
         <div className="md:col-span-1 space-y-6">
           <Card className="border-border/60">
             <CardHeader className="pb-3">
-              <Badge variant="outline" className="w-fit mb-2 text-xs font-bold text-primary border-primary/30">
+              <Badge
+                variant="outline"
+                className="w-fit mb-2 text-xs font-bold text-primary border-primary/30"
+              >
                 Réservation #{reservation.id}
               </Badge>
-              <CardTitle className="text-lg font-bold">{circuitTitle}</CardTitle>
+              <CardTitle className="text-lg font-bold">
+                {circuitTitle}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {reservation.nbVoyageurs > 0 && (
@@ -88,8 +106,13 @@ export default async function PaymentTunnelPage({ params }: Props) {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4 text-primary shrink-0" />
                   <span>
-                    Du {new Date(reservation.dateDebut).toLocaleDateString("fr-FR")}
-                    {reservation.dateFin ? ` au ${new Date(reservation.dateFin).toLocaleDateString("fr-FR")}` : ""}
+                    Du{" "}
+                    {new Date(reservation.dateDebut).toLocaleDateString(
+                      "fr-FR",
+                    )}
+                    {reservation.dateFin
+                      ? ` au ${new Date(reservation.dateFin).toLocaleDateString("fr-FR")}`
+                      : ""}
                   </span>
                 </div>
               )}
@@ -98,7 +121,9 @@ export default async function PaymentTunnelPage({ params }: Props) {
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                   Montant à régler
                 </p>
-                <p className="text-3xl font-extrabold text-primary mt-1">{amount} €</p>
+                <p className="text-3xl font-extrabold text-primary mt-1">
+                  {amount} €
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -107,8 +132,13 @@ export default async function PaymentTunnelPage({ params }: Props) {
             <CardContent className="p-4 flex items-start gap-3 text-xs text-muted-foreground">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-foreground mb-0.5">Paiement Garanti & Sécurisé</p>
-                <p>Vos transactions sont protégées par le système d'authentification SSL.</p>
+                <p className="font-bold text-foreground mb-0.5">
+                  Paiement Garanti & Sécurisé
+                </p>
+                <p>
+                  Vos transactions sont protégées par le système
+                  d&apos;authentification SSL.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -120,12 +150,16 @@ export default async function PaymentTunnelPage({ params }: Props) {
             reservationId={reservation.id}
             amount={amount}
             userId={session.user.id}
-            latestTransaction={latestTransaction ? {
-              id: latestTransaction.id,
-              method: latestTransaction.method,
-              status: latestTransaction.status,
-              providerRef: latestTransaction.providerRef
-            } : null}
+            latestTransaction={
+              latestTransaction
+                ? {
+                    id: latestTransaction.id,
+                    method: latestTransaction.method,
+                    status: latestTransaction.status,
+                    providerRef: latestTransaction.providerRef,
+                  }
+                : null
+            }
           />
         </div>
       </div>

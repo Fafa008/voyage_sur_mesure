@@ -1,15 +1,12 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Compass, User as UserIcon, LayoutDashboard, Send, Star } from "lucide-react";
+import { LayoutDashboard, Send, Star } from "lucide-react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-
 import { getCachedUserWithRole } from "@/lib/auth-utils";
 import { getUnreadNotificationCount } from "@/lib/notifications-utils";
 
@@ -21,9 +18,13 @@ export default async function Header() {
   let userRole: string | undefined;
   let unreadNotifications = 0;
   if (session) {
-    const user = await getCachedUserWithRole(session.user.id);
+    // Parallélisation : les deux requêtes DB sont indépendantes
+    const [user, count] = await Promise.all([
+      getCachedUserWithRole(session.user.id),
+      getUnreadNotificationCount(session.user.id),
+    ]);
     userRole = user?.role?.nom;
-    unreadNotifications = await getUnreadNotificationCount(session.user.id);
+    unreadNotifications = count;
   }
 
   const getDashboardLink = () => {
@@ -36,18 +37,13 @@ export default async function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/home" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
-            <Compass className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-lg tracking-tight text-foreground leading-none">
-              Mon Voyage
-            </span>
-            <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-widest mt-0.5">
-              Sur Mesure
-            </span>
-          </div>
+        <Link href="/home" className="flex items-center group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/Logo.svg"
+            alt="Madaventure – Explorez Madagascar autrement"
+            className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+          />
         </Link>
 
         {/* Navigation principale */}

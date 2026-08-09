@@ -89,7 +89,7 @@ export default function Temoignages() {
                 </div>
 
                 <p className="text-sm text-foreground/90 leading-relaxed italic">
-                  "{a.texte}"
+                  &quot;{a.texte}&quot;
                 </p>
               </CardContent>
 
@@ -100,9 +100,7 @@ export default function Temoignages() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="text-sm font-bold text-foreground">
-                    {a.nom}
-                  </h4>
+                  <h4 className="text-sm font-bold text-foreground">{a.nom}</h4>
                   <p className="text-xs text-muted-foreground">{a.voyage}</p>
                 </div>
               </div>

@@ -269,7 +269,10 @@ export default async function DashboardPage() {
                 >
                   <div>
                     <p className="font-semibold text-sm">
-                      {res.devis?.circuit?.titre ?? (res.devis ? `Devis #${res.devis.id}` : `Réservation #${res.id}`)}
+                      {res.devis?.circuit?.titre ??
+                        (res.devis
+                          ? `Devis #${res.devis.id}`
+                          : `Réservation #${res.id}`)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(res.dateReservation).toLocaleDateString(
@@ -332,7 +335,7 @@ export default async function DashboardPage() {
                     colSpan={4}
                     className="text-center text-muted-foreground py-8"
                   >
-                    Vous n'avez pas encore de demande de devis.
+                    Vous n&apos;avez pas encore de demande de devis.
                     <div className="mt-2">
                       <Link
                         href="/devis/nouveau"

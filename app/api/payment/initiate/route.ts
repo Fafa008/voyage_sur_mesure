@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json({ error: "reservationId ou devisId requis" }, { status: 400 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur interne";
     console.error("Erreur POST /api/payment/initiate:", error);
-    return NextResponse.json({ error: error.message || "Erreur interne" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

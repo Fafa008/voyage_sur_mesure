@@ -274,7 +274,7 @@ export default async function AdminDashboardPage() {
       <Card className="border border-border/60">
         <CardHeader>
           <CardTitle className="text-base font-bold">
-            ⚡ Actions d'Administration Rapides
+            ⚡ Actions d&apos;Administration Rapides
           </CardTitle>
           <CardDescription className="text-xs">
             Raccourcis vers la gestion du catalogue et la modération

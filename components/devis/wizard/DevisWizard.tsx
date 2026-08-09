@@ -13,22 +13,22 @@ import { NavigationButtons } from "./NavigationButtons";
 import dynamic from "next/dynamic";
 
 const Step1PersonalInfo = dynamic(() =>
-  import("./steps/Step1PersonalInfo").then((m) => m.Step1PersonalInfo)
+  import("./steps/Step1PersonalInfo").then((m) => m.Step1PersonalInfo),
 );
 const Step2Travel = dynamic(() =>
-  import("./steps/Step2Travel").then((m) => m.Step2Travel)
+  import("./steps/Step2Travel").then((m) => m.Step2Travel),
 );
 const Step3Accommodation = dynamic(() =>
-  import("./steps/Step3Accommodation").then((m) => m.Step3Accommodation)
+  import("./steps/Step3Accommodation").then((m) => m.Step3Accommodation),
 );
 const Step4Activities = dynamic(() =>
-  import("./steps/Step4Activities").then((m) => m.Step4Activities)
+  import("./steps/Step4Activities").then((m) => m.Step4Activities),
 );
 const Step5Budget = dynamic(() =>
-  import("./steps/Step5Budget").then((m) => m.Step5Budget)
+  import("./steps/Step5Budget").then((m) => m.Step5Budget),
 );
 const Step6Complementary = dynamic(() =>
-  import("./steps/Step6Complementary").then((m) => m.Step6Complementary)
+  import("./steps/Step6Complementary").then((m) => m.Step6Complementary),
 );
 
 import {
@@ -333,7 +333,9 @@ export function DevisWizard({
               disabled={isSubmitting}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-extrabold text-sm hover:brightness-95 transition-all shadow-md disabled:opacity-60"
             >
-              {isSubmitting ? "Transmission en cours..." : "🚀 Confirmer et Envoyer ma Demande"}
+              {isSubmitting
+                ? "Transmission en cours..."
+                : "🚀 Confirmer et Envoyer ma Demande"}
             </button>
           ) : (
             <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
@@ -375,7 +377,9 @@ function FinalStep({
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
 }) {
-  const selectedCircuit = circuits.find((c) => String(c.id) === formData.circuitId);
+  const selectedCircuit = circuits.find(
+    (c) => String(c.id) === formData.circuitId,
+  );
 
   return (
     <div className="space-y-8">
@@ -387,7 +391,8 @@ function FinalStep({
             Récapitulatif de votre Demande
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Vérifiez l'ensemble des éléments avant la transmission définitive à nos spécialistes.
+            Vérifiez l'ensemble des éléments avant la transmission définitive à
+            nos spécialistes.
           </p>
         </div>
       </div>
@@ -403,8 +408,12 @@ function FinalStep({
           <p className="font-semibold text-foreground">
             {formData.prenom} {formData.nom}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{formData.email}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{formData.telephone || "Non renseigné"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {formData.email}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {formData.telephone || "Non renseigné"}
+          </p>
         </SummaryCard>
 
         {/* Card 2 : Projet & Inspiration */}
@@ -414,11 +423,16 @@ function FinalStep({
           onEdit={() => onEditStep(1)}
         >
           <p className="font-semibold text-foreground">
-            {selectedCircuit ? `Basé sur : ${selectedCircuit.titre}` : "Création 100% sur-mesure"}
+            {selectedCircuit
+              ? `Basé sur : ${selectedCircuit.titre}`
+              : "Création 100% sur-mesure"}
           </p>
           {formData.typeVoyage.length > 0 && (
             <p className="text-xs text-muted-foreground mt-1">
-              Styles : <span className="font-medium text-foreground">{formData.typeVoyage.join(", ")}</span>
+              Styles :{" "}
+              <span className="font-medium text-foreground">
+                {formData.typeVoyage.join(", ")}
+              </span>
             </p>
           )}
         </SummaryCard>
@@ -451,7 +465,10 @@ function FinalStep({
             {formData.typeHebergement || "Non spécifié"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Régime : <span className="font-medium text-foreground">{formData.regime || "Standard"}</span>
+            Régime :{" "}
+            <span className="font-medium text-foreground">
+              {formData.regime || "Standard"}
+            </span>
           </p>
         </SummaryCard>
 
@@ -463,11 +480,15 @@ function FinalStep({
         >
           <p className="text-xs text-foreground font-medium">
             {formData.activites.length > 0
-              ? formData.activites.slice(0, 3).join(", ") + (formData.activites.length > 3 ? "..." : "")
+              ? formData.activites.slice(0, 3).join(", ") +
+                (formData.activites.length > 3 ? "..." : "")
               : "Aucune activité sélectionnée"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Transports : {formData.transport.length > 0 ? formData.transport.join(", ") : "Non spécifié"}
+            Transports :{" "}
+            {formData.transport.length > 0
+              ? formData.transport.join(", ")
+              : "Non spécifié"}
           </p>
         </SummaryCard>
 
@@ -491,7 +512,9 @@ function FinalStep({
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Remarques particulières :
           </span>
-          <p className="text-xs text-foreground italic">"{formData.commentaire}"</p>
+          <p className="text-xs text-foreground italic">
+            &quot;{formData.commentaire}&quot;
+          </p>
         </div>
       )}
 
@@ -502,7 +525,9 @@ function FinalStep({
             🔒 Inscription ou connexion nécessaire
           </p>
           <p className="text-xs leading-relaxed opacity-90">
-            Afin que nous puissions rattacher ce devis à votre espace client et vous notifier dès sa validation, veuillez vous connecter ou créer un compte. Vos réponses actuelles sont automatiquement conservées.
+            Afin que nous puissions rattacher ce devis à votre espace client et
+            vous notifier dès sa validation, veuillez vous connecter ou créer un
+            compte. Vos réponses actuelles sont automatiquement conservées.
           </p>
         </div>
       )}

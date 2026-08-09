@@ -6,8 +6,16 @@ import { initiatePaymentAction } from "@/actions/payments.actions";
 import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
 import { BinancePayPanel } from "@/components/payment/BinancePayPanel";
 import { BankTransferPanel } from "@/components/payment/BankTransferPanel";
+import { StripePaymentPanel } from "@/components/payment/StripePaymentPanel";
+import { MobileMoneyPanel } from "@/components/payment/MobileMoneyPanel";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { CreditCard, Loader2, ArrowRight } from "lucide-react";
 import { PaymentResult } from "@/types/payment.types";
 
@@ -23,9 +31,14 @@ interface Props {
   } | null;
 }
 
-export function PaymentCheckoutForm({ reservationId, amount, userId, latestTransaction }: Props) {
+export function PaymentCheckoutForm({
+  reservationId,
+  amount,
+  userId,
+  latestTransaction,
+}: Props) {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(
-    latestTransaction?.method || PaymentMethod.BINANCE_PAY
+    latestTransaction?.method || PaymentMethod.BINANCE_PAY,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,12 +54,13 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
             success: true,
             transactionId: latestTransaction.id,
             providerRef: latestTransaction.providerRef || undefined,
-            checkoutUrl: latestTransaction.method === PaymentMethod.BINANCE_PAY
-              ? `https://pay.binance.com/checkout/${latestTransaction.providerRef}`
-              : undefined,
+            checkoutUrl:
+              latestTransaction.method === PaymentMethod.BINANCE_PAY
+                ? `https://pay.binance.com/checkout/${latestTransaction.providerRef}`
+                : undefined,
           },
         }
-      : null
+      : null,
   );
 
   const handleInitiate = async () => {
@@ -54,7 +68,11 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
     setError(null);
 
     try {
-      const res = await initiatePaymentAction(reservationId, selectedMethod, userId);
+      const res = await initiatePaymentAction(
+        reservationId,
+        selectedMethod,
+        userId,
+      );
       if (!res.success || !res.data) {
         setError(res.error || "Erreur lors de l'initiation du paiement");
       } else {
@@ -63,8 +81,10 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
           result: res.data,
         });
       }
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Une erreur est survenue";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -90,14 +110,37 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
         />
       );
     }
+
+    if (activePayment.method === PaymentMethod.STRIPE) {
+      return (
+        <StripePaymentPanel
+          paymentResult={activePayment.result}
+          reservationId={reservationId}
+          amount={amount}
+        />
+      );
+    }
+
+    if (activePayment.method === PaymentMethod.MOBILE_MONEY) {
+      return (
+        <MobileMoneyPanel
+          paymentResult={activePayment.result}
+          reservationId={reservationId}
+          amount={amount}
+        />
+      );
+    }
   }
 
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Sélection du mode de paiement</CardTitle>
+        <CardTitle className="text-xl font-bold">
+          Sélection du mode de paiement
+        </CardTitle>
         <CardDescription>
-          Choisissez la méthode qui vous convient le mieux pour finaliser votre commande.
+          Choisissez la méthode qui vous convient le mieux pour finaliser votre
+          commande.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -111,6 +154,16 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
           <PaymentMethodCard
             method={PaymentMethod.BANK_TRANSFER}
             selected={selectedMethod === PaymentMethod.BANK_TRANSFER}
+            onSelect={setSelectedMethod}
+          />
+          <PaymentMethodCard
+            method={PaymentMethod.STRIPE}
+            selected={selectedMethod === PaymentMethod.STRIPE}
+            onSelect={setSelectedMethod}
+          />
+          <PaymentMethodCard
+            method={PaymentMethod.MOBILE_MONEY}
+            selected={selectedMethod === PaymentMethod.MOBILE_MONEY}
             onSelect={setSelectedMethod}
           />
         </div>
@@ -134,7 +187,15 @@ export function PaymentCheckoutForm({ reservationId, amount, userId, latestTrans
             </>
           ) : (
             <>
-              Confirmer et procéder au paiement ({selectedMethod === PaymentMethod.BINANCE_PAY ? "Binance Pay" : "Virement"})
+              Confirmer et procéder au paiement (
+              {selectedMethod === PaymentMethod.BINANCE_PAY
+                ? "Binance Pay"
+                : selectedMethod === PaymentMethod.STRIPE
+                  ? "Carte bancaire"
+                  : selectedMethod === PaymentMethod.MOBILE_MONEY
+                    ? "Mobile Money"
+                    : "Virement"}
+              )
               <ArrowRight className="w-4 h-4 ml-2" />
             </>
           )}

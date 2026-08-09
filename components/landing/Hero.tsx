@@ -32,8 +32,7 @@ export default function Hero() {
                 Trouvez votre voyage idéal
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.1]">
-                Là Où Les Rêves{" "}
-                <br className="hidden sm:inline" />
+                Là Où Les Rêves <br className="hidden sm:inline" />
                 Deviennent Des{" "}
                 <span className="text-primary font-serif italic font-normal relative">
                   Destinations
@@ -55,9 +54,9 @@ export default function Hero() {
             </div>
 
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Découvrez des circuits d'exception à Madagascar.
-              Parcourez des paysages époustouflants et vivez votre prochaine
-              grande aventure avec nos conseillers spécialistes locaux.
+              Découvrez des circuits d&apos;exception à Madagascar. Parcourez
+              des paysages époustouflants et vivez votre prochaine grande
+              aventure avec nos conseillers spécialistes locaux.
             </p>
 
             {/* CTA Buttons */}
@@ -147,8 +146,7 @@ export default function Hero() {
                   <Route className="w-3 h-3" /> 5 étapes
                 </span>
                 <span className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" />{" "}
-                  4.9
+                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> 4.9
                 </span>
               </div>
             </div>

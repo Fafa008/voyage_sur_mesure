@@ -3,7 +3,15 @@
 
 import { SelectField } from "@/components/ui/SelectField";
 import { InputField } from "@/components/ui/InputField";
-import { Building, Utensils, Hotel, Tent, Home, Sparkles, Check } from "lucide-react";
+import {
+  Building,
+  Utensils,
+  Hotel,
+  Tent,
+  Home,
+  Sparkles,
+  Check,
+} from "lucide-react";
 
 interface AccommodationSectionProps {
   data: {
@@ -69,7 +77,8 @@ export function AccommodationSection({
             Hébergement & Restauration
           </h2>
           <p className="text-xs text-muted-foreground">
-            Choisissez la gamme d'hébergement souhaitée et vos préférences de repas
+            Choisissez la gamme d&apos;hébergement souhaitée et vos préférences
+            de repas
           </p>
         </div>
       </div>

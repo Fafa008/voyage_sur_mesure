@@ -32,24 +32,33 @@ export default async function CircuitsPage({
   const currentPage = Math.max(1, parseInt(page ?? "1", 10));
   const skip = (currentPage - 1) * CIRCUITS_PER_PAGE;
 
-  // Requête paginée + comptage total en parallèle
-  const [circuits, total] = await Promise.all([
+  // Toutes les requêtes indépendantes en parallèle
+  const [circuits, total, session] = await Promise.all([
     prisma.circuit.findMany({
       take: CIRCUITS_PER_PAGE,
       skip,
-      include: {
-        theme: true,
-        region: true,
-        images: { take: 1 },
+      select: {
+        id: true,
+        titre: true,
+        slug: true,
+        description: true,
+        dureeJours: true,
+        prixEstime: true,
+        theme: { select: { id: true, nom: true } },
+        region: { select: { id: true, nom: true } },
+        images: {
+          select: { id: true, url: true },
+          take: 1,
+          orderBy: { ordre: "asc" },
+        },
       },
       orderBy: { titre: "asc" },
     }),
     prisma.circuit.count(),
+    auth.api.getSession({ headers: await headers() }),
   ]);
 
   const totalPages = Math.ceil(total / CIRCUITS_PER_PAGE);
-
-  const session = await auth.api.getSession({ headers: await headers() });
   const favoriteIds = await getUserFavoriteCircuitIds(session?.user.id);
 
   return (

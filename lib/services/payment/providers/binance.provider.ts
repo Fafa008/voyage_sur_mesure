@@ -1,4 +1,4 @@
-import { PaymentStatus } from "@prisma/client";
+import { PaymentStatus, type Prisma } from "@prisma/client";
 import { IPaymentProvider, PaymentOptions, PaymentResult, WebhookResult } from "@/types/payment.types";
 
 export class BinanceProvider implements IPaymentProvider {
@@ -19,18 +19,19 @@ export class BinanceProvider implements IPaymentProvider {
     return { status: PaymentStatus.PAID, amount: 100 };
   }
 
-  async handleWebhook(payload: any, headers: any): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult> {
     // Simulation de validation d'un webhook (vérifier la signature)
-    const { bizId, bizStatus } = payload;
-    
+    const bizId = typeof payload.bizId === "string" ? payload.bizId : "";
+    const bizStatus = typeof payload.bizStatus === "string" ? payload.bizStatus : undefined;
+
     let status: PaymentStatus = PaymentStatus.PENDING;
-    if (bizStatus === 'PAY_SUCCESS') status = PaymentStatus.PAID;
-    if (bizStatus === 'PAY_CLOSED') status = PaymentStatus.CANCELLED;
+    if (bizStatus === "PAY_SUCCESS") status = PaymentStatus.PAID;
+    if (bizStatus === "PAY_CLOSED") status = PaymentStatus.CANCELLED;
 
     return {
       providerRef: bizId,
       status,
-      raw: payload,
+      raw: payload as Prisma.InputJsonValue,
     };
   }
 

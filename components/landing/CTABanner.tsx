@@ -40,9 +40,9 @@ export default function CTABanner() {
                 </h2>
 
                 <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
-                  Que vous cherchiez l'aventure, la détente ou la découverte
-                  culturelle, notre équipe crée un itinéraire qui vous
-                  ressemble. Commencez votre voyage dès maintenant.
+                  Que vous cherchiez l&apos;aventure, la détente ou la
+                  découverte culturelle, notre équipe crée un itinéraire qui
+                  vous ressemble. Commencez votre voyage dès maintenant.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3">

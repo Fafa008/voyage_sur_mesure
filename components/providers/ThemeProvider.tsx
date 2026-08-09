@@ -43,10 +43,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = (localStorage.getItem("theme") as Theme) || "system";
-    setThemeState(stored);
     const resolved = stored === "system" ? getSystemTheme() : stored;
+    const initialTheme = stored === "system" ? "system" : stored;
+
+    setThemeState(initialTheme);
     setResolvedTheme(resolved);
-    applyTheme(stored);
+    applyTheme(initialTheme);
     setMounted(true);
   }, []);
 

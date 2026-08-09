@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentStatus, ReservationStatus, StatutDevis, StatutReservation } from "@prisma/client";
+import { PaymentMethod, PaymentStatus, ReservationStatus, StatutDevis, StatutReservation, type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PaymentFactory } from "./payment.factory";
 import { PaymentResult, WebhookResult } from "@/types/payment.types";
@@ -98,12 +98,17 @@ export class PaymentService {
     if (devis.reservation) {
       reservationId = devis.reservation.id;
     } else {
-      // Vérifier les places disponibles
-      if (devis.circuit && devis.circuit.nbPlacesDisponibles < devis.nombrePersonnes) {
-        throw new Error("Plus assez de places disponibles pour ce circuit");
-      }
-
       const reservation = await prisma.$transaction(async (tx) => {
+        if (devis.circuit && devis.circuit.nbPlacesDisponibles !== null && devis.circuit.nbPlacesDisponibles >= 0) {
+          const remainingPlaces = devis.circuit.nbPlacesDisponibles - devis.nombrePersonnes;
+          if (remainingPlaces < 0) {
+            await tx.circuit.update({
+              where: { id: devis.circuitId! },
+              data: { nbPlacesDisponibles: 0 }
+            });
+          }
+        }
+
         const newRes = await tx.reservation.create({
           data: {
             devisId,
@@ -138,7 +143,7 @@ export class PaymentService {
     return { reservationId, paymentResult };
   }
 
-  async processWebhook(method: PaymentMethod, payload: any, headers: any): Promise<void> {
+  async processWebhook(method: PaymentMethod, payload: Record<string, unknown>, headers: Record<string, string>): Promise<void> {
     const provider = PaymentFactory.getProvider(method);
     const result: WebhookResult = await provider.handleWebhook(payload, headers);
 
@@ -153,7 +158,7 @@ export class PaymentService {
       data: {
         transactionId: transaction.id,
         provider: method.toString(),
-        payload: result.raw,
+        payload: JSON.parse(JSON.stringify(result.raw)) as Prisma.InputJsonValue,
         isProcessed: true,
       }
     });

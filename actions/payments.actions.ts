@@ -5,15 +5,17 @@ import { paymentService } from "@/lib/services/payment/payment.service";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { PaymentResult } from "@/types/payment.types";
 
 export async function initiatePaymentAction(reservationId: number, method: PaymentMethod, userId: string) {
   try {
     const result = await paymentService.initiatePayment(reservationId, method, userId);
     revalidatePath(`/paiement/${reservationId}`);
     return { success: true, data: result };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("Erreur d'initiation du paiement:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 
@@ -39,9 +41,10 @@ export async function initiatePaymentFromDevisAction(devisId: number, method: Pa
         paymentResult,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("Erreur initiation paiement devis:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: message };
   }
 }
 

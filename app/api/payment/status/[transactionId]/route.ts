@@ -48,8 +48,9 @@ export async function GET(
         createdAt: transaction.createdAt,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur interne";
     console.error("Erreur GET /api/payment/status:", error);
-    return NextResponse.json({ error: error.message || "Erreur interne" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
