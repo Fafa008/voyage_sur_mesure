@@ -26,8 +26,8 @@ export default async function AdminLayout({
   });
 
   if (!user || !user.role || user.role.nom !== RoleNom.admin) {
-    if (user?.role?.nom === RoleNom.conseiller) {
-      redirect("/conseiller/dashboard");
+    if (user?.role?.nom === RoleNom.admin) {
+      redirect("/admin/dashboard");
     }
     redirect("/dashboard");
   }

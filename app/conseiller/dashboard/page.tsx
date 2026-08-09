@@ -74,7 +74,7 @@ export default async function ConseillerDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            📋 Gestion des Demandes de Devis
+            Gestion des Demandes de Devis
           </h1>
           <p className="text-sm text-muted-foreground">
             Étudiez les demandes entrantes, proposez des chiffrages et accompagnez les clients dans leur projet.

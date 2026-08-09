@@ -3,10 +3,10 @@ import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register", "/contact"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Laisse Better Auth gérer ses propres routes sans interférence
+  // Laisse Better Auth gérer ses propres routes API sans interférence
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -21,12 +21,9 @@ export function middleware(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
+  // Si pas de cookie de session et que la route n'est pas publique, rediriger vers /login
   if (!sessionCookie && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

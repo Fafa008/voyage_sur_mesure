@@ -1,0 +1,95 @@
+/* CSS Personnalisé pour la Carte Interactive Leaflet - Mon Voyage Madagascar */
+
+@import "leaflet/dist/leaflet.css";
+
+/* Conteneur principal de la carte */
+.madagascar-map-container {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  font-family: inherit;
+  z-index: 1;
+}
+
+/* Personnalisation des Popups Leaflet */
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 0.25rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  border-color: rgba(51, 65, 85, 0.8);
+}
+
+.dark .leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* Style des icônes HTML DivIcon personnalisées */
+.custom-leaflet-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-leaflet-marker:hover {
+  transform: scale(1.2);
+  z-index: 9999 !important;
+}
+
+.marker-pin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  border: 2.5px solid #ffffff;
+}
+
+.marker-pin-step {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.marker-pin-hotel {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.marker-pin-park {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.marker-pin-city {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+/* Tooltip pour les régions */
+.region-tooltip {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 4px 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.region-tooltip::before {
+  border-top-color: rgba(15, 23, 42, 0.85) !important;
+}

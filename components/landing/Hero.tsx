@@ -101,14 +101,14 @@ export default function Hero() {
 
           {/* Right Column - Hero Image + Floating Card */}
           <div className="relative order-1 lg:order-2">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-[3/4]">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[3/2] lg:aspect-[3/2]">
               <Image
                 src="/hero-baobabs.png"
                 alt="Allée des Baobabs au coucher du soleil à Madagascar"
                 fill
                 className="object-cover"
                 priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 1024px) 50vw, 50vw"
               />
               {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />

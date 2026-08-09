@@ -56,18 +56,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Col 1: Identity */}
           <div className="space-y-4">
-            <Link href="/home" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                <Compass className="w-4.5 h-4.5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-extrabold text-lg tracking-tight text-foreground leading-none">
-                  Mon Voyage
-                </span>
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-widest mt-0.5">
-                  Sur Mesure
-                </span>
-              </div>
+            <Link href="/home" className="flex items-center group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/Logo.svg"
+                alt="Madaventure"
+                className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Créateur de séjours et circuits sur mesure d'exception à

@@ -16,7 +16,21 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
   trustedOrigins: [
     process.env.BETTER_AUTH_URL!
-],
+  ],
+  user: {
+    additionalFields: {
+      roleId: {
+        type: "number",
+        required: false,
+      },
+    },
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
 
   databaseHooks: {
     user: { 

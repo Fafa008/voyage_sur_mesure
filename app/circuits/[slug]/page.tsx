@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
+import { CircuitMap } from "@/components/map/CircuitMap";
 import type { Metadata } from "next";
 
 /**
@@ -142,6 +143,11 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
           </Link>
         </CardContent>
       </Card>
+
+      {/* Carte Interactive & Régions de Madagascar */}
+      <section className="space-y-4 pt-2">
+        <CircuitMap circuit={circuit} />
+      </section>
 
       {/* Programme des étapes */}
       <div className="space-y-6">

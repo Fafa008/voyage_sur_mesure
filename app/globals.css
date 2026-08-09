@@ -2,102 +2,112 @@
 @import "tw-animate-css";
 
 :root {
-  --background: #fcfaf8;
-  --foreground: #3a2d2d;
+  /* Arrière-plan & Textes */
+  --background: #fdfcfb;
+  --foreground: #1c1917;
 
+  /* Cartes & Popovers */
   --card: #ffffff;
-  --card-foreground: #3a2d2d;
+  --card-foreground: #1c1917;
 
   --popover: #ffffff;
-  --popover-foreground: #3a2d2d;
+  --popover-foreground: #1c1917;
 
-  /* Couleur principale */
-  --primary: #8f5d5b;
+  /* Couleur Principale (Rouge Crimson Madaventure du Logo #731B1A) */
+  --primary: #731b1a;
   --primary-foreground: #ffffff;
+  --primary-hover: #8b2221;
 
-  /* Couleur secondaire */
-  --secondary: #c9b1ad;
-  --secondary-foreground: #4d3a3a;
+  /* Couleur Secondaire (Vert Émeraude Madaventure du Logo #21734B) */
+  --secondary: #21734b;
+  --secondary-foreground: #ffffff;
+  --secondary-hover: #185a3a;
 
-  /* Fond discret */
-  --muted: #f3efed;
-  --muted-foreground: #736161;
+  /* Fond discret & Éléments mutés */
+  --muted: #f4efed;
+  --muted-foreground: #6e5e5b;
 
-  /* Hover */
-  --accent: #e7d9d5;
-  --accent-foreground: #5b4343;
+  /* Accent & Hover neutre */
+  --accent: #f8eef0;
+  --accent-foreground: #731b1a;
 
-  /* Danger */
-  --destructive: #7a1f21;
-  --destructive-foreground: white;
+  /* Statuts / Danger */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
-  --border: #ded4d1;
-  --input: #e7dfdc;
-  --ring: #8f5d5b;
+  /* Bordures & Focus Ring */
+  --border: #e7ded9;
+  --input: #e7ded9;
+  --ring: #731b1a;
 
   --radius: 0.75rem;
 
-  /* Charts */
-  --chart-1: #8f5d5b;
-  --chart-2: #2c7a4b;
-  --chart-3: #c9b1ad;
-  --chart-4: #7a1f21;
-  --chart-5: #a67d7b;
+  /* Graphiques & Dashboard */
+  --chart-1: #731b1a;
+  --chart-2: #21734b;
+  --chart-3: #d97706;
+  --chart-4: #0284c7;
+  --chart-5: #7c3aed;
 
   /* Sidebar */
   --sidebar: #ffffff;
-  --sidebar-foreground: #3a2d2d;
-  --sidebar-primary: #8f5d5b;
-  --sidebar-primary-foreground: white;
-  --sidebar-accent: #f4efed;
-  --sidebar-accent-foreground: #8f5d5b;
-  --sidebar-border: #ded4d1;
-  --sidebar-ring: #8f5d5b;
+  --sidebar-foreground: #1c1917;
+  --sidebar-primary: #731b1a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f8eef0;
+  --sidebar-accent-foreground: #731b1a;
+  --sidebar-border: #e7ded9;
+  --sidebar-ring: #731b1a;
 }
 
 .dark {
-  --background: #1d1818;
-  --foreground: #faf8f7;
+  /* Arrière-plan sombre élégant aux nuances acajou */
+  --background: #0f172a;
+  --foreground: #f8fafc;
 
-  --card: #2b2323;
-  --card-foreground: #faf8f7;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
 
-  --popover: #2b2323;
-  --popover-foreground: #faf8f7;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
 
-  --primary: #c9b1ad;
-  --primary-foreground: #2b2323;
+  /* Primary en mode sombre (Crimson vibrant) */
+  --primary: #9e2a28;
+  --primary-foreground: #ffffff;
+  --primary-hover: #b83634;
 
-  --secondary: #503837;
-  --secondary-foreground: white;
+  /* Secondary en mode sombre (Vert Émeraude lumineux) */
+  --secondary: #288a59;
+  --secondary-foreground: #ffffff;
+  --secondary-hover: #32a86d;
 
-  --muted: #352c2c;
-  --muted-foreground: #d0c7c5;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
 
-  --accent: #503837;
-  --accent-foreground: white;
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
 
-  --destructive: #d85b5b;
-  --destructive-foreground: white;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  --border: #473838;
-  --input: #473838;
-  --ring: #c9b1ad;
+  --border: #334155;
+  --input: #334155;
+  --ring: #9e2a28;
 
-  --chart-1: #c9b1ad;
-  --chart-2: #4da36f;
-  --chart-3: #b77a77;
-  --chart-4: #c84d4d;
-  --chart-5: #8f5d5b;
+  --chart-1: #9e2a28;
+  --chart-2: #288a59;
+  --chart-3: #f59e0b;
+  --chart-4: #38bdf8;
+  --chart-5: #a78bfa;
 
-  --sidebar: #241d1d;
-  --sidebar-foreground: #faf8f7;
-  --sidebar-primary: #8f5d5b;
-  --sidebar-primary-foreground: white;
-  --sidebar-accent: #342929;
-  --sidebar-accent-foreground: white;
-  --sidebar-border: #473838;
-  --sidebar-ring: #c9b1ad;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #9e2a28;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #334155;
+  --sidebar-ring: #9e2a28;
 }
 
 @layer base {
@@ -144,24 +154,23 @@
   }
 
   .btn-primary {
-    @apply rounded-lg px-6 py-3 transition font-medium;
+    @apply rounded-xl px-6 py-3 transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
     background-color: var(--primary);
     color: var(--primary-foreground);
   }
 
   .btn-primary:hover {
-    filter: brightness(0.95);
+    background-color: var(--primary-hover);
   }
 
   .btn-secondary {
-    @apply rounded-lg px-6 py-3 transition font-medium;
+    @apply rounded-xl px-6 py-3 transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
     background-color: var(--secondary);
     color: var(--secondary-foreground);
   }
 
   .btn-secondary:hover {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
+    background-color: var(--secondary-hover);
   }
 
   .card {
