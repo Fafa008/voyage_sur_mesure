@@ -95,10 +95,23 @@ export class PapiProvider implements IPaymentProvider {
 
       const data = await response.json();
 
-      if (!data.paymentUrl) {
+      // Log les clés de la réponse Papi pour diagnostic Sandbox (sans valeurs sensibles)
+      console.log(
+        "Papi /payment-links response keys:",
+        Object.keys(data)
+      );
+
+      // Papi peut retourner paymentUrl ou paymentLink selon la version
+      const checkoutUrl = data.paymentUrl || data.paymentLink;
+
+      if (!checkoutUrl) {
+        console.error(
+          "Papi API response missing paymentUrl/paymentLink. Response keys:",
+          Object.keys(data)
+        );
         return {
           success: false,
-          error: "Papi API response missing paymentUrl",
+          error: "Papi API response missing paymentUrl/paymentLink",
         };
       }
 
@@ -121,7 +134,7 @@ export class PapiProvider implements IPaymentProvider {
       return {
         success: true,
         providerRef: orderId,
-        checkoutUrl: data.paymentUrl,
+        checkoutUrl,
         notificationToken,
         expiresAt,
       };

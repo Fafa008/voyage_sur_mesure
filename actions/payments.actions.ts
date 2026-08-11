@@ -11,7 +11,11 @@ export async function initiatePaymentAction(reservationId: number, method: Payme
   try {
     const result = await paymentService.initiatePayment(reservationId, method, userId);
     revalidatePath(`/paiement/${reservationId}`);
-    return { success: true, data: result };
+
+    // SÉCURITÉ : Ne jamais propager notificationToken vers le frontend
+    // Le notificationToken est un secret par-paiement stocké côté serveur uniquement
+    const { notificationToken: _removed, ...safeResult } = result;
+    return { success: true, data: safeResult };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
     console.error("Erreur d'initiation du paiement:", error);

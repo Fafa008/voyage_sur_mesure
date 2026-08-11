@@ -87,6 +87,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. SÉCURITÉ : Validation du notificationToken
+    //
+    // Selon la documentation officielle Papi.mg :
+    //   - POST /payment-links retourne un notificationToken dans la réponse
+    //   - Le webhook Papi renvoie ce même notificationToken
+    //   - Le serveur doit comparer les deux pour authentifier le webhook
+    //
+    // IMPORTANT : notificationToken ≠ PAPI_API_KEY
+    //   PAPI_API_KEY  = credential serveur pour appeler l'API Papi
+    //   notificationToken = secret par-paiement pour valider le webhook
+    //
     const receivedToken =
       (typeof notificationToken === "string" && notificationToken.trim() !== ""
         ? notificationToken
@@ -95,27 +105,45 @@ export async function POST(req: NextRequest) {
         ? token
         : undefined);
 
-    const expectedToken = transaction.notificationToken || process.env.PAPI_API_KEY;
+    const expectedToken = transaction.notificationToken;
 
-    if (expectedToken) {
-      if (!receivedToken || receivedToken !== expectedToken) {
-        console.error(
-          `Papi webhook: invalid or missing notificationToken for ref ${reference}`
-        );
-        await prisma.paymentWebhook.create({
-          data: {
-            transactionId: transaction.id,
-            provider: "PAPI",
-            payload: payload,
-            isProcessed: false,
-            error: "Unauthorized: invalid notificationToken",
-          },
-        });
-        return NextResponse.json(
-          { error: "Unauthorized: invalid notificationToken" },
-          { status: 401 }
-        );
-      }
+    if (!expectedToken) {
+      // Pas de token stocké = impossible de vérifier l'authenticité du webhook
+      console.error(
+        `Papi webhook: no notificationToken stored for transaction ${transaction.id}. Cannot verify webhook authenticity.`
+      );
+      await prisma.paymentWebhook.create({
+        data: {
+          transactionId: transaction.id,
+          provider: "PAPI",
+          payload: payload,
+          isProcessed: false,
+          error: "No notificationToken stored — cannot verify webhook authenticity",
+        },
+      });
+      return NextResponse.json(
+        { error: "Cannot verify webhook: no stored notificationToken" },
+        { status: 401 }
+      );
+    }
+
+    if (!receivedToken || receivedToken !== expectedToken) {
+      console.error(
+        `Papi webhook: invalid or missing notificationToken for ref ${reference}`
+      );
+      await prisma.paymentWebhook.create({
+        data: {
+          transactionId: transaction.id,
+          provider: "PAPI",
+          payload: payload,
+          isProcessed: false,
+          error: "Unauthorized: invalid notificationToken",
+        },
+      });
+      return NextResponse.json(
+        { error: "Unauthorized: invalid notificationToken" },
+        { status: 401 }
+      );
     }
 
     // 5. Validation du statut Papi
