@@ -9,6 +9,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { getCachedUserWithRole } from "@/lib/auth-utils";
 import { getUnreadNotificationCount } from "@/lib/notifications-utils";
+import LoginButton from "./auth/LoginButton";
 
 export default async function Header() {
   const session = await auth.api.getSession({
@@ -82,17 +83,12 @@ export default async function Header() {
           <ThemeToggle />
           {!session ? (
             <>
-              <Link
-                href="/login"
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                Se connecter
-              </Link>
+              <LoginButton />
               <Link
                 href="/devis/nouveau"
-                className={buttonVariants({ variant: "default", size: "sm" })}
+                className={buttonVariants({ variant: "default"})}
               >
-                <Send className="w-3.5 h-3.5 mr-1.5" />
+                <Send className="w-3.5 h-3 mr-1.5" />
                 Devis Express
               </Link>
             </>
@@ -110,13 +106,13 @@ export default async function Header() {
                 href={getDashboardLink()}
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" />
+                <LayoutDashboard className="mr-1.5 h-3.5 w-3.5" />
                 Tableau de bord
               </Link>
 
-              <div className="flex items-center gap-2 pl-2 border-l border-border">
+              <div className="flex items-center gap-2 pl-3 border-l border-border">
                 <Avatar className="h-8 w-8 border border-border">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                     {getInitials(session.user.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -131,7 +127,6 @@ export default async function Header() {
                     </span>
                   )}
                 </div>
-
                 <LogoutButton />
               </div>
             </div>

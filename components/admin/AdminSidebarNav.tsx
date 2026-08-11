@@ -62,7 +62,7 @@ export function AdminSidebarNav() {
   ];
 
   return (
-    <nav className="space-y-1 text-sm font-medium">
+    <nav className="space-y-1 text-sm font-medium h-full">
       {navItems.map((item) => {
         const isActive = item.exact
           ? pathname === item.href

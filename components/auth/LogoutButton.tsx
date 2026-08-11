@@ -1,27 +1,63 @@
 "use client";
 
+import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 
 export default function LogoutButton() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
-    console.log("1");
-    await authClient.signOut();
-    console.log("2");
-    router.replace("/home");
-    router.refresh();
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      await authClient.signOut();
+      router.replace("/home");
+      router.refresh();
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      setIsLoading(false);
+    }
   };
 
   return (
     <button
+      type="button"
       onClick={handleLogout}
-      className="flex items-center gap-2 rounded-lg border px-4 py-2"
+      disabled={isLoading}
+      className="
+        flex items-center gap-1.5
+        rounded-md
+        px-2 py-3
+        text-xs font-medium
+        text-muted-foreground
+        transition-colors duration-200
+        hover:bg-red-50
+        hover:text-red-600
+        dark:hover:bg-red-950/30
+        disabled:pointer-events-none
+        disabled:opacity-50
+      "
     >
-      <LogOut size={18} />
-      Déconnexion
+      {isLoading ? (
+        <Loader2
+          className="h-3.5 w-3.5 animate-spin"
+        />
+      ) : (
+        <LogOut
+          className="h-3.5 w-3.5"
+          strokeWidth={1.8}
+        />
+      )}
+
+      <span>
+        {isLoading ? "Déconnexion..." : "Déconnexion"}
+      </span>
     </button>
   );
 }
+
