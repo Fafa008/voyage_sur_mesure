@@ -24,7 +24,7 @@ export default function ContactPage() {
         {/* Informations de contact */}
         <Card className="h-full flex flex-col justify-between">
           <CardHeader>
-            <CardTitle>📍 Nos Coordonnées</CardTitle>
+            <CardTitle>Nos Coordonnées</CardTitle>
             <CardDescription>
               Venez nous rencontrer ou contactez un conseiller
             </CardDescription>
@@ -65,7 +65,7 @@ export default function ContactPage() {
         {/* Formulaire de message */}
         <Card>
           <CardHeader>
-            <CardTitle>✉️ Envoyez-nous un message</CardTitle>
+            <CardTitle>Envoyez-nous un message</CardTitle>
             <CardDescription>
               Une question ? Une demande spécifique ?
             </CardDescription>

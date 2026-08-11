@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
+import { formatCurrency } from "@/lib/format";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +66,7 @@ export default async function CircuitsPage({
     <main className="max-w-7xl mx-auto py-12 px-4 space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          🌍 Nos Circuits de Voyage
+          Nos Circuits de Voyage
         </h1>
         <p className="text-muted-foreground mt-2">
           Découvrez nos itinéraires phares et laissez-vous inspirer pour créer
@@ -154,7 +155,7 @@ export default async function CircuitsPage({
                     </span>
                     <span className="text-lg font-bold text-primary">
                       {circuit.prixEstime
-                        ? `${circuit.prixEstime.toString()} €`
+                        ? formatCurrency(circuit.prixEstime)
                         : "Sur devis"}
                     </span>
                   </div>

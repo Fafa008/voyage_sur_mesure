@@ -1,7 +1,9 @@
 // app/admin/circuits/page.tsx
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/format";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -31,14 +33,18 @@ export default async function AdminCircuitsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">🌍 Circuits</h1>
+          <h1 className="text-2xl font-bold">Circuits</h1>
           <p className="text-muted-foreground text-sm">
             {circuits.length} circuit(s) au total
           </p>
         </div>
-        <Button>
-          <Link href="/admin/circuits/nouveau">➕ Ajouter un circuit</Link>
-        </Button>
+        <Link
+          href="/admin/circuits/nouveau"
+          className={buttonVariants({ variant: "default" }) + " flex items-center gap-1.5"}
+        >
+          <Plus className="w-4 h-4" />
+          Ajouter un circuit
+        </Link>
       </div>
 
       <Card>
@@ -88,7 +94,7 @@ export default async function AdminCircuitsPage() {
                     <TableCell>{circuit.dureeJours} j</TableCell>
                     <TableCell>
                       {circuit.prixEstime
-                        ? `${circuit.prixEstime.toString()} €`
+                        ? formatCurrency(circuit.prixEstime)
                         : "-"}
                     </TableCell>
                     <TableCell>{circuit._count.etapes}</TableCell>

@@ -270,7 +270,7 @@ export async function POST(req: NextRequest) {
         await tx.notification.create({
           data: {
             userId: transaction.userId,
-            titre: "Paiement confirmé 🎉",
+            titre: "Paiement confirmé",
             message: `Votre paiement pour la réservation #${transaction.reservationId} (${providerPaymentMethodStr || "Papi"}) a été confirmé avec succès. Bon voyage !`,
           },
         });

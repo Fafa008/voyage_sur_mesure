@@ -52,7 +52,7 @@ export default async function AdminAvisPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">⭐ Modération des avis</h1>
+        <h1 className="text-2xl font-bold">Modération des avis</h1>
         <p className="text-muted-foreground text-sm">
           {avisList.length} avis au total
           {pendingCount > 0 && (

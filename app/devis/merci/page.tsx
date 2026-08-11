@@ -16,7 +16,7 @@ export default function MerciPage() {
 
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Demande envoyée ! 🎉
+              Demande envoyée !
             </h1>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
               Votre demande de devis a bien été enregistrée. Notre équipe de conseillers spécialistes étudie votre projet et vous recontactera dans les plus brefs délais.

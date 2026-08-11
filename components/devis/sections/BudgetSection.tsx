@@ -2,7 +2,8 @@
 "use client";
 
 import { InputField } from "@/components/ui/InputField";
-import { Coins, Euro, Sparkles, Check } from "lucide-react";
+import { Coins, Banknote, Check } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface BudgetSectionProps {
   data: {
@@ -13,10 +14,10 @@ interface BudgetSectionProps {
 }
 
 const budgetPresets = [
-  { label: "Économique", min: 500, max: 1200, desc: "Essentiel & Logements simples" },
-  { label: "Équilibré", min: 1200, max: 2500, desc: "Très bon confort & Activités incluses" },
-  { label: "Premium", min: 2500, max: 4500, desc: "Hôtels 4-5★ & Excursions privées" },
-  { label: "Luxe & Prestige", min: 4500, max: 10000, desc: "Sur-mesure d'exception & Conciergerie" },
+  { label: "Économique", min: 500000, max: 1200000, desc: "Essentiel & Logements simples" },
+  { label: "Équilibré", min: 1200000, max: 2500000, desc: "Très bon confort & Activités incluses" },
+  { label: "Premium", min: 2500000, max: 4500000, desc: "Hôtels 4-5★ & Excursions privées" },
+  { label: "Luxe & Prestige", min: 4500000, max: 10000000, desc: "Sur-mesure d'exception & Conciergerie" },
 ];
 
 export function BudgetSection({ data, onChange }: BudgetSectionProps) {
@@ -80,7 +81,7 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
                 </div>
 
                 <span className="text-xs font-bold text-primary">
-                  {preset.min} € - {preset.max} €
+                  {formatCurrency(preset.min)} - {formatCurrency(preset.max)}
                 </span>
                 <span className="text-[10px] text-muted-foreground mt-1">
                   {preset.desc}
@@ -102,13 +103,13 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <InputField
-            label="Budget minimum (€)"
+            label="Budget minimum (MGA)"
             id="budgetMin"
             type="number"
             min="0"
-            step="100"
-            placeholder="Ex: 1000"
-            icon={<Euro className="w-4 h-4" />}
+            step="50000"
+            placeholder="Ex: 1000000"
+            icon={<Banknote className="w-4 h-4" />}
             value={data.budgetMin ? String(data.budgetMin) : ""}
             onChange={(e) =>
               onChange("budgetMin", parseFloat(e.target.value) || 0)
@@ -116,13 +117,13 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
           />
 
           <InputField
-            label="Budget maximum (€)"
+            label="Budget maximum (MGA)"
             id="budgetMax"
             type="number"
             min="0"
-            step="100"
-            placeholder="Ex: 2500"
-            icon={<Euro className="w-4 h-4" />}
+            step="50000"
+            placeholder="Ex: 2500000"
+            icon={<Banknote className="w-4 h-4" />}
             value={data.budgetMax ? String(data.budgetMax) : ""}
             onChange={(e) =>
               onChange("budgetMax", parseFloat(e.target.value) || 0)

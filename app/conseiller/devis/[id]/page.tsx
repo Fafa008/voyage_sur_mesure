@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ConseillerPricingForm } from "@/components/devis/ConseillerPricingForm";
+import { formatCurrency } from "@/lib/format";
 import { CalendarCheck } from "lucide-react";
 
 interface Props {
@@ -81,7 +82,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
               Statut : <strong className="capitalize">{devis.reservation.statut}</strong>
             </p>
             <p>
-              Montant : <strong>{devis.reservation.montantFinal?.toString()} €</strong>
+              Montant : <strong>{formatCurrency(devis.reservation.montantFinal)}</strong>
             </p>
             {devis.reservation.paiement && (
               <p>
@@ -158,8 +159,8 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                 <div className="col-span-2">
                   <p className="text-muted-foreground">Budget client</p>
                   <p>
-                    {devis.budgetMin ? `${devis.budgetMin} €` : "—"} →{" "}
-                    {devis.budgetMax ? `${devis.budgetMax} €` : "—"}
+                    {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"} →{" "}
+                    {devis.budgetMax ? formatCurrency(devis.budgetMax) : "—"}
                   </p>
                 </div>
               )}
@@ -167,7 +168,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                 <div className="col-span-2">
                   <p className="text-muted-foreground">Montant proposé</p>
                   <p className="text-xl font-bold text-primary">
-                    {devis.montantTotal.toString()} €
+                    {formatCurrency(devis.montantTotal)}
                   </p>
                 </div>
               )}

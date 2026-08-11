@@ -33,6 +33,7 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import { MarkNotificationReadButton } from "@/components/notifications/MarkNotificationReadButton";
+import { formatCurrency } from "@/lib/format";
 
 const statutColors: Record<StatutDevis, string> = {
   [StatutDevis.en_cours]: "bg-amber-500/10 text-amber-600 border-amber-500/20",
@@ -278,7 +279,7 @@ export default async function DashboardPage() {
                       {new Date(res.dateReservation).toLocaleDateString(
                         "fr-FR",
                       )}{" "}
-                      — {res.montantFinal?.toString()} €
+                      — {formatCurrency(res.montantFinal)}
                     </p>
                   </div>
                   <Link
@@ -302,7 +303,7 @@ export default async function DashboardPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg font-bold">
-              📋 Vos dernières demandes
+              Vos dernières demandes
             </CardTitle>
             <CardDescription className="text-xs">
               Consultez l&apos;historique et l&apos;état d&apos;avancement de
@@ -426,7 +427,7 @@ export default async function DashboardPage() {
                       <span className="text-xs text-muted-foreground">
                         À partir de{" "}
                         {fav.circuit.prixEstime
-                          ? `${fav.circuit.prixEstime.toString()} €`
+                          ? formatCurrency(fav.circuit.prixEstime)
                           : "Sur devis"}
                       </span>
                     </div>

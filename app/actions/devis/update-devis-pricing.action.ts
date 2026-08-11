@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { formatCurrency } from "@/lib/format";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -101,7 +102,7 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
       data: {
         userId: devis.userId,
         titre: "Devis prêt",
-        message: `Votre devis #${devisId} a été chiffré à ${montantTotal.toLocaleString("fr-FR")} €. Consultez-le pour accepter ou refuser.`,
+        message: `Votre devis #${devisId} a été chiffré à ${formatCurrency(montantTotal)}. Consultez-le pour accepter ou refuser.`,
       },
     }),
   ]);

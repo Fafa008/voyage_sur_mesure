@@ -131,7 +131,7 @@ export default function Hero() {
                     Allée des Baobabs
                   </h3>
                   <p className="text-lg font-extrabold text-primary leading-tight">
-                    890€
+                    890 000 MGA
                     <span className="text-[10px] font-normal text-muted-foreground ml-1">
                       /personne
                     </span>

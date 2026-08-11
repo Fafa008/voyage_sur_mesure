@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/format";
 
 export default async function FavorisPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -24,9 +25,13 @@ export default async function FavorisPage() {
     where: { userId: session.user.id },
     include: {
       circuit: {
-        include: {
-          region: true,
-          theme: true,
+        select: {
+          id: true,
+          titre: true,
+          slug: true,
+          prixEstime: true,
+          dureeJours: true,
+          region: { select: { nom: true } },
           images: { take: 1 },
         },
       },
@@ -37,7 +42,7 @@ export default async function FavorisPage() {
   return (
     <main className="max-w-7xl mx-auto py-10 px-4 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">⭐ Mes Circuits Favoris</h1>
+        <h1 className="text-3xl font-bold">Mes Circuits Favoris</h1>
         <p className="text-muted-foreground mt-1">
           Retrouvez les circuits que vous avez sauvegardés pour votre futur
           voyage.
@@ -98,7 +103,7 @@ export default async function FavorisPage() {
                 <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4 gap-3">
                   <span className="text-lg font-bold text-primary">
                     {circuit.prixEstime
-                      ? `${circuit.prixEstime.toString()} €`
+                      ? formatCurrency(circuit.prixEstime)
                       : "Sur devis"}
                   </span>
                   <div className="flex items-center gap-2">

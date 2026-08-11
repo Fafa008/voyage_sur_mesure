@@ -1,6 +1,7 @@
 "use client";
 
 import { DollarSign } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface BudgetSelectProps {
   value?: number | null;
@@ -9,11 +10,11 @@ interface BudgetSelectProps {
 }
 
 const budgetOptions = [
-  { value: 500, label: "Jusqu'à 500 €" },
-  { value: 1000, label: "Jusqu'à 1 000 €" },
-  { value: 1500, label: "Jusqu'à 1 500 €" },
-  { value: 2000, label: "Jusqu'à 2 000 €" },
-  { value: 3000, label: "Jusqu'à 3 000 €" },
+  { value: 500000, label: `Jusqu'à ${formatCurrency(500000)}` },
+  { value: 1000000, label: `Jusqu'à ${formatCurrency(1000000)}` },
+  { value: 1500000, label: `Jusqu'à ${formatCurrency(1500000)}` },
+  { value: 2000000, label: `Jusqu'à ${formatCurrency(2000000)}` },
+  { value: 3000000, label: `Jusqu'à ${formatCurrency(3000000)}` },
 ];
 
 export function BudgetSelect({

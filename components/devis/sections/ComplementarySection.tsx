@@ -65,11 +65,11 @@ export function ComplementarySection({
           icon={<Share2 className="w-4 h-4" />}
           options={[
             { value: "", label: "-- Sélectionnez une option --" },
-            { value: "moteur", label: "🔍 Moteur de recherche (Google, Bing...)" },
-            { value: "reseau", label: "📱 Réseaux sociaux (Instagram, Facebook...)" },
-            { value: "ami", label: "👥 Recommandation d'un proche ou ami" },
-            { value: "blog", label: "📰 Blog de voyage ou article de presse" },
-            { value: "foire", label: "🎪 Foire / Salon du Voyage" },
+            { value: "moteur", label: "Moteur de recherche (Google, Bing...)" },
+            { value: "reseau", label: "Réseaux sociaux (Instagram, Facebook...)" },
+            { value: "ami", label: "Recommandation d'un proche ou ami" },
+            { value: "blog", label: "Blog de voyage ou article de presse" },
+            { value: "foire", label: "Foire / Salon du Voyage" },
             { value: "autre", label: "Autre" },
           ]}
           value={data.source}

@@ -24,9 +24,9 @@ export default async function HistoriqueDevisPage() {
   if (devisList.length === 0) {
     return (
       <main className="max-w-4xl mx-auto p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">📋 Mes devis</h1>
-        <p className="text-gray-500">Aucune demande pour le moment.</p>
-        <Link href="/devis/nouveau" className="text-blue-600 hover:underline">
+        <h1 className="text-2xl font-bold mb-4">Mes devis</h1>
+        <p className="text-muted-foreground">Aucune demande pour le moment.</p>
+        <Link href="/devis/nouveau" className="text-primary hover:underline">
           Créer ma première demande
         </Link>
       </main>
@@ -35,18 +35,18 @@ export default async function HistoriqueDevisPage() {
 
   return (
     <main className="max-w-4xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">📋 Mes devis</h1>
+      <h1 className="text-2xl font-bold mb-6">Mes devis</h1>
       <div className="space-y-4">
         {devisList.map((devis) => (
           <div
             key={devis.id}
-            className="border p-4 rounded shadow-sm flex justify-between items-center"
+            className="border border-border p-4 rounded-xl bg-card shadow-xs flex justify-between items-center"
           >
             <div>
-              <p className="font-semibold">
+              <p className="font-semibold text-foreground">
                 {devis.circuit?.titre || "Demande personnalisée"}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {new Date(devis.dateDemande).toLocaleDateString("fr-FR")} •{" "}
                 {devis.nombrePersonnes} pers.
               </p>

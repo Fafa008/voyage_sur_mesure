@@ -3,6 +3,7 @@
 import { X, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/format";
 import type { SearchFilters, SearchOptionsData } from "@/types/search";
 
 interface ActiveFiltersProps {
@@ -55,7 +56,7 @@ export function ActiveFilters({
   if (filters.maxBudget) {
     activeBadges.push({
       key: "maxBudget",
-      label: `Budget Max: ${filters.maxBudget} €`,
+      label: `Budget Max: ${formatCurrency(filters.maxBudget)}`,
     });
   }
 

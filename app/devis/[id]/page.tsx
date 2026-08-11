@@ -9,7 +9,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { buttonVariants } from "@/components/ui/button";
 import { DevisResponseActions } from "@/components/devis/DevisResponseActions";
 import { PaymentForm } from "@/components/reservation/PaymentForm";
-import { CalendarCheck, CreditCard, CheckCircle2 } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  User,
+  CreditCard,
+  CheckCircle2,
+  AlertCircle,
+  CalendarCheck,
+} from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface DevisDetailPageProps {
   params: Promise<{ id: string }>;
@@ -149,7 +158,7 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
               className={buttonVariants({ variant: "default", size: "lg" }) + " font-bold shadow-md"}
             >
               <CreditCard className="w-4 h-4 mr-2" />
-              Accéder à l'espace de paiement ({devis.reservation.montantFinal?.toString()} €)
+              Accéder à l'espace de paiement ({formatCurrency(devis.reservation.montantFinal)})
             </Link>
           </CardContent>
         </Card>
@@ -185,7 +194,7 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
                   Montant réglé
                 </span>
                 <p className="font-bold text-primary">
-                  {devis.reservation.montantFinal?.toString()} €
+                  {formatCurrency(devis.reservation.montantFinal)}
                 </p>
               </div>
               {devis.reservation.paiement && (
@@ -273,8 +282,8 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
               <div>
                 <span className="font-semibold block">Budget estimé :</span>
                 <p>
-                  {devis.budgetMin ? `${devis.budgetMin} €` : "0 €"} -{" "}
-                  {devis.budgetMax ? `${devis.budgetMax} €` : "Illimité"}
+                  {formatCurrency(devis.budgetMin)} -{" "}
+                  {devis.budgetMax ? formatCurrency(devis.budgetMax) : "Illimité"}
                 </p>
               </div>
             )}
@@ -291,7 +300,7 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
               <span className="font-semibold block">Montant total proposé :</span>
               <p className="text-2xl font-bold text-primary mt-1">
                 {devis.montantTotal
-                  ? `${devis.montantTotal.toString()} €`
+                  ? formatCurrency(devis.montantTotal)
                   : "En cours d'estimation"}
               </p>
             </div>

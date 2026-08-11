@@ -156,11 +156,11 @@ export function AccommodationSection({
             id="regime"
             icon={<Utensils className="w-4 h-4" />}
             options={[
-              { value: "aucun", label: "🍽️ Sans restriction particulière" },
-              { value: "vegetarien", label: "🥗 Végétarien" },
-              { value: "vegan", label: "🌱 Végétalien / Vegan" },
-              { value: "sansGluten", label: "🌾 Sans gluten" },
-              { value: "allergie", label: "⚠️ Allergie(s) alimentaire(s)" },
+              { value: "aucun", label: "Sans restriction particulière" },
+              { value: "vegetarien", label: "Végétarien" },
+              { value: "vegan", label: "Végétalien / Vegan" },
+              { value: "sansGluten", label: "Sans gluten" },
+              { value: "allergie", label: "Allergie(s) alimentaire(s)" },
               { value: "autre", label: "Autre précision" },
             ]}
             value={data.regime || "aucun"}

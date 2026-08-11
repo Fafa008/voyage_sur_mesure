@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { Send, Hotel, Target, MapPin } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
@@ -132,14 +134,15 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
           <div>
             <span className="text-sm text-muted-foreground block">Prix indicatif par personne</span>
             <span className="text-3xl font-extrabold text-primary">
-              {circuit.prixEstime ? `${circuit.prixEstime.toString()} €` : "Sur mesure"}
+              {circuit.prixEstime ? formatCurrency(circuit.prixEstime) : "Sur mesure"}
             </span>
           </div>
           <Link
             href={`/devis/nouveau?circuitId=${circuit.id}`}
             className={buttonVariants({ variant: "default", size: "lg" })}
           >
-            ✈️ Demander un devis personnalisé
+            <Send className="w-4 h-4 mr-2" />
+            Demander un devis personnalisé
           </Link>
         </CardContent>
       </Card>
@@ -151,7 +154,10 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
 
       {/* Programme des étapes */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold">📍 Itinéraire &amp; Étapes</h2>
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <MapPin className="w-6 h-6 text-primary" />
+          Itinéraire &amp; Étapes
+        </h2>
 
         {circuit.etapes.length === 0 ? (
           <p className="text-muted-foreground">Le détail des étapes pour ce circuit est en cours de finalisation.</p>
@@ -173,7 +179,9 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                   {/* Hébergement */}
                   {etape.hebergement && (
                     <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-                      <span className="font-semibold block">🏨 Hébergement :</span>
+                      <span className="font-semibold flex items-center gap-1.5">
+                        <Hotel className="w-4 h-4 text-primary" /> Hébergement :
+                      </span>
                       <p>
                         {etape.hebergement.nom}{" "}
                         {etape.hebergement.etoiles ? `(${etape.hebergement.etoiles}★)` : ""}
@@ -184,7 +192,9 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                   {/* Activités */}
                   {etape.activites.length > 0 && (
                     <div className="space-y-1 text-sm">
-                      <span className="font-semibold block">🎯 Activités au programme :</span>
+                      <span className="font-semibold flex items-center gap-1.5">
+                        <Target className="w-4 h-4 text-primary" /> Activités au programme :
+                      </span>
                       <ul className="list-disc list-inside space-y-1 text-muted-foreground pl-2">
                         {etape.activites.map((act) => (
                           <li key={act.id}>

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Smartphone, CreditCard, QrCode, Building2, ArrowUpRight } from "lucide-react";
 import { AdminBankTransferAction } from "./AdminBankTransferAction";
+import { formatCurrency } from "@/lib/format";
 import Link from "next/link";
 
 const methodIcons: Record<PaymentMethod, React.ComponentType<{ className?: string }>> = {
@@ -72,7 +73,7 @@ export default async function AdminPaiementsPage() {
             Gestion des Transactions & Paiements
           </h1>
           <p className="text-sm text-muted-foreground">
-            Suivez les règlements Binance Pay, Virements bancaires et mettez à jour les statuts.
+            Suivez les règlements Papi, Binance Pay, Virements bancaires et mettez à jour les statuts.
           </p>
         </div>
       </div>
@@ -86,7 +87,7 @@ export default async function AdminPaiementsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-emerald-600">{totalVolume.toFixed(2)} MGA</div>
+            <div className="text-3xl font-extrabold text-emerald-600">{formatCurrency(totalVolume)}</div>
             <p className="text-[11px] text-muted-foreground mt-1">{totalPaid} transactions validées</p>
           </CardContent>
         </Card>
@@ -173,7 +174,7 @@ export default async function AdminPaiementsPage() {
                         </TableCell>
 
                         <TableCell className="font-bold text-primary">
-                          {tx.amount.toString()} {tx.currency}
+                          {formatCurrency(tx.amount)}
                         </TableCell>
 
                         <TableCell>

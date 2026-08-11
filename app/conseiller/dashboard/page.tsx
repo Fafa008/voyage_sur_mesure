@@ -153,7 +153,7 @@ export default async function ConseillerDashboardPage() {
                     colSpan={5}
                     className="text-center text-muted-foreground py-10"
                   >
-                    🎉 Aucune demande en attente actuellement.
+                    Aucune demande en attente actuellement.
                   </TableCell>
                 </TableRow>
               ) : (

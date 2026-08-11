@@ -40,7 +40,7 @@ export function ConseillerPricingForm({
       </p>
 
       <InputField
-        label="Montant total (€)"
+        label="Montant total (MGA)"
         id="montantTotal"
         type="number"
         min="1"

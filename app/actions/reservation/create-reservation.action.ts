@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { formatCurrency } from "@/lib/format";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -105,7 +106,7 @@ export async function createReservation(prevState: unknown, formData: FormData) 
         data: {
           userId: session.user.id,
           titre: "Réservation confirmée",
-          message: `Votre réservation #${newReservation.id} est confirmée. Montant réglé : ${montant.toString()} €.`,
+          message: `Votre réservation #${newReservation.id} est confirmée. Montant réglé : ${formatCurrency(montant)}.`,
         },
       });
 

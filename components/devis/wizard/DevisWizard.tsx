@@ -46,7 +46,9 @@ import {
   LogIn,
   UserPlus,
   Edit3,
+  Lock,
 } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 const DRAFT_KEY = "mon-voyage-devis-draft";
 const STEP_KEY = "mon-voyage-devis-step";
@@ -333,9 +335,10 @@ export function DevisWizard({
               disabled={isSubmitting}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-extrabold text-sm hover:brightness-95 transition-all shadow-md disabled:opacity-60"
             >
+              <Send className="w-4 h-4" />
               {isSubmitting
                 ? "Transmission en cours..."
-                : "🚀 Confirmer et Envoyer ma Demande"}
+                : "Confirmer et Envoyer ma Demande"}
             </button>
           ) : (
             <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
@@ -500,7 +503,7 @@ function FinalStep({
         >
           <p className="font-extrabold text-primary text-base">
             {formData.budgetMin || formData.budgetMax
-              ? `${formData.budgetMin || 0} € - ${formData.budgetMax || 0} € / personne`
+              ? `${formatCurrency(formData.budgetMin)} - ${formatCurrency(formData.budgetMax)} / personne`
               : "Non défini"}
           </p>
         </SummaryCard>
@@ -522,7 +525,7 @@ function FinalStep({
       {!user && (
         <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-sm space-y-2">
           <p className="font-bold flex items-center gap-2">
-            🔒 Inscription ou connexion nécessaire
+            <Lock className="w-4 h-4" /> Inscription ou connexion nécessaire
           </p>
           <p className="text-xs leading-relaxed opacity-90">
             Afin que nous puissions rattacher ce devis à votre espace client et

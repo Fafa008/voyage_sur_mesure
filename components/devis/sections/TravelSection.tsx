@@ -95,7 +95,7 @@ export function TravelSection({
           options={[
             {
               value: "",
-              label: "✨ Création 100% sur-mesure (sans circuit modèle)",
+              label: "Création 100% sur-mesure (sans circuit modèle)",
             },
             ...circuits.map((c) => ({
               value: String(c.id),

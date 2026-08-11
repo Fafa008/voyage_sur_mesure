@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { ArrowRight, Clock, MapPin, Star, Route } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 export default async function CircuitsPreview() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -147,7 +148,7 @@ export default async function CircuitsPreview() {
 
                       <p className="text-lg font-extrabold text-foreground mt-1">
                         {circuit.prixEstime
-                          ? `${circuit.prixEstime.toString()}€`
+                          ? formatCurrency(circuit.prixEstime)
                           : "Sur devis"}
                         <span className="text-[11px] font-normal text-muted-foreground ml-1">
                           /personne
