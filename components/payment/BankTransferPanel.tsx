@@ -36,7 +36,7 @@ export function BankTransferPanel({ paymentResult, reservationId, amount }: Bank
         </div>
         <CardTitle className="text-xl">Coordonnées Bancaires de l'Agence</CardTitle>
         <CardDescription>
-          Veuillez effectuer le virement de <strong className="text-foreground">{amount} €</strong> en indiquant impérativement la référence ci-dessous.
+          Veuillez effectuer le virement de <strong className="text-foreground">{amount} MGA</strong> en indiquant impérativement la référence ci-dessous.
         </CardDescription>
       </CardHeader>
 

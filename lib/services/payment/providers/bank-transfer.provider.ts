@@ -6,10 +6,11 @@ export class BankTransferProvider implements IPaymentProvider {
     // Generate a unique reference for the bank transfer
     const providerRef = `BT-${Date.now()}-${options.reservationId}`;
     
+    const iban = process.env.BANK_IBAN || "FR76 1234 5678 9101 1121 3141 516";
     return {
       success: true,
       providerRef,
-      instructions: `Veuillez effectuer un virement de ${amount} ${currency} sur notre compte IBAN: FR76 1234 5678 9101 1121 3141 516. Indiquez la référence ${providerRef} dans le motif.`,
+      instructions: `Veuillez effectuer un virement de ${amount} ${currency} sur notre compte IBAN: ${iban}. Indiquez la référence ${providerRef} dans le motif.`,
     };
   }
 

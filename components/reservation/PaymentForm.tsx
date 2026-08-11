@@ -17,7 +17,7 @@ interface PaymentFormProps {
 export function PaymentForm({ devisId, montant }: PaymentFormProps) {
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(
-    PaymentMethod.BINANCE_PAY,
+    PaymentMethod.PAPI,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
             Montant total à régler
           </p>
-          <p className="text-3xl font-extrabold text-primary">{montant} €</p>
+          <p className="text-3xl font-extrabold text-primary">{montant} MGA</p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
           <CreditCard className="w-6 h-6" />
@@ -64,12 +64,17 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
           Choisissez votre mode de paiement
         </label>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
+          <PaymentMethodCard
+            method={PaymentMethod.PAPI}
+            selected={selectedMethod === PaymentMethod.PAPI}
+            onSelect={setSelectedMethod}
+            recommended
+          />
           <PaymentMethodCard
             method={PaymentMethod.BINANCE_PAY}
             selected={selectedMethod === PaymentMethod.BINANCE_PAY}
             onSelect={setSelectedMethod}
-            recommended
           />
           <PaymentMethodCard
             method={PaymentMethod.BANK_TRANSFER}
@@ -84,8 +89,10 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
         <p>
           Transaction 100% sécurisée. Vos données personnelles sont protégées
           par le chiffrement SSL.
+          {selectedMethod === PaymentMethod.PAPI &&
+            " Paiement direct par Mobile Money ou Carte bancaire via Papi.mg."}
           {selectedMethod === PaymentMethod.BINANCE_PAY &&
-            " Le taux de conversion crypto/EUR est garanti pendant 15 minutes."}
+            " Le taux de conversion crypto/MGA est garanti pendant 15 minutes."}
         </p>
       </div>
 
@@ -109,9 +116,11 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
         ) : (
           <>
             Procéder au paiement (
-            {selectedMethod === PaymentMethod.BINANCE_PAY
-              ? "Binance Pay"
-              : "Virement"}
+            {selectedMethod === PaymentMethod.PAPI
+              ? "Paiement en ligne Papi"
+              : selectedMethod === PaymentMethod.BINANCE_PAY
+                ? "Binance Pay"
+                : "Virement"}
             )
             <ArrowRight className="w-4 h-4 ml-2" />
           </>

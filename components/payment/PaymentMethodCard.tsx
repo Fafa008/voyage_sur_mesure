@@ -2,7 +2,7 @@
 
 import { PaymentMethod } from "@prisma/client";
 import { cn } from "@/lib/utils";
-import { QrCode, Building2, CreditCard, Wallet } from "lucide-react";
+import { Smartphone, QrCode, Building2, CreditCard } from "lucide-react";
 
 interface PaymentMethodCardProps {
   method: PaymentMethod;
@@ -15,6 +15,11 @@ const methodDetails: Record<
   PaymentMethod,
   { title: string; description: string; icon: React.ComponentType<{ className?: string }> }
 > = {
+  [PaymentMethod.PAPI]: {
+    title: "Paiement en ligne (Papi)",
+    description: "Paiement rapide et sécurisé par MVola, Orange Money, Airtel Money ou Carte bancaire",
+    icon: Smartphone,
+  },
   [PaymentMethod.BINANCE_PAY]: {
     title: "Binance Pay",
     description: "Paiement rapide et sécurisé en cryptomonnaies (USDT, BUSD, BTC...)",
@@ -22,23 +27,8 @@ const methodDetails: Record<
   },
   [PaymentMethod.BANK_TRANSFER]: {
     title: "Virement Bancaire",
-    description: "Virement SEPA direct avec coordonnées IBAN et référence unique",
+    description: "Virement SEPA / Manuel avec coordonnées bancaires et référence unique",
     icon: Building2,
-  },
-  [PaymentMethod.STRIPE]: {
-    title: "Carte Bancaire (Stripe)",
-    description: "Paiement sécurisé par Visa, Mastercard ou American Express",
-    icon: CreditCard,
-  },
-  [PaymentMethod.PAYPAL]: {
-    title: "PayPal",
-    description: "Paiement via votre compte PayPal ou CB",
-    icon: Wallet,
-  },
-  [PaymentMethod.MOBILE_MONEY]: {
-    title: "Mobile Money",
-    description: "Paiement via Mvola, Orange Money ou Airtel Money",
-    icon: CreditCard,
   },
 };
 

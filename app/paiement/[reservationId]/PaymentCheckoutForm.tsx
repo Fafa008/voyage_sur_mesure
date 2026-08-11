@@ -4,10 +4,9 @@ import { useState } from "react";
 import { PaymentMethod, PaymentStatus } from "@prisma/client";
 import { initiatePaymentAction } from "@/actions/payments.actions";
 import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
+import { PapiPayPanel } from "@/components/payment/PapiPayPanel";
 import { BinancePayPanel } from "@/components/payment/BinancePayPanel";
 import { BankTransferPanel } from "@/components/payment/BankTransferPanel";
-import { StripePaymentPanel } from "@/components/payment/StripePaymentPanel";
-import { MobileMoneyPanel } from "@/components/payment/MobileMoneyPanel";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CreditCard, Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import { PaymentResult } from "@/types/payment.types";
 
 interface Props {
@@ -38,7 +37,7 @@ export function PaymentCheckoutForm({
   latestTransaction,
 }: Props) {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(
-    latestTransaction?.method || PaymentMethod.BINANCE_PAY,
+    latestTransaction?.method || PaymentMethod.PAPI,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +90,16 @@ export function PaymentCheckoutForm({
   };
 
   if (activePayment) {
+    if (activePayment.method === PaymentMethod.PAPI) {
+      return (
+        <PapiPayPanel
+          paymentResult={activePayment.result}
+          reservationId={reservationId}
+          amount={amount}
+        />
+      );
+    }
+
     if (activePayment.method === PaymentMethod.BINANCE_PAY) {
       return (
         <BinancePayPanel
@@ -104,26 +113,6 @@ export function PaymentCheckoutForm({
     if (activePayment.method === PaymentMethod.BANK_TRANSFER) {
       return (
         <BankTransferPanel
-          paymentResult={activePayment.result}
-          reservationId={reservationId}
-          amount={amount}
-        />
-      );
-    }
-
-    if (activePayment.method === PaymentMethod.STRIPE) {
-      return (
-        <StripePaymentPanel
-          paymentResult={activePayment.result}
-          reservationId={reservationId}
-          amount={amount}
-        />
-      );
-    }
-
-    if (activePayment.method === PaymentMethod.MOBILE_MONEY) {
-      return (
-        <MobileMoneyPanel
           paymentResult={activePayment.result}
           reservationId={reservationId}
           amount={amount}
@@ -146,24 +135,19 @@ export function PaymentCheckoutForm({
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-3">
           <PaymentMethodCard
-            method={PaymentMethod.BINANCE_PAY}
-            selected={selectedMethod === PaymentMethod.BINANCE_PAY}
+            method={PaymentMethod.PAPI}
+            selected={selectedMethod === PaymentMethod.PAPI}
             onSelect={setSelectedMethod}
             recommended
           />
           <PaymentMethodCard
+            method={PaymentMethod.BINANCE_PAY}
+            selected={selectedMethod === PaymentMethod.BINANCE_PAY}
+            onSelect={setSelectedMethod}
+          />
+          <PaymentMethodCard
             method={PaymentMethod.BANK_TRANSFER}
             selected={selectedMethod === PaymentMethod.BANK_TRANSFER}
-            onSelect={setSelectedMethod}
-          />
-          <PaymentMethodCard
-            method={PaymentMethod.STRIPE}
-            selected={selectedMethod === PaymentMethod.STRIPE}
-            onSelect={setSelectedMethod}
-          />
-          <PaymentMethodCard
-            method={PaymentMethod.MOBILE_MONEY}
-            selected={selectedMethod === PaymentMethod.MOBILE_MONEY}
             onSelect={setSelectedMethod}
           />
         </div>
@@ -188,13 +172,11 @@ export function PaymentCheckoutForm({
           ) : (
             <>
               Confirmer et procéder au paiement (
-              {selectedMethod === PaymentMethod.BINANCE_PAY
-                ? "Binance Pay"
-                : selectedMethod === PaymentMethod.STRIPE
-                  ? "Carte bancaire"
-                  : selectedMethod === PaymentMethod.MOBILE_MONEY
-                    ? "Mobile Money"
-                    : "Virement"}
+              {selectedMethod === PaymentMethod.PAPI
+                ? "Paiement en ligne Papi"
+                : selectedMethod === PaymentMethod.BINANCE_PAY
+                  ? "Binance Pay"
+                  : "Virement"}
               )
               <ArrowRight className="w-4 h-4 ml-2" />
             </>

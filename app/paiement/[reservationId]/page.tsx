@@ -122,7 +122,7 @@ export default async function PaymentTunnelPage({ params }: Props) {
                   Montant à régler
                 </p>
                 <p className="text-3xl font-extrabold text-primary mt-1">
-                  {amount} €
+                  {amount} MGA
                 </p>
               </div>
             </CardContent>

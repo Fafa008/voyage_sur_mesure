@@ -350,11 +350,9 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
+  PAPI
   BINANCE_PAY
   BANK_TRANSFER
-  STRIPE
-  PAYPAL
-  MOBILE_MONEY
 }
 
 enum InvoiceStatus {
@@ -384,7 +382,7 @@ model PaymentProvider {
 model PaymentTransaction {
   id          String          @id @default(cuid())
   amount      Decimal         @db.Decimal(10, 2)
-  currency    String          @default("EUR")
+  currency    String          @default("MGA")
   status      PaymentStatus   @default(PENDING)
   method      PaymentMethod
   providerId  String
@@ -398,11 +396,19 @@ model PaymentTransaction {
 
   expiresAt DateTime?
 
+  notificationToken     String?
+  providerPaymentMethod String?
+
   logs     PaymentLog[]
   webhooks PaymentWebhook[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([reservationId])
+  @@index([providerRef])
+  @@index([status])
+  @@index([userId])
 }
 
 model Invoice {

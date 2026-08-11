@@ -14,7 +14,7 @@ export class PaymentService {
     if (!reservation.montantFinal) throw new Error("Amount is not defined");
 
     const amount = Number(reservation.montantFinal);
-    const currency = "EUR";
+    const currency = "MGA";
 
     // 1. Get Provider
     const provider = PaymentFactory.getProvider(method);
@@ -48,9 +48,10 @@ export class PaymentService {
           status: PaymentStatus.PENDING,
           providerId: internalProvider.id,
           providerRef: result.providerRef,
+          notificationToken: result.notificationToken || null,
           reservationId,
           userId,
-          expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+          expiresAt: result.expiresAt || new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
         }
       });
 

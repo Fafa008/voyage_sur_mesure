@@ -103,7 +103,7 @@ export default async function PaymentConfirmationPage({ params }: Props) {
           <CardContent className="space-y-3 text-sm">
             <div>
               <span className="text-muted-foreground text-xs uppercase tracking-wider block">Montant</span>
-              <p className="text-2xl font-extrabold text-primary">{amount} €</p>
+              <p className="text-2xl font-extrabold text-primary">{amount} MGA</p>
             </div>
 
             {lastTransaction && (
@@ -111,7 +111,11 @@ export default async function PaymentConfirmationPage({ params }: Props) {
                 <div>
                   <span className="text-muted-foreground text-xs uppercase tracking-wider block">Mode</span>
                   <Badge variant="outline" className="font-semibold text-xs mt-0.5">
-                    {lastTransaction.method === "BINANCE_PAY" ? "Binance Pay (Crypto)" : "Virement Bancaire"}
+                    {lastTransaction.method === "PAPI"
+                      ? "Papi (Mobile Money / CB)"
+                      : lastTransaction.method === "BINANCE_PAY"
+                        ? "Binance Pay (Crypto)"
+                        : "Virement Bancaire"}
                   </Badge>
                 </div>
 

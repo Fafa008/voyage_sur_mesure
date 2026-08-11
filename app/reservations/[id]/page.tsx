@@ -210,7 +210,7 @@ export default async function ReservationDetailPage({ params }: Props) {
                 Montant réglé
               </span>
               <p className="text-2xl font-extrabold text-primary">
-                {reservation.montantFinal?.toString()} €
+                {reservation.montantFinal?.toString()} MGA
               </p>
             </div>
 

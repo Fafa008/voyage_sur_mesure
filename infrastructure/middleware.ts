@@ -6,8 +6,8 @@ const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Laisse Better Auth gérer ses propres routes sans interférence
-  if (pathname.startsWith("/api/auth")) {
+  // Laisse Better Auth et les webhooks de paiement passer sans interférence
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/payment/webhook")) {
     return NextResponse.next();
   }
 

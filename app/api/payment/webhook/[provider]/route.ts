@@ -11,12 +11,10 @@ export async function POST(
     const providerUpper = provider.toUpperCase();
 
     let method: PaymentMethod;
-    if (providerUpper === "BINANCE" || providerUpper === "BINANCE_PAY") {
+    if (providerUpper === "PAPI") {
+      method = PaymentMethod.PAPI;
+    } else if (providerUpper === "BINANCE" || providerUpper === "BINANCE_PAY") {
       method = PaymentMethod.BINANCE_PAY;
-    } else if (providerUpper === "STRIPE") {
-      method = PaymentMethod.STRIPE;
-    } else if (providerUpper === "PAYPAL") {
-      method = PaymentMethod.PAYPAL;
     } else if (providerUpper === "BANK_TRANSFER") {
       method = PaymentMethod.BANK_TRANSFER;
     } else {

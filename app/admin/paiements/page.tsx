@@ -13,16 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, QrCode, Building2, Wallet, ArrowUpRight } from "lucide-react";
+import { Smartphone, CreditCard, QrCode, Building2, ArrowUpRight } from "lucide-react";
 import { AdminBankTransferAction } from "./AdminBankTransferAction";
 import Link from "next/link";
 
 const methodIcons: Record<PaymentMethod, React.ComponentType<{ className?: string }>> = {
+  [PaymentMethod.PAPI]: Smartphone,
   [PaymentMethod.BINANCE_PAY]: QrCode,
   [PaymentMethod.BANK_TRANSFER]: Building2,
-  [PaymentMethod.STRIPE]: CreditCard,
-  [PaymentMethod.PAYPAL]: Wallet,
-  [PaymentMethod.MOBILE_MONEY]: CreditCard,
 };
 
 const statusColors: Record<PaymentStatus, string> = {
@@ -88,7 +86,7 @@ export default async function AdminPaiementsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-emerald-600">{totalVolume.toFixed(2)} €</div>
+            <div className="text-3xl font-extrabold text-emerald-600">{totalVolume.toFixed(2)} MGA</div>
             <p className="text-[11px] text-muted-foreground mt-1">{totalPaid} transactions validées</p>
           </CardContent>
         </Card>
@@ -165,7 +163,11 @@ export default async function AdminPaiementsPage() {
                           <div className="flex items-center gap-2">
                             <MethodIcon className="w-4 h-4 text-primary shrink-0" />
                             <span className="text-xs font-semibold">
-                              {tx.method === "BINANCE_PAY" ? "Binance Pay" : "Virement"}
+                              {tx.method === "PAPI"
+                                ? "Papi (en ligne)"
+                                : tx.method === "BINANCE_PAY"
+                                  ? "Binance Pay"
+                                  : "Virement"}
                             </span>
                           </div>
                         </TableCell>

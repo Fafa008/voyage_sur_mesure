@@ -88,7 +88,7 @@ export function BinancePayPanel({ paymentResult, reservationId, amount }: Binanc
           <QrCode className="w-4 h-4" />
           Paiement via Binance Pay
         </div>
-        <CardTitle className="text-2xl font-extrabold text-primary">{amount} €</CardTitle>
+        <CardTitle className="text-2xl font-extrabold text-primary">{amount} MGA</CardTitle>
         <CardDescription>
           Scannez le QR Code depuis votre application Binance ou cliquez sur le lien
         </CardDescription>

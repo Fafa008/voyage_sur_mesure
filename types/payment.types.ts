@@ -15,12 +15,16 @@ export interface PaymentResult {
   checkoutUrl?: string;
   qrCodeUrl?: string;
   instructions?: string;
+  notificationToken?: string;
+  expiresAt?: Date;
   error?: string;
 }
 
 export interface WebhookResult {
   providerRef: string;
   status: PaymentStatus;
+  notificationToken?: string;
+  providerPaymentMethod?: string;
   raw: Prisma.InputJsonValue;
 }
 

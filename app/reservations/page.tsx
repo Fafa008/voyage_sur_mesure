@@ -101,7 +101,7 @@ export default async function ReservationsPage() {
                       Montant
                     </p>
                     <p className="text-xl font-bold text-primary">
-                      {res.montantFinal?.toString()} €
+                      {res.montantFinal?.toString()} MGA
                     </p>
                   </div>
                   {res.paiement && (
