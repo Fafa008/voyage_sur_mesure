@@ -73,7 +73,10 @@ export class PapiProvider implements IPaymentProvider {
         body: JSON.stringify({
           amount,
           currency,
-          orderId,
+          reference: orderId, // Papi requires reference
+          orderId,            // Kept for backward compatibility
+          clientName: options.clientName || "Client Mon Voyage",
+          description: (options.description || `Paiement Réservation #${options.reservationId}`).substring(0, 255),
           successUrl,
           failureUrl,
           notificationUrl,

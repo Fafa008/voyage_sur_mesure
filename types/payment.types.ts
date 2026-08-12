@@ -6,6 +6,7 @@ export interface PaymentOptions {
   description?: string;
   returnUrl?: string;
   cancelUrl?: string;
+  clientName?: string;
 }
 
 export interface PaymentResult {

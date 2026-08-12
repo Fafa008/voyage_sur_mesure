@@ -7,7 +7,10 @@ export class PaymentService {
   async initiatePayment(reservationId: number, method: PaymentMethod, userId: string): Promise<PaymentResult> {
     const reservation = await prisma.reservation.findUnique({
       where: { id: reservationId },
-      include: { user: true }
+      include: {
+        user: true,
+        devis: true,
+      }
     });
 
     if (!reservation) throw new Error("Reservation not found");
@@ -29,6 +32,22 @@ export class PaymentService {
       });
     }
 
+    // Resolve clientName
+    let clientName = "Client Mon Voyage";
+    if (reservation.user?.name) {
+      clientName = reservation.user.name;
+      if (reservation.user.prenom) {
+        clientName = `${reservation.user.prenom} ${reservation.user.name}`;
+      }
+    } else if (reservation.devis) {
+      const devisNom = reservation.devis.nom || "";
+      const devisPrenom = reservation.devis.prenom || "";
+      const devisFullName = `${devisPrenom} ${devisNom}`.trim();
+      if (devisFullName) {
+        clientName = devisFullName;
+      }
+    }
+
     // 3. Initiate Charge on Provider
     const result = await provider.createCharge(amount, currency, {
       reservationId,
@@ -36,6 +55,7 @@ export class PaymentService {
       description: `Paiement Réservation #${reservationId}`,
       returnUrl: `${process.env.APP_URL}/paiement/${reservationId}/confirmation`,
       cancelUrl: `${process.env.APP_URL}/paiement/${reservationId}`,
+      clientName,
     });
 
     if (result.success) {
