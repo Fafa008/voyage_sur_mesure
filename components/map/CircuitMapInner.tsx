@@ -24,7 +24,7 @@ import {
   PointOfInterest,
 } from "@/lib/data/madagascar-pois";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   MapPin,
   Hotel,
@@ -70,7 +70,7 @@ export interface CircuitMapProps {
 function createCustomIcon(
   type: "step" | "hotel" | "park" | "city",
   label: string | number,
-  title?: string
+  title?: string,
 ) {
   const pinClass =
     type === "step"
@@ -82,7 +82,7 @@ function createCustomIcon(
           : "marker-pin-city";
 
   const iconHtml = `
-    <div class="custom-leaflet-marker" title="${title || ''}">
+    <div class="custom-leaflet-marker" title="${title || ""}">
       <div class="marker-pin ${pinClass}">
         ${label}
       </div>
@@ -117,7 +117,10 @@ function FitBoundsController({
   return null;
 }
 
-export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMapProps) {
+export default function CircuitMapInner({
+  circuit,
+  height = "540px",
+}: CircuitMapProps) {
   const [showRegions, setShowRegions] = useState(true);
   const [showHotels, setShowHotels] = useState(true);
   const [showParks, setShowParks] = useState(true);
@@ -135,7 +138,7 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
       (r) =>
         r.name.toLowerCase().includes(currentRegionName) ||
         currentRegionName.includes(r.name.toLowerCase()) ||
-        r.id === currentRegionName
+        r.id === currentRegionName,
     );
   }, [currentRegionName]);
 
@@ -166,10 +169,16 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
     }
     if (circuitRegion) {
       const [lat, lng] = circuitRegion.center;
-      return L.latLngBounds([[lat - 1.2, lng - 1.2], [lat + 1.2, lng + 1.2]]);
+      return L.latLngBounds([
+        [lat - 1.2, lng - 1.2],
+        [lat + 1.2, lng + 1.2],
+      ]);
     }
     // Vue globale de Madagascar par défaut
-    return L.latLngBounds([[-25.6, 43.0], [-11.8, 50.8]]);
+    return L.latLngBounds([
+      [-25.6, 43.0],
+      [-11.8, 50.8],
+    ]);
   }, [itineraryPath, circuitRegion]);
 
   // Réinitialiser la vue
@@ -189,7 +198,8 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
 
   // Style personnalisé pour les 24 régions dans la couche GeoJSON
   const getRegionStyle = (feature: any) => {
-    const isSelected = circuitRegion && feature.properties.id === circuitRegion.id;
+    const isSelected =
+      circuitRegion && feature.properties.id === circuitRegion.id;
     return {
       fillColor: feature.properties.color || "#3b82f6",
       weight: isSelected ? 3 : 1,
@@ -212,7 +222,8 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
       },
       mouseout: (e) => {
         const target = e.target;
-        const isSelected = circuitRegion && feature.properties.id === circuitRegion.id;
+        const isSelected =
+          circuitRegion && feature.properties.id === circuitRegion.id;
         target.setStyle({
           fillOpacity: isSelected ? 0.35 : 0.12,
           weight: isSelected ? 3 : 1,
@@ -223,8 +234,9 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
 
   return (
     <div
-      className={`relative w-full rounded-2xl overflow-hidden border bg-background shadow-md transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen" : ""
-        }`}
+      className={`relative w-full rounded-2xl overflow-hidden border bg-background shadow-md transition-all duration-300 ${
+        isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen" : ""
+      }`}
     >
       {/* En-tête de la carte avec contrôles de calques */}
       <div className="p-4 bg-card border-b flex flex-wrap items-center justify-between gap-3 z-10 relative shadow-sm">
@@ -234,7 +246,10 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
             Carte Interactive — Madagascar &amp; 24 Régions
           </h3>
           {circuit.region && (
-            <Badge variant="default" className="hidden sm:inline-flex bg-primary text-primary-foreground">
+            <Badge
+              variant="default"
+              className="hidden sm:inline-flex bg-primary text-primary-foreground"
+            >
               {circuit.region.nom}
             </Badge>
           )}
@@ -287,7 +302,13 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
           </Button>
 
           {/* Recentrer */}
-          <Button variant="ghost" size="icon" onClick={handleRecenter} title="Recentrer la vue" className="h-8 w-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRecenter}
+            title="Recentrer la vue"
+            className="h-8 w-8"
+          >
             <RotateCcw className="w-4 h-4" />
           </Button>
 
@@ -299,13 +320,20 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
             title={isFullscreen ? "Réduire" : "Plein écran"}
             className="h-8 w-8"
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
 
       {/* Rendu de la carte Leaflet */}
-      <div style={{ height: isFullscreen ? "calc(100vh - 65px)" : height }} className="w-full relative">
+      <div
+        style={{ height: isFullscreen ? "calc(100vh - 65px)" : height }}
+        className="w-full relative"
+      >
         <MapContainer
           center={[-18.8792, 47.5079]}
           zoom={6}
@@ -330,7 +358,7 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
                 onEachRegion(feature, layer);
                 layer.bindTooltip(
                   `<div><strong>${feature.properties.name}</strong><br/><span style="font-size: 11px;">Capitale: ${feature.properties.capital}</span></div>`,
-                  { className: "region-tooltip", sticky: true }
+                  { className: "region-tooltip", sticky: true },
                 );
               }}
             />
@@ -355,7 +383,11 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
               <Marker
                 key={`etape-${etape.id}`}
                 position={[etape.lat, etape.lng]}
-                icon={createCustomIcon("step", etape.ordre, `Étape ${etape.ordre}: ${etape.ville}`)}
+                icon={createCustomIcon(
+                  "step",
+                  etape.ordre,
+                  `Étape ${etape.ordre}: ${etape.ville}`,
+                )}
               >
                 <Popup>
                   <div className="space-y-2 p-1 min-w-[200px]">
@@ -363,9 +395,15 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
                       <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">
                         {etape.ordre}
                       </span>
-                      <h4 className="font-bold text-sm">{etape.ville || `Étape ${etape.ordre}`}</h4>
+                      <h4 className="font-bold text-sm">
+                        {etape.ville || `Étape ${etape.ordre}`}
+                      </h4>
                     </div>
-                    {etape.description && <p className="text-xs text-muted-foreground">{etape.description}</p>}
+                    {etape.description && (
+                      <p className="text-xs text-muted-foreground">
+                        {etape.description}
+                      </p>
+                    )}
 
                     {etape.hebergement && (
                       <div className="bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-lg text-xs space-y-1 border border-emerald-200">
@@ -382,7 +420,9 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
 
                     {etape.activites && etape.activites.length > 0 && (
                       <div className="text-xs space-y-1">
-                        <span className="font-semibold block">🎯 Activités :</span>
+                        <span className="font-semibold block">
+                          🎯 Activités :
+                        </span>
                         <ul className="list-disc list-inside space-y-0.5 text-muted-foreground">
                           {etape.activites.map((act) => (
                             <li key={act.id}>{act.nom}</li>
@@ -406,7 +446,10 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
                 <Popup>
                   <div className="space-y-2 p-1 min-w-[220px]">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-[10px] border-emerald-500 text-emerald-600">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] border-emerald-500 text-emerald-600"
+                      >
                         Hôtel &amp; Lodge
                       </Badge>
                       {hotel.rating && (
@@ -415,10 +458,16 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
                         </span>
                       )}
                     </div>
-                    <h4 className="font-bold text-sm text-foreground">{hotel.name}</h4>
-                    <p className="text-xs text-muted-foreground">{hotel.description}</p>
+                    <h4 className="font-bold text-sm text-foreground">
+                      {hotel.name}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {hotel.description}
+                    </p>
                     {hotel.address && (
-                      <p className="text-[11px] font-medium text-slate-500">📍 {hotel.address}</p>
+                      <p className="text-[11px] font-medium text-slate-500">
+                        📍 {hotel.address}
+                      </p>
                     )}
                   </div>
                 </Popup>
@@ -435,11 +484,20 @@ export default function CircuitMapInner({ circuit, height = "540px" }: CircuitMa
               >
                 <Popup>
                   <div className="space-y-2 p-1 min-w-[230px]">
-                    <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-800">
-                      {park.category === "landmark" ? "Site Emblématique" : "Parc National / Réserve"}
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] bg-amber-100 text-amber-800"
+                    >
+                      {park.category === "landmark"
+                        ? "Site Emblématique"
+                        : "Parc National / Réserve"}
                     </Badge>
-                    <h4 className="font-bold text-sm text-foreground">{park.name}</h4>
-                    <p className="text-xs text-muted-foreground">{park.description}</p>
+                    <h4 className="font-bold text-sm text-foreground">
+                      {park.name}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {park.description}
+                    </p>
                   </div>
                 </Popup>
               </Marker>

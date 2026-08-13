@@ -59,6 +59,10 @@ export class PaymentService {
     });
 
     if (result.success) {
+      console.log(
+        `[PaymentService] Creating transaction for reservation ${reservationId}, method=${method}`
+      );
+
       // 4. Record Transaction
       const transaction = await prisma.paymentTransaction.create({
         data: {
@@ -75,6 +79,10 @@ export class PaymentService {
         }
       });
 
+      console.log(
+        `[PaymentService] Transaction created: id=${transaction.id}, providerRef=${result.providerRef}`
+      );
+
       // Log
       await prisma.paymentLog.create({
         data: {
@@ -85,9 +93,16 @@ export class PaymentService {
       });
 
       // Attach transactionId to result
-      return { ...result, transactionId: transaction.id };
+      const finalResult = { ...result, transactionId: transaction.id };
+      console.log(
+        `[PaymentService] Returning result: success=true, hasCheckoutUrl=${!!finalResult.checkoutUrl}, transactionId=${transaction.id}`
+      );
+      return finalResult;
     }
 
+    console.log(
+      `[PaymentService] Provider returned error for reservation ${reservationId}: ${result.error}`
+    );
     return result;
   }
 

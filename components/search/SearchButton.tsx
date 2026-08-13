@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 interface SearchButtonProps {
   loading?: boolean;

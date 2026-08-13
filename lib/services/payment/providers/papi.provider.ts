@@ -1,3 +1,4 @@
+// lib/services/payment/providers/papi.provider.ts
 import { PaymentStatus, type Prisma } from "@prisma/client";
 import {
   IPaymentProvider,
@@ -100,8 +101,11 @@ export class PapiProvider implements IPaymentProvider {
 
       // Log les clés de la réponse Papi pour diagnostic Sandbox (sans valeurs sensibles)
       console.log(
-        "Papi /payment-links response keys:",
+        "[PAPI] /payment-links response keys:",
         Object.keys(data)
+      );
+      console.log(
+        `[PAPI] Response received for reservation ${options.reservationId}`
       );
 
       // Papi peut retourner paymentUrl ou paymentLink selon la version
@@ -109,14 +113,17 @@ export class PapiProvider implements IPaymentProvider {
 
       if (!checkoutUrl) {
         console.error(
-          "Papi API response missing paymentUrl/paymentLink. Response keys:",
-          Object.keys(data)
+          `[PAPI] ERROR: Response missing paymentUrl/paymentLink. Keys: ${Object.keys(data).join(", ")}`
         );
         return {
           success: false,
           error: "Papi API response missing paymentUrl/paymentLink",
         };
       }
+
+      console.log(
+        `[PAPI] checkoutUrl extracted successfully for orderId ${orderId}`
+      );
 
       // Extraction optionnelle du token de notification ou de la date d'expiration si fournie par Papi
       const notificationToken =
@@ -134,15 +141,22 @@ export class PapiProvider implements IPaymentProvider {
         }
       }
 
-      return {
+      const result = {
         success: true,
         providerRef: orderId,
         checkoutUrl,
         notificationToken,
         expiresAt,
       };
+
+      console.log(
+        `[PAPI] SUCCESS: Created payment link. providerRef=${orderId}, hasCheckoutUrl=${!!checkoutUrl}, hasNotificationToken=${!!notificationToken}`
+      );
+
+      return result;
     } catch (error) {
-      console.error("Papi createCharge error:", error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(`[PAPI] ERROR in createCharge: ${errorMsg}`);
       return {
         success: false,
         error:

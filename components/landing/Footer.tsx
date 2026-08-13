@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Compass, Mail, Phone, MapPin, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 const quickLinks = [
   { label: "Accueil", href: "/home" },

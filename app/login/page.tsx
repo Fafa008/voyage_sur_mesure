@@ -4,8 +4,14 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { LogIn, Mail, Lock } from "lucide-react";
 import { RoleNom } from "@prisma/client";
 
@@ -37,9 +43,9 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      
+
       const { role } = await response.json();
-      
+
       if (role === RoleNom.admin) {
         router.push("/admin/dashboard");
       } else if (role === RoleNom.conseiller) {

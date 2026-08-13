@@ -3,13 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConseillerPricingForm } from "@/components/devis/ConseillerPricingForm";
 import { formatCurrency } from "@/lib/format";
 import { CalendarCheck } from "lucide-react";
@@ -79,10 +74,12 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <p>
-              Statut : <strong className="capitalize">{devis.reservation.statut}</strong>
+              Statut :{" "}
+              <strong className="capitalize">{devis.reservation.statut}</strong>
             </p>
             <p>
-              Montant : <strong>{formatCurrency(devis.reservation.montantFinal)}</strong>
+              Montant :{" "}
+              <strong>{formatCurrency(devis.reservation.montantFinal)}</strong>
             </p>
             {devis.reservation.paiement && (
               <p>
@@ -133,11 +130,15 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                 <p className="text-muted-foreground">Dates souhaitées</p>
                 <p>
                   {devis.dateDebutSouhaitee
-                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
+                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
+                        "fr-FR",
+                      )
                     : "Non renseigné"}{" "}
                   →{" "}
                   {devis.dateFinSouhaitee
-                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
+                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
+                        "fr-FR",
+                      )
                     : "Non renseigné"}
                 </p>
               </div>

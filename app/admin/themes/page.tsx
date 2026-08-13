@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { createTheme } from "@/app/admin/themes/actions/create-theme.action";
 import { createRegion } from "@/app/admin/themes/actions/create-region.action";
@@ -129,7 +129,9 @@ export default async function AdminThemesPage() {
                 ) : (
                   regions.map((region) => (
                     <TableRow key={region.id}>
-                      <TableCell className="font-medium">{region.nom}</TableCell>
+                      <TableCell className="font-medium">
+                        {region.nom}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {region._count.circuits}
                       </TableCell>

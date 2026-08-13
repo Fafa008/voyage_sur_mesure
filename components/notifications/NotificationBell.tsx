@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 
 interface NotificationBellProps {
   unreadCount: number;
@@ -13,7 +13,7 @@ export function NotificationBell({ unreadCount }: NotificationBellProps) {
       href="/notifications"
       className={cn(
         buttonVariants({ variant: "ghost", size: "icon" }),
-        "relative shrink-0"
+        "relative shrink-0",
       )}
       aria-label={
         unreadCount > 0

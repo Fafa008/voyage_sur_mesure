@@ -2,8 +2,11 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { acceptDevis, refuseDevis } from "@/app/actions/devis/accept-devis.action";
-import { Button } from "@/components/ui/button";
+import {
+  acceptDevis,
+  refuseDevis,
+} from "@/app/actions/devis/accept-devis.action";
+import { Button } from "@/components/ui/Button";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface DevisResponseActionsProps {
@@ -12,8 +15,14 @@ interface DevisResponseActionsProps {
 
 export function DevisResponseActions({ devisId }: DevisResponseActionsProps) {
   const router = useRouter();
-  const [acceptState, acceptAction, acceptPending] = useActionState(acceptDevis, null);
-  const [refuseState, refuseAction, refusePending] = useActionState(refuseDevis, null);
+  const [acceptState, acceptAction, acceptPending] = useActionState(
+    acceptDevis,
+    null,
+  );
+  const [refuseState, refuseAction, refusePending] = useActionState(
+    refuseDevis,
+    null,
+  );
 
   const error = acceptState?.error ?? refuseState?.error;
   const success = acceptState?.success || refuseState?.success;
@@ -25,8 +34,8 @@ export function DevisResponseActions({ devisId }: DevisResponseActionsProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Votre conseiller a chiffré ce devis. Acceptez-le pour procéder au paiement, ou refusez-le si
-        le tarif ne vous convient pas.
+        Votre conseiller a chiffré ce devis. Acceptez-le pour procéder au
+        paiement, ou refusez-le si le tarif ne vous convient pas.
       </p>
 
       <div className="flex flex-wrap gap-3">

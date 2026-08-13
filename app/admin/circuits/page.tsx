@@ -1,7 +1,7 @@
 // app/admin/circuits/page.tsx
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/format";
 import { Plus } from "lucide-react";
 import {
@@ -40,7 +40,10 @@ export default async function AdminCircuitsPage() {
         </div>
         <Link
           href="/admin/circuits/nouveau"
-          className={buttonVariants({ variant: "default" }) + " flex items-center gap-1.5"}
+          className={
+            buttonVariants({ variant: "default" }) +
+            " flex items-center gap-1.5"
+          }
         >
           <Plus className="w-4 h-4" />
           Ajouter un circuit

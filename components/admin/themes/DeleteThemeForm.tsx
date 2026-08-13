@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { deleteTheme } from "@/app/admin/themes/actions/delete-theme.action";
 
 interface DeleteThemeFormProps {

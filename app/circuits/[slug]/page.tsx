@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Hotel, Target, MapPin } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { CircuitMap } from "@/components/map/CircuitMap";
@@ -32,7 +32,7 @@ const getCircuitBySlug = cache(async (slug: string) =>
         orderBy: { ordre: "asc" },
       },
     },
-  })
+  }),
 );
 
 // Revalidation ISR : les pages de circuit sont régénérées toutes les heures
@@ -74,7 +74,9 @@ interface CircuitDetailPageProps {
   }>;
 }
 
-export default async function CircuitDetailPage({ params }: CircuitDetailPageProps) {
+export default async function CircuitDetailPage({
+  params,
+}: CircuitDetailPageProps) {
   const { slug } = await params;
 
   // Pas de nouvelle requête DB : récupère le résultat depuis le cache de generateMetadata
@@ -91,20 +93,31 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
   return (
     <main className="max-w-5xl mx-auto py-10 px-4 space-y-8">
       {/* Bouton retour */}
-      <Link href="/circuits" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        href="/circuits"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+      >
         ← Retour aux circuits
       </Link>
 
       {/* En-tête du circuit */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          {circuit.region && <Badge variant="default">{circuit.region.nom}</Badge>}
-          {circuit.theme && <Badge variant="outline">{circuit.theme.nom}</Badge>}
-          {circuit.dureeJours && <Badge variant="secondary">{circuit.dureeJours} jours</Badge>}
+          {circuit.region && (
+            <Badge variant="default">{circuit.region.nom}</Badge>
+          )}
+          {circuit.theme && (
+            <Badge variant="outline">{circuit.theme.nom}</Badge>
+          )}
+          {circuit.dureeJours && (
+            <Badge variant="secondary">{circuit.dureeJours} jours</Badge>
+          )}
         </div>
 
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-4xl font-extrabold tracking-tight">{circuit.titre}</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            {circuit.titre}
+          </h1>
           <FavoriteButton circuitId={circuit.id} initialIsFavori={isFavori} />
         </div>
         <p className="text-lg text-muted-foreground">{circuit.description}</p>
@@ -114,7 +127,10 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
       {circuit.images.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-md">
           {circuit.images.map((img, idx) => (
-            <div key={img.id || idx} className="relative h-72 w-full overflow-hidden">
+            <div
+              key={img.id || idx}
+              className="relative h-72 w-full overflow-hidden"
+            >
               <Image
                 src={img.url}
                 alt={img.legende || circuit.titre}
@@ -132,9 +148,13 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="flex flex-wrap items-center justify-between gap-4 py-6">
           <div>
-            <span className="text-sm text-muted-foreground block">Prix indicatif par personne</span>
+            <span className="text-sm text-muted-foreground block">
+              Prix indicatif par personne
+            </span>
             <span className="text-3xl font-extrabold text-primary">
-              {circuit.prixEstime ? formatCurrency(circuit.prixEstime) : "Sur mesure"}
+              {circuit.prixEstime
+                ? formatCurrency(circuit.prixEstime)
+                : "Sur mesure"}
             </span>
           </div>
           <Link
@@ -160,7 +180,9 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
         </h2>
 
         {circuit.etapes.length === 0 ? (
-          <p className="text-muted-foreground">Le détail des étapes pour ce circuit est en cours de finalisation.</p>
+          <p className="text-muted-foreground">
+            Le détail des étapes pour ce circuit est en cours de finalisation.
+          </p>
         ) : (
           <div className="space-y-4">
             {circuit.etapes.map((etape) => (
@@ -174,7 +196,11 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {etape.description && <p className="text-sm text-muted-foreground">{etape.description}</p>}
+                  {etape.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {etape.description}
+                    </p>
+                  )}
 
                   {/* Hébergement */}
                   {etape.hebergement && (
@@ -184,7 +210,9 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                       </span>
                       <p>
                         {etape.hebergement.nom}{" "}
-                        {etape.hebergement.etoiles ? `(${etape.hebergement.etoiles}★)` : ""}
+                        {etape.hebergement.etoiles
+                          ? `(${etape.hebergement.etoiles}★)`
+                          : ""}
                       </p>
                     </div>
                   )}
@@ -193,12 +221,15 @@ export default async function CircuitDetailPage({ params }: CircuitDetailPagePro
                   {etape.activites.length > 0 && (
                     <div className="space-y-1 text-sm">
                       <span className="font-semibold flex items-center gap-1.5">
-                        <Target className="w-4 h-4 text-primary" /> Activités au programme :
+                        <Target className="w-4 h-4 text-primary" /> Activités au
+                        programme :
                       </span>
                       <ul className="list-disc list-inside space-y-1 text-muted-foreground pl-2">
                         {etape.activites.map((act) => (
                           <li key={act.id}>
-                            <span className="font-medium text-foreground">{act.nom}</span>
+                            <span className="font-medium text-foreground">
+                              {act.nom}
+                            </span>
                             {act.description ? ` - ${act.description}` : ""}
                           </li>
                         ))}

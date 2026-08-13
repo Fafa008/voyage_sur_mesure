@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { markBankTransferAsPaidAction } from "@/actions/payments.actions";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 interface Props {
@@ -13,7 +13,8 @@ export function AdminBankTransferAction({ transactionId }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleConfirm = async () => {
-    if (!confirm("Confirmer la réception du virement pour cette transaction ?")) return;
+    if (!confirm("Confirmer la réception du virement pour cette transaction ?"))
+      return;
     setLoading(true);
     try {
       await markBankTransferAsPaidAction(transactionId);

@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 export default function LoginButton() {
   return (
@@ -22,10 +22,7 @@ export default function LoginButton() {
         disabled:opacity-50
       "
     >
-      <Link href="/login">
-        Se connecter
-      </Link>
+      <Link href="/login">Se connecter</Link>
     </Button>
   );
 }
-

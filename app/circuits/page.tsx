@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { formatCurrency } from "@/lib/format";

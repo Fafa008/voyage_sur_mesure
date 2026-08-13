@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { updateUserRole } from "@/app/admin/utilisateurs/actions/update-user-role.action";
 import { RoleNom } from "@prisma/client";
 
@@ -129,14 +129,22 @@ export default async function AdminUtilisateursPage() {
                             action={updateUserRole}
                             className="inline-flex items-center gap-2 justify-end"
                           >
-                            <input type="hidden" name="userId" value={user.id} />
+                            <input
+                              type="hidden"
+                              name="userId"
+                              value={user.id}
+                            />
                             <select
                               name="roleId"
                               defaultValue={user.roleId ?? undefined}
                               className="h-8 rounded-lg border border-border bg-card text-foreground px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
                             >
                               {roles.map((role) => (
-                                <option key={role.id} value={role.id} className="bg-card text-foreground">
+                                <option
+                                  key={role.id}
+                                  value={role.id}
+                                  className="bg-card text-foreground"
+                                >
                                   {roleLabels[role.nom]}
                                 </option>
                               ))}

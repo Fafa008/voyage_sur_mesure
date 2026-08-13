@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { approveAvis } from "@/app/admin/avis/actions/moderate-avis.action";
 import DeleteAvisForm from "@/components/admin/avis/DeleteAvisForm";
 import { Star } from "lucide-react";
@@ -56,7 +56,10 @@ export default async function AdminAvisPage() {
         <p className="text-muted-foreground text-sm">
           {avisList.length} avis au total
           {pendingCount > 0 && (
-            <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20">
+            <Badge
+              variant="outline"
+              className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20"
+            >
               {pendingCount} en attente
             </Badge>
           )}

@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import { LayoutDashboard, Send, Star } from "lucide-react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -86,7 +86,7 @@ export default async function Header() {
               <LoginButton />
               <Link
                 href="/devis/nouveau"
-                className={buttonVariants({ variant: "default"})}
+                className={buttonVariants({ variant: "default" })}
               >
                 <Send className="w-3.5 h-3 mr-1.5" />
                 Devis Express

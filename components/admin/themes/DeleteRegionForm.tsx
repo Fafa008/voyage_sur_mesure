@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { deleteRegion } from "@/app/admin/themes/actions/delete-region.action";
 
 interface DeleteRegionFormProps {

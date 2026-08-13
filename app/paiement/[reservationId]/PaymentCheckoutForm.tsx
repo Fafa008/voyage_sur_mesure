@@ -1,3 +1,4 @@
+//paiment/[reservationId]/PaymentCheckoutForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
 import { PapiPayPanel } from "@/components/payment/PapiPayPanel";
 import { BinancePayPanel } from "@/components/payment/BinancePayPanel";
 import { BankTransferPanel } from "@/components/payment/BankTransferPanel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardContent,
@@ -75,6 +76,12 @@ export function PaymentCheckoutForm({
       if (!res.success || !res.data) {
         setError(res.error || "Erreur lors de l'initiation du paiement");
       } else {
+        if (selectedMethod === PaymentMethod.PAPI && res.data.checkoutUrl) {
+          window.location.assign(res.data.checkoutUrl);
+          console.log(res.data.checkoutUrl);
+          return;
+        }
+
         setActivePayment({
           method: selectedMethod,
           result: res.data,

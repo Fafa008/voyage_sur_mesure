@@ -2,9 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { PaymentResult } from "@/types/payment.types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { QrCode, ExternalLink, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  QrCode,
+  ExternalLink,
+  CheckCircle2,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
 import { checkPaymentStatusAction } from "@/actions/payments.actions";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +26,11 @@ interface BinancePayPanelProps {
   amount: string;
 }
 
-export function BinancePayPanel({ paymentResult, reservationId, amount }: BinancePayPanelProps) {
+export function BinancePayPanel({
+  paymentResult,
+  reservationId,
+  amount,
+}: BinancePayPanelProps) {
   const router = useRouter();
   const [checking, setChecking] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
@@ -88,9 +104,12 @@ export function BinancePayPanel({ paymentResult, reservationId, amount }: Binanc
           <QrCode className="w-4 h-4" />
           Paiement via Binance Pay
         </div>
-        <CardTitle className="text-2xl font-extrabold text-primary">{amount} MGA</CardTitle>
+        <CardTitle className="text-2xl font-extrabold text-primary">
+          {amount} MGA
+        </CardTitle>
         <CardDescription>
-          Scannez le QR Code depuis votre application Binance ou cliquez sur le lien
+          Scannez le QR Code depuis votre application Binance ou cliquez sur le
+          lien
         </CardDescription>
       </CardHeader>
 
@@ -127,7 +146,9 @@ export function BinancePayPanel({ paymentResult, reservationId, amount }: Binanc
               <rect x="70" y="70" width="12" height="12" />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 rounded-xl">
-              <span className="text-xs font-bold text-amber-600">Binance Pay</span>
+              <span className="text-xs font-bold text-amber-600">
+                Binance Pay
+              </span>
             </div>
           </div>
 

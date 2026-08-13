@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { InputField } from "@/components/ui/InputField";
 import { SelectField } from "@/components/ui/SelectField";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
@@ -137,7 +137,10 @@ export default async function EditCircuitPage({
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="description" className="block text-sm font-semibold text-foreground">
+          <label
+            htmlFor="description"
+            className="block text-sm font-semibold text-foreground"
+          >
             Description
           </label>
           <textarea

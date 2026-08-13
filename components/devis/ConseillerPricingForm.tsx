@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { validateDevisWithPricing } from "@/app/actions/devis/update-devis-pricing.action";
 import { InputField } from "@/components/ui/InputField";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { StatutDevis } from "@prisma/client";
 
 interface ConseillerPricingFormProps {
@@ -21,7 +21,10 @@ export function ConseillerPricingForm({
   defaultCommentaire,
 }: ConseillerPricingFormProps) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(validateDevisWithPricing, null);
+  const [state, formAction, pending] = useActionState(
+    validateDevisWithPricing,
+    null,
+  );
 
   useEffect(() => {
     if (state?.success) router.refresh();
@@ -36,7 +39,8 @@ export function ConseillerPricingForm({
     <form action={formAction} className="space-y-4 border-t pt-6">
       <h3 className="font-bold text-base">Chiffrage et validation</h3>
       <p className="text-sm text-muted-foreground">
-        Définissez le montant total et un message pour le client avant de valider le devis.
+        Définissez le montant total et un message pour le client avant de
+        valider le devis.
       </p>
 
       <InputField

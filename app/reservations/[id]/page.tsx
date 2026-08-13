@@ -5,7 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutReservation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import {
   Card,
   CardContent,
@@ -26,9 +26,12 @@ interface Props {
 }
 
 const statutColors: Record<StatutReservation, string> = {
-  [StatutReservation.confirmee]: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  [StatutReservation.annulee]: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-  [StatutReservation.terminee]: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  [StatutReservation.confirmee]:
+    "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  [StatutReservation.annulee]:
+    "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  [StatutReservation.terminee]:
+    "bg-blue-500/10 text-blue-600 border-blue-500/20",
 };
 
 const statutLabels: Record<StatutReservation, string> = {
@@ -93,7 +96,8 @@ export default async function ReservationDetailPage({ params }: Props) {
               Réservation confirmée !
             </p>
             <p className="text-sm text-emerald-700 dark:text-emerald-400">
-              Votre voyage est réservé. Un conseiller vous contactera pour les prochaines étapes.
+              Votre voyage est réservé. Un conseiller vous contactera pour les
+              prochaines étapes.
             </p>
           </div>
         </div>
@@ -112,7 +116,9 @@ export default async function ReservationDetailPage({ params }: Props) {
             })}
           </p>
         </div>
-        <Badge className={`text-sm px-3 py-1 border ${statutColors[reservation.statut]}`}>
+        <Badge
+          className={`text-sm px-3 py-1 border ${statutColors[reservation.statut]}`}
+        >
           {statutLabels[reservation.statut]}
         </Badge>
       </div>
@@ -151,7 +157,9 @@ export default async function ReservationDetailPage({ params }: Props) {
                     )}
                   </>
                 ) : (
-                  <p className="text-muted-foreground">Voyage entièrement personnalisé</p>
+                  <p className="text-muted-foreground">
+                    Voyage entièrement personnalisé
+                  </p>
                 )}
 
                 {(devis.dateDebutSouhaitee || devis.dateFinSouhaitee) && (
@@ -161,11 +169,15 @@ export default async function ReservationDetailPage({ params }: Props) {
                     </span>
                     <p>
                       {devis.dateDebutSouhaitee
-                        ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
+                        ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
+                            "fr-FR",
+                          )
                         : "?"}{" "}
                       →{" "}
                       {devis.dateFinSouhaitee
-                        ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
+                        ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
+                            "fr-FR",
+                          )
                         : "?"}
                     </p>
                   </div>
@@ -191,7 +203,9 @@ export default async function ReservationDetailPage({ params }: Props) {
                 </Link>
               </>
             ) : (
-              <p className="text-muted-foreground">Réservation directe sans devis associé.</p>
+              <p className="text-muted-foreground">
+                Réservation directe sans devis associé.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -227,7 +241,9 @@ export default async function ReservationDetailPage({ params }: Props) {
                     Date du paiement
                   </span>
                   <p>
-                    {new Date(paiement.datePaiement).toLocaleDateString("fr-FR")}
+                    {new Date(paiement.datePaiement).toLocaleDateString(
+                      "fr-FR",
+                    )}
                   </p>
                 </div>
                 {paiement.referenceTransaction && (
@@ -264,11 +280,17 @@ export default async function ReservationDetailPage({ params }: Props) {
 
       {isOwner && (
         <div className="flex gap-3">
-          <Link href="/reservations" className={buttonVariants({ variant: "outline" })}>
+          <Link
+            href="/reservations"
+            className={buttonVariants({ variant: "outline" })}
+          >
             <CalendarCheck className="w-4 h-4" />
             Toutes mes réservations
           </Link>
-          <Link href="/dashboard" className={buttonVariants({ variant: "default" })}>
+          <Link
+            href="/dashboard"
+            className={buttonVariants({ variant: "default" })}
+          >
             Tableau de bord
           </Link>
         </div>

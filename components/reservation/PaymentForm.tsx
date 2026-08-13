@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PaymentMethod } from "@prisma/client";
 import { initiatePaymentFromDevisAction } from "@/actions/payments.actions";
 import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { CreditCard, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 

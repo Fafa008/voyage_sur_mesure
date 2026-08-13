@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { markNotificationRead } from "@/app/actions/notification/mark-notification-read.action";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Check, Loader2 } from "lucide-react";
 
 interface MarkNotificationReadButtonProps {
@@ -14,7 +14,10 @@ export function MarkNotificationReadButton({
   notificationId,
 }: MarkNotificationReadButtonProps) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(markNotificationRead, null);
+  const [state, formAction, pending] = useActionState(
+    markNotificationRead,
+    null,
+  );
 
   useEffect(() => {
     if (state?.success) {

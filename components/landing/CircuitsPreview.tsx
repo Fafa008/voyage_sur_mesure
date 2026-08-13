@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { ArrowRight, Clock, MapPin, Star, Route } from "lucide-react";

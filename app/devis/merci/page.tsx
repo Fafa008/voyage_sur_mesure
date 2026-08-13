@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { CheckCircle2, LayoutDashboard, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/Button";
 
 export default function MerciPage() {
   return (
@@ -19,14 +19,19 @@ export default function MerciPage() {
               Demande envoyée !
             </h1>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
-              Votre demande de devis a bien été enregistrée. Notre équipe de conseillers spécialistes étudie votre projet et vous recontactera dans les plus brefs délais.
+              Votre demande de devis a bien été enregistrée. Notre équipe de
+              conseillers spécialistes étudie votre projet et vous recontactera
+              dans les plus brefs délais.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Link
               href="/dashboard"
-              className={buttonVariants({ variant: "default", size: "lg" }) + " font-semibold"}
+              className={
+                buttonVariants({ variant: "default", size: "lg" }) +
+                " font-semibold"
+              }
             >
               <LayoutDashboard className="w-4 h-4 mr-2" />
               Voir mes devis

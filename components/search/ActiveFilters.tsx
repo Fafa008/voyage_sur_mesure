@@ -2,7 +2,7 @@
 
 import { X, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/format";
 import type { SearchFilters, SearchOptionsData } from "@/types/search";
 
@@ -39,7 +39,9 @@ export function ActiveFilters({
   }
 
   if (filters.regionId) {
-    const region = options.regions.find((r) => Number(r.id) === filters.regionId);
+    const region = options.regions.find(
+      (r) => Number(r.id) === filters.regionId,
+    );
     activeBadges.push({
       key: "regionId",
       label: `Région: ${region ? region.nom : filters.regionId}`,
@@ -70,7 +72,9 @@ export function ActiveFilters({
   if (activeBadges.length === 0) return null;
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 pt-3 border-t border-border/40 ${className}`}>
+    <div
+      className={`flex flex-wrap items-center gap-2 pt-3 border-t border-border/40 ${className}`}
+    >
       <span className="text-xs font-semibold text-muted-foreground mr-1">
         Filtres actifs :
       </span>

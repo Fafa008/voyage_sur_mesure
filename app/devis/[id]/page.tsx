@@ -5,8 +5,14 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/Button";
 import { DevisResponseActions } from "@/components/devis/DevisResponseActions";
 import { PaymentForm } from "@/components/reservation/PaymentForm";
 import {
@@ -26,7 +32,8 @@ interface DevisDetailPageProps {
 
 const statutColors: Record<StatutDevis, string> = {
   [StatutDevis.en_cours]: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  [StatutDevis.en_modification]: "bg-orange-100 text-orange-800 border-orange-300",
+  [StatutDevis.en_modification]:
+    "bg-orange-100 text-orange-800 border-orange-300",
   [StatutDevis.valide]: "bg-blue-100 text-blue-800 border-blue-300",
   [StatutDevis.accepte]: "bg-green-100 text-green-800 border-green-300",
   [StatutDevis.reserve]: "bg-purple-100 text-purple-800 border-purple-300",
@@ -42,7 +49,9 @@ const statutLabels: Record<StatutDevis, string> = {
   [StatutDevis.refuse]: "Refusé",
 };
 
-export default async function DevisDetailPage({ params }: DevisDetailPageProps) {
+export default async function DevisDetailPage({
+  params,
+}: DevisDetailPageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
@@ -82,7 +91,8 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
   const showClientActions = isOwner && devis.statut === StatutDevis.valide;
   const showPayment =
     isOwner &&
-    (devis.statut === StatutDevis.accepte || devis.statut === StatutDevis.reserve) &&
+    (devis.statut === StatutDevis.accepte ||
+      devis.statut === StatutDevis.reserve) &&
     !devis.reservation;
   const hasReservation = !!devis.reservation;
 
@@ -102,7 +112,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
             Demandé le {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
           </p>
         </div>
-        <Badge className={`text-sm px-3 py-1 border ${statutColors[devis.statut]}`}>
+        <Badge
+          className={`text-sm px-3 py-1 border ${statutColors[devis.statut]}`}
+        >
           {statutLabels[devis.statut]}
         </Badge>
       </div>
@@ -141,91 +153,103 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
       )}
 
       {/* Si réservation existe mais N'EST PAS ENCORE PAYÉE */}
-      {hasReservation && devis.reservation && devis.reservation.status !== "PAYEE" && (
-        <Card className="border-amber-200 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-900">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-amber-800 dark:text-amber-300 font-bold">
-              <CreditCard className="w-5 h-5 text-amber-600" />
-              Réservation enregistrée — En attente de paiement
-            </CardTitle>
-            <CardDescription>
-              Votre réservation #{devis.reservation.id} est en attente. Finalisez votre règlement pour valider définitivement votre dossier.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href={`/paiement/${devis.reservation.id}`}
-              className={buttonVariants({ variant: "default", size: "lg" }) + " font-bold shadow-md"}
-            >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Accéder à l'espace de paiement ({formatCurrency(devis.reservation.montantFinal)})
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      {hasReservation &&
+        devis.reservation &&
+        devis.reservation.status !== "PAYEE" && (
+          <Card className="border-amber-200 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base text-amber-800 dark:text-amber-300 font-bold">
+                <CreditCard className="w-5 h-5 text-amber-600" />
+                Réservation enregistrée — En attente de paiement
+              </CardTitle>
+              <CardDescription>
+                Votre réservation #{devis.reservation.id} est en attente.
+                Finalisez votre règlement pour valider définitivement votre
+                dossier.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link
+                href={`/paiement/${devis.reservation.id}`}
+                className={
+                  buttonVariants({ variant: "default", size: "lg" }) +
+                  " font-bold shadow-md"
+                }
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Accéder à l'espace de paiement (
+                {formatCurrency(devis.reservation.montantFinal)})
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Si réservation PAYÉE */}
-      {hasReservation && devis.reservation && devis.reservation.status === "PAYEE" && (
-        <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/20 dark:border-purple-900">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CheckCircle2 className="w-5 h-5 text-purple-600" />
-              Réservation payée et confirmée
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                  N° réservation
-                </span>
-                <p className="font-bold">#{devis.reservation.id}</p>
+      {hasReservation &&
+        devis.reservation &&
+        devis.reservation.status === "PAYEE" && (
+          <Card className="border-purple-200 bg-purple-50/30 dark:bg-purple-950/20 dark:border-purple-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CheckCircle2 className="w-5 h-5 text-purple-600" />
+                Réservation payée et confirmée
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                    N° réservation
+                  </span>
+                  <p className="font-bold">#{devis.reservation.id}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                    Date
+                  </span>
+                  <p>
+                    {new Date(
+                      devis.reservation.dateReservation,
+                    ).toLocaleDateString("fr-FR")}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                    Montant réglé
+                  </span>
+                  <p className="font-bold text-primary">
+                    {formatCurrency(devis.reservation.montantFinal)}
+                  </p>
+                </div>
+                {devis.reservation.paiement && (
+                  <>
+                    <div>
+                      <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                        Mode de paiement
+                      </span>
+                      <p>{devis.reservation.paiement.mode.nom}</p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <span className="text-muted-foreground block text-xs uppercase tracking-wider">
+                        Référence transaction
+                      </span>
+                      <p className="font-mono text-xs">
+                        {devis.reservation.paiement.referenceTransaction}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
-              <div>
-                <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                  Date
-                </span>
-                <p>
-                  {new Date(devis.reservation.dateReservation).toLocaleDateString("fr-FR")}
-                </p>
-              </div>
-              <div>
-                <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                  Montant réglé
-                </span>
-                <p className="font-bold text-primary">
-                  {formatCurrency(devis.reservation.montantFinal)}
-                </p>
-              </div>
-              {devis.reservation.paiement && (
-                <>
-                  <div>
-                    <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                      Mode de paiement
-                    </span>
-                    <p>{devis.reservation.paiement.mode.nom}</p>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <span className="text-muted-foreground block text-xs uppercase tracking-wider">
-                      Référence transaction
-                    </span>
-                    <p className="font-mono text-xs">
-                      {devis.reservation.paiement.referenceTransaction}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-            <Link
-              href={`/reservations/${devis.reservation.id}`}
-              className={buttonVariants({ variant: "default", size: "sm" })}
-            >
-              <CalendarCheck className="w-4 h-4" />
-              Voir le détail de la réservation
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+              <Link
+                href={`/reservations/${devis.reservation.id}`}
+                className={buttonVariants({ variant: "default", size: "sm" })}
+              >
+                <CalendarCheck className="w-4 h-4" />
+                Voir le détail de la réservation
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
@@ -236,7 +260,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
           <CardContent className="space-y-3 text-sm">
             {devis.circuit && (
               <div>
-                <span className="font-semibold block">Circuit sélectionné :</span>
+                <span className="font-semibold block">
+                  Circuit sélectionné :
+                </span>
                 <Link
                   href={`/circuits/${devis.circuit.slug}`}
                   className="text-primary hover:underline font-medium"
@@ -260,11 +286,15 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
                 <span className="font-semibold block">Dates souhaitées :</span>
                 <p>
                   {devis.dateDebutSouhaitee
-                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR")
+                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
+                        "fr-FR",
+                      )
                     : "?"}{" "}
                   au{" "}
                   {devis.dateFinSouhaitee
-                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR")
+                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
+                        "fr-FR",
+                      )
                     : "?"}
                   {devis.dureeFlexible ? " (Dates flexibles)" : ""}
                 </p>
@@ -273,7 +303,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
 
             {devis.typeHebergement && (
               <div>
-                <span className="font-semibold block">Type d'hébergement :</span>
+                <span className="font-semibold block">
+                  Type d'hébergement :
+                </span>
                 <p className="capitalize">{devis.typeHebergement}</p>
               </div>
             )}
@@ -283,7 +315,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
                 <span className="font-semibold block">Budget estimé :</span>
                 <p>
                   {formatCurrency(devis.budgetMin)} -{" "}
-                  {devis.budgetMax ? formatCurrency(devis.budgetMax) : "Illimité"}
+                  {devis.budgetMax
+                    ? formatCurrency(devis.budgetMax)
+                    : "Illimité"}
                 </p>
               </div>
             )}
@@ -297,7 +331,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div>
-              <span className="font-semibold block">Montant total proposé :</span>
+              <span className="font-semibold block">
+                Montant total proposé :
+              </span>
               <p className="text-2xl font-bold text-primary mt-1">
                 {devis.montantTotal
                   ? formatCurrency(devis.montantTotal)
@@ -310,7 +346,9 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
                 <span className="font-semibold block text-xs text-muted-foreground uppercase mb-1">
                   Votre commentaire :
                 </span>
-                <p className="italic">&ldquo;{devis.commentaireClient}&rdquo;</p>
+                <p className="italic">
+                  &ldquo;{devis.commentaireClient}&rdquo;
+                </p>
               </div>
             )}
 
@@ -323,8 +361,8 @@ export default async function DevisDetailPage({ params }: DevisDetailPageProps) 
               </div>
             ) : (
               <p className="text-muted-foreground text-xs italic">
-                Un conseiller étudie actuellement votre dossier et vous contactera très
-                rapidement.
+                Un conseiller étudie actuellement votre dossier et vous
+                contactera très rapidement.
               </p>
             )}
           </CardContent>

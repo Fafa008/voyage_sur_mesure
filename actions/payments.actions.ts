@@ -7,19 +7,60 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { PaymentResult } from "@/types/payment.types";
 
-export async function initiatePaymentAction(reservationId: number, method: PaymentMethod, userId: string) {
+export async function initiatePaymentAction(
+  reservationId: number,
+  method: PaymentMethod,
+  userId: string
+) {
   try {
-    const result = await paymentService.initiatePayment(reservationId, method, userId);
+    console.log(
+      `[initiatePaymentAction] Starting for reservation=${reservationId}, method=${method}`
+    );
+
+    const result = await paymentService.initiatePayment(
+      reservationId,
+      method,
+      userId
+    );
+
+    console.log(
+      `[initiatePaymentAction] Service returned: success=${result.success}, hasCheckoutUrl=${!!result.checkoutUrl}, transactionId=${result.transactionId}`
+    );
+
+    if (!result.success) {
+      console.error(
+        `[initiatePaymentAction] Payment failed: ${result.error}`
+      );
+
+      return {
+        success: false,
+        error: result.error || "Échec de l'initialisation du paiement",
+      };
+    }
+
     revalidatePath(`/paiement/${reservationId}`);
 
-    // SÉCURITÉ : Ne jamais propager notificationToken vers le frontend
-    // Le notificationToken est un secret par-paiement stocké côté serveur uniquement
+    // Ne jamais envoyer le token Papi au navigateur
     const { notificationToken: _removed, ...safeResult } = result;
-    return { success: true, data: safeResult };
+
+    console.log(
+      `[initiatePaymentAction] Payment initialized: checkoutUrl=${!!safeResult.checkoutUrl}`
+    );
+
+    return {
+      success: true,
+      data: safeResult,
+    };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Erreur inconnue";
-    console.error("Erreur d'initiation du paiement:", error);
-    return { success: false, error: message };
+    const message =
+      error instanceof Error ? error.message : "Erreur inconnue";
+
+    console.error(`[initiatePaymentAction] ERROR: ${message}`);
+
+    return {
+      success: false,
+      error: message,
+    };
   }
 }
 

@@ -1,8 +1,9 @@
+//components/payment/PapiPayPanel.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { PaymentResult } from "@/types/payment.types";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardContent,
@@ -61,9 +62,7 @@ export function PapiPayPanel({
     if (!paymentResult.transactionId || isPaid) return;
 
     const interval = setInterval(async () => {
-      const res = await checkPaymentStatusAction(
-        paymentResult.transactionId!
-      );
+      const res = await checkPaymentStatusAction(paymentResult.transactionId!);
       if (res.success && res.data?.status === "PAID") {
         setIsPaid(true);
         clearInterval(interval);
@@ -80,9 +79,7 @@ export function PapiPayPanel({
     if (!paymentResult.transactionId) return;
     setChecking(true);
     try {
-      const res = await checkPaymentStatusAction(
-        paymentResult.transactionId
-      );
+      const res = await checkPaymentStatusAction(paymentResult.transactionId);
       if (res.success && res.data?.status === "PAID") {
         setIsPaid(true);
         setTimeout(() => {
@@ -125,8 +122,8 @@ export function PapiPayPanel({
           {amount} MGA
         </CardTitle>
         <CardDescription>
-          Payez en toute sécurité via MVola, Orange Money, Airtel Money ou
-          Carte bancaire
+          Payez en toute sécurité via MVola, Orange Money, Airtel Money ou Carte
+          bancaire
         </CardDescription>
       </CardHeader>
 
