@@ -5,7 +5,7 @@ import { paymentService } from "@/lib/services/payment/payment.service";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { PaymentResult } from "@/types/payment.types";
+import type { PaymentResult } from "@/types/payment.types";
 
 export async function initiatePaymentAction(
   reservationId: number,
@@ -34,18 +34,25 @@ export async function initiatePaymentAction(
 
       return {
         success: false,
-        error: result.error || "Échec de l'initialisation du paiement",
+        error: result.error || "Impossible de créer le paiement PAPI",
       };
     }
 
-    revalidatePath(`/paiement/${reservationId}`);
-
-    // Ne jamais envoyer le token Papi au navigateur
-    const { notificationToken: _removed, ...safeResult } = result;
+    // Whitelist des champs renvoyés au navigateur : le notificationToken
+    // (secret par-paiement servant à valider le webhook) n'est jamais propagé.
+    const safeResult: PaymentResult = {
+      success: true,
+      transactionId: result.transactionId,
+      providerRef: result.providerRef,
+      checkoutUrl: result.checkoutUrl,
+      expiresAt: result.expiresAt,
+    };
 
     console.log(
-      `[initiatePaymentAction] Payment initialized: checkoutUrl=${!!safeResult.checkoutUrl}`
+      `[initiatePaymentAction] Payment created: checkoutUrl=${!!safeResult.checkoutUrl}, transactionId=${safeResult.transactionId}`
     );
+
+    revalidatePath(`/paiement/${reservationId}`);
 
     return {
       success: true,
@@ -83,7 +90,13 @@ export async function initiatePaymentFromDevisAction(devisId: number, method: Pa
       success: true,
       data: {
         reservationId,
-        paymentResult,
+        paymentResult: {
+          success: paymentResult.success,
+          transactionId: paymentResult.transactionId,
+          providerRef: paymentResult.providerRef,
+          checkoutUrl: paymentResult.checkoutUrl,
+          expiresAt: paymentResult.expiresAt,
+        },
       },
     };
   } catch (error: unknown) {
@@ -103,8 +116,10 @@ export async function checkPaymentStatusAction(transactionId: string) {
     if (!transaction) throw new Error("Transaction non trouvée");
 
     return { success: true, data: { status: transaction.status } };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
   }
 }
 
@@ -114,7 +129,9 @@ export async function markBankTransferAsPaidAction(transactionId: string) {
     revalidatePath("/admin/paiements");
     revalidatePath("/admin/dashboard");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
   }
 }

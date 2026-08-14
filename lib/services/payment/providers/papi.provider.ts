@@ -1,5 +1,7 @@
 // lib/services/payment/providers/papi.provider.ts
+
 import { PaymentStatus, type Prisma } from "@prisma/client";
+
 import {
   IPaymentProvider,
   PaymentOptions,
@@ -10,11 +12,14 @@ import {
 /**
  * Papi.mg Payment Provider
  *
- * Intègre l'API Papi.mg pour accepter les paiements en ligne à Madagascar :
- * MVola, Orange Money, Airtel Money, Carte bancaire.
+ * Gestion des paiements via Papi.mg :
+ * - MVola
+ * - Orange Money
+ * - Airtel Money
+ * - Carte bancaire
  *
- * Documentation officielle : https://papi.mg
- * Endpoint : POST https://app.papi.mg/dashboard/api/payment-links
+ * Endpoint :
+ * POST https://app.papi.mg/dashboard/api/payment-links
  */
 export class PapiProvider implements IPaymentProvider {
   private readonly apiKey: string;
@@ -36,17 +41,12 @@ export class PapiProvider implements IPaymentProvider {
       );
     }
 
-    this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
+    this.apiKey = apiKey.trim();
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
   }
 
   /**
-   * Crée un lien de paiement Papi.
-   *
-   * POST /payment-links
-   * Headers: { Token: <API_KEY>, Content-Type: application/json }
-   * Body: { amount, currency, orderId, successUrl, failureUrl, notificationUrl, validDuration }
-   * Response: { paymentUrl: "https://app.papi.mg/pay/...", notificationToken?: string, linkExpirationDateTime?: string }
+   * Création d'un lien de paiement Papi.
    */
   async createCharge(
     amount: number,
@@ -54,142 +54,264 @@ export class PapiProvider implements IPaymentProvider {
     options: PaymentOptions
   ): Promise<PaymentResult> {
     const orderId = `RES-${options.reservationId}-${Date.now()}`;
-    const appUrl = process.env.APP_URL || "http://localhost:3000";
+
+    const appUrl =
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
 
     const successUrl =
       options.returnUrl ||
       `${appUrl}/paiement/${options.reservationId}/confirmation`;
+
     const failureUrl =
-      options.cancelUrl || `${appUrl}/paiement/${options.reservationId}`;
-    const notificationUrl = `${appUrl}/api/payment/webhook/papi`;
-    const validDuration = 15; // 15 minutes d'expiration demandées à Papi
+      options.cancelUrl ||
+      `${appUrl}/paiement/${options.reservationId}`;
+
+    const notificationUrl =
+      `${appUrl}/api/payment/webhook/papi`;
+
+    const validDuration =
+      Number(process.env.PAYMENT_EXPIRATION_MINUTES) || 15;
+
+    // Mode test : activé par défaut hors production, contrôlable via PAPI_TEST_MODE.
+    const isTestMode = process.env.PAPI_TEST_MODE
+      ? process.env.PAPI_TEST_MODE === "true"
+      : process.env.NODE_ENV !== "production";
+
+    const requestBody = {
+      amount,
+      clientName: options.clientName || "Client Mon Voyage",
+      reference: orderId,
+      description: (
+        options.description ||
+        `Paiement Réservation #${options.reservationId}`
+      ).substring(0, 255),
+      successUrl,
+      failureUrl,
+      notificationUrl,
+      validDuration,
+      ...(isTestMode
+        ? {
+            isTestMode: true,
+            testReason: `Test intégration réservation #${options.reservationId}`,
+          }
+        : {}),
+    };
 
     try {
-      const response = await fetch(`${this.baseUrl}/payment-links`, {
+      const endpoint = `${this.baseUrl}/payment-links`;
+
+      console.log("[PAPI] Creating payment link...");
+      console.log("[PAPI] Endpoint:", endpoint);
+      console.log("[PAPI] Reservation:", options.reservationId);
+      console.log("[PAPI] Amount:", amount);
+      console.log("[PAPI] Currency:", currency);
+      console.log("[PAPI] Test mode:", isTestMode);
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Token: this.apiKey,
         },
         body: JSON.stringify({
-          amount,
+          ...requestBody,
           currency,
-          reference: orderId, // Papi requires reference
-          orderId,            // Kept for backward compatibility
-          clientName: options.clientName || "Client Mon Voyage",
-          description: (options.description || `Paiement Réservation #${options.reservationId}`).substring(0, 255),
-          successUrl,
-          failureUrl,
-          notificationUrl,
-          validDuration,
         }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Unknown error");
-        console.error(
-          `Papi API error: ${response.status} ${response.statusText}`,
-          errorText
-        );
+      const responseText = await response.text();
+
+      let responseData: Record<string, unknown>;
+
+      try {
+        responseData = JSON.parse(responseText);
+      } catch {
+        console.error("[PAPI] Invalid JSON response:", responseText);
+
         return {
           success: false,
-          error: `Papi API returned ${response.status}: payment link creation failed`,
+          error: "Papi returned an invalid JSON response",
         };
       }
 
-      const data = await response.json();
+      /**
+       * Gestion des erreurs HTTP.
+       */
+      if (!response.ok) {
+        console.error("[PAPI] API error:", {
+          status: response.status,
+          response: responseData,
+        });
 
-      // Log les clés de la réponse Papi pour diagnostic Sandbox (sans valeurs sensibles)
-      console.log(
-        "[PAPI] /payment-links response keys:",
-        Object.keys(data)
-      );
-      console.log(
-        `[PAPI] Response received for reservation ${options.reservationId}`
-      );
+        const apiError = responseData.error;
 
-      // Papi peut retourner paymentUrl ou paymentLink selon la version
-      const checkoutUrl = data.paymentUrl || data.paymentLink;
+        let errorMessage = "Payment link creation failed";
+
+        if (
+          apiError &&
+          typeof apiError === "object" &&
+          "message" in apiError &&
+          typeof apiError.message === "string"
+        ) {
+          errorMessage = apiError.message;
+        }
+
+        return {
+          success: false,
+          error: `Papi API returned ${response.status}: ${errorMessage}`,
+        };
+      }
+
+      /**
+       * Papi retourne actuellement :
+       *
+       * {
+       *   "data": {
+       *     "paymentLink": "...",
+       *     "paymentReference": "...",
+       *     "notificationToken": "...",
+       *     "linkExpirationDateTime": "..."
+       *   }
+       * }
+       */
+      const papiData =
+        responseData.data &&
+        typeof responseData.data === "object"
+          ? (responseData.data as Record<string, unknown>)
+          : responseData;
+
+      console.log("[PAPI] Response received.");
+      console.log("[PAPI] Response keys:", Object.keys(responseData));
+      console.log("[PAPI] Data keys:", Object.keys(papiData));
+
+      /**
+       * Récupération du lien de paiement.
+       */
+      const checkoutUrl =
+        typeof papiData.paymentLink === "string"
+          ? papiData.paymentLink
+          : typeof papiData.paymentUrl === "string"
+            ? papiData.paymentUrl
+            : undefined;
 
       if (!checkoutUrl) {
         console.error(
-          `[PAPI] ERROR: Response missing paymentUrl/paymentLink. Keys: ${Object.keys(data).join(", ")}`
+          "[PAPI] Missing paymentLink/paymentUrl in response."
         );
+
         return {
           success: false,
-          error: "Papi API response missing paymentUrl/paymentLink",
+          error: "Papi API response missing paymentLink",
         };
       }
 
-      console.log(
-        `[PAPI] checkoutUrl extracted successfully for orderId ${orderId}`
-      );
+      /**
+       * Référence marchand (providerRef).
+       *
+       * Toujours `orderId` : Papi la renvoie dans le webhook sous
+       * `merchantPaymentReference`, et c'est cette clé qui sert à retrouver
+       * la transaction côté serveur. Si on stockait la référence interne
+       * Papi, le webhook ne retrouverait plus la transaction.
+       */
+      const providerRef = orderId;
 
-      // Extraction optionnelle du token de notification ou de la date d'expiration si fournie par Papi
+      /**
+       * Référence interne Papi (diagnostic uniquement).
+       */
+      const papiPaymentReference =
+        typeof papiData.paymentReference === "string"
+          ? papiData.paymentReference
+          : undefined;
+
+      /**
+       * Token utilisé pour les notifications/webhooks.
+       */
       const notificationToken =
-        typeof data.notificationToken === "string"
-          ? data.notificationToken
-          : typeof data.token === "string"
-            ? data.token
+        typeof papiData.notificationToken === "string"
+          ? papiData.notificationToken
+          : typeof papiData.token === "string"
+            ? papiData.token
             : undefined;
 
-      let expiresAt = new Date(Date.now() + validDuration * 60 * 1000);
-      if (typeof data.linkExpirationDateTime === "string") {
-        const parsedDate = new Date(data.linkExpirationDateTime);
-        if (!isNaN(parsedDate.getTime())) {
+      /**
+       * Date d'expiration.
+       *
+       * Fallback : 15 minutes.
+       */
+      let expiresAt = new Date(
+        Date.now() + validDuration * 60 * 1000
+      );
+
+      if (
+        typeof papiData.linkExpirationDateTime === "string"
+      ) {
+        const parsedDate = new Date(
+          papiData.linkExpirationDateTime
+        );
+
+        if (!Number.isNaN(parsedDate.getTime())) {
           expiresAt = parsedDate;
         }
       }
 
-      const result = {
+      console.log("[PAPI] Payment link created successfully.");
+      console.log("[PAPI] Provider reference:", providerRef);
+      console.log(
+        "[PAPI] Papi payment reference:",
+        papiPaymentReference || "(none)"
+      );
+      console.log(
+        "[PAPI] Notification token:",
+        Boolean(notificationToken)
+      );
+      console.log("[PAPI] Checkout URL:", Boolean(checkoutUrl));
+
+      return {
         success: true,
-        providerRef: orderId,
+        providerRef,
         checkoutUrl,
         notificationToken,
         expiresAt,
       };
-
-      console.log(
-        `[PAPI] SUCCESS: Created payment link. providerRef=${orderId}, hasCheckoutUrl=${!!checkoutUrl}, hasNotificationToken=${!!notificationToken}`
-      );
-
-      return result;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[PAPI] ERROR in createCharge: ${errorMsg}`);
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      console.error("[PAPI] Connection error:", message);
+
       return {
         success: false,
-        error:
-          error instanceof Error
-            ? `Papi connection error: ${error.message}`
-            : "Papi connection error",
+        error: `Papi connection error: ${message}`,
       };
     }
   }
 
   /**
-   * Vérification de paiement.
-   * Le statut est notifié via webhook par Papi.
+   * Vérification du paiement.
+   *
+   * Le statut final est normalement reçu via webhook Papi.
    */
   async verifyPayment(
     providerRef: string
-  ): Promise<{ status: PaymentStatus; amount?: number }> {
-    return { status: PaymentStatus.PENDING };
+  ): Promise<{
+    status: PaymentStatus;
+    amount?: number;
+  }> {
+    console.log(
+      `[PAPI] Payment verification requested: ${providerRef}`
+    );
+
+    return {
+      status: PaymentStatus.PENDING,
+    };
   }
 
   /**
-   * Traite le webhook Papi.
-   *
-   * Payload attendu de Papi :
-   * {
-   *   paymentStatus: "SUCCESS" | "FAILED" | "EXPIRED" | "CANCELLED",
-   *   paymentMethod?: "MVOLA" | "ORANGE_MONEY" | "AIRTEL_MONEY" | "VISA",
-   *   currency: "MGA",
-   *   amount: 4500000,
-   *   merchantPaymentReference?: "RES-145-...",
-   *   paymentReference?: "PAPI_...",
-   *   notificationToken: "..."
-   * }
+   * Traitement du webhook Papi.
    */
   async handleWebhook(
     payload: Record<string, unknown>,
@@ -200,16 +322,14 @@ export class PapiProvider implements IPaymentProvider {
         ? payload.paymentStatus
         : undefined;
 
-    const reference =
-      (typeof payload.merchantPaymentReference === "string"
+    const providerRef =
+      typeof payload.merchantPaymentReference === "string"
         ? payload.merchantPaymentReference
-        : undefined) ||
-      (typeof payload.paymentReference === "string"
-        ? payload.paymentReference
-        : undefined) ||
-      (typeof payload.orderId === "string"
-        ? payload.orderId
-        : undefined);
+        : typeof payload.paymentReference === "string"
+          ? payload.paymentReference
+          : typeof payload.orderId === "string"
+            ? payload.orderId
+            : undefined;
 
     const notificationToken =
       typeof payload.notificationToken === "string"
@@ -225,34 +345,51 @@ export class PapiProvider implements IPaymentProvider {
           ? payload.providerPaymentMethod
           : undefined;
 
-    if (!reference) {
-      throw new Error("Papi webhook: missing order/payment reference in payload");
+    if (!providerRef) {
+      throw new Error(
+        "Papi webhook: missing payment reference"
+      );
     }
 
     if (!paymentStatus) {
-      throw new Error("Papi webhook: missing paymentStatus in payload");
+      throw new Error(
+        "Papi webhook: missing paymentStatus"
+      );
     }
 
     let status: PaymentStatus;
+
     switch (paymentStatus.toUpperCase()) {
       case "SUCCESS":
         status = PaymentStatus.PAID;
         break;
+
       case "FAILED":
         status = PaymentStatus.FAILED;
         break;
+
       case "EXPIRED":
         status = PaymentStatus.EXPIRED;
         break;
+
       case "CANCELLED":
         status = PaymentStatus.CANCELLED;
         break;
+
       default:
         status = PaymentStatus.PENDING;
     }
 
+    console.log("[PAPI] Webhook received:", {
+      providerRef,
+      paymentStatus,
+      status,
+      providerPaymentMethod,
+      hasNotificationToken: Boolean(notificationToken),
+    });
+
     return {
-      providerRef: reference,
+      providerRef,
       status,
       notificationToken,
       providerPaymentMethod,
@@ -260,9 +397,17 @@ export class PapiProvider implements IPaymentProvider {
     };
   }
 
-  async refund(providerRef: string, amount: number): Promise<boolean> {
+  /**
+   * Papi ne supporte pas actuellement les remboursements
+   * automatisés dans cette intégration.
+   */
+  async refund(
+    providerRef: string,
+    amount: number
+  ): Promise<boolean> {
     throw new Error(
-      "Papi does not support automated refunds. Please process manually via the Papi dashboard."
+      "Papi does not support automated refunds. " +
+        "Please process manually via the Papi dashboard."
     );
   }
 }
