@@ -30,9 +30,52 @@ export async function deleteCircuit(formData: FormData) {
     select: { url: true },
   });
 
-  // 2. Suppression en cascade (ON DELETE CASCADE défini dans le schéma)
-  await prisma.circuit.delete({
-    where: { id: circuitId },
+  // 2. Suppression sécurisée en transaction.
+  //    Un circuit peut être lié à des Devis (ON DELETE CASCADE) et donc à des
+  //    Réservations. Les dépendances de paiement (transactions, logs, webhooks,
+  //    factures, paiements) n'ont pas de cascade : on les nettoie d'abord pour
+  //    ne jamais laisser de données orphelines.
+  await prisma.$transaction(async (tx) => {
+    const devisList = await tx.devis.findMany({
+      where: { circuitId },
+      select: { id: true },
+    });
+    const devisIds = devisList.map((d) => d.id);
+
+    const reservations = await tx.reservation.findMany({
+      where: devisIds.length
+        ? { OR: [{ devisId: { in: devisIds } }, { circuitId }] }
+        : { circuitId },
+      select: { id: true },
+    });
+    const reservationIds = reservations.map((r) => r.id);
+
+    if (reservationIds.length) {
+      await tx.paymentWebhook.deleteMany({
+        where: { transaction: { reservationId: { in: reservationIds } } },
+      });
+      await tx.paymentLog.deleteMany({
+        where: { transaction: { reservationId: { in: reservationIds } } },
+      });
+      await tx.paymentTransaction.deleteMany({
+        where: { reservationId: { in: reservationIds } },
+      });
+      await tx.invoice.deleteMany({
+        where: { reservationId: { in: reservationIds } },
+      });
+      await tx.paiement.deleteMany({
+        where: { reservationId: { in: reservationIds } },
+      });
+      await tx.reservation.deleteMany({
+        where: { id: { in: reservationIds } },
+      });
+    }
+
+    if (devisIds.length) {
+      await tx.devis.deleteMany({ where: { id: { in: devisIds } } });
+    }
+
+    await tx.circuit.delete({ where: { id: circuitId } });
   });
 
   // 3. Supprimer physiquement les images associées du disque

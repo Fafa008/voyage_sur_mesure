@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Routes publiques accessibles sans session.
 const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register", "/contact"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Laisse Better Auth gérer ses propres routes API sans interférence
-  if (pathname.startsWith("/api/auth")) {
+  // Routes qui gèrent leur propre authentification/autorisation :
+  // - Better Auth (/api/auth)
+  // - Webhooks de paiement (/api/payment/webhook/*) appelés par Papi/Binance
+  //   côté serveur, sans cookie de session : il ne faut pas les rediriger.
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/payment/webhook")
+  ) {
     return NextResponse.next();
   }
 
@@ -21,9 +28,14 @@ export function proxy(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  // Si pas de cookie de session et que la route n'est pas publique, rediriger vers /login
+  // Pas de session et route non publique → connexion requise.
   if (!sessionCookie && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Déjà connecté → ne pas laisser revoir login/register.
+  if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

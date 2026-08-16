@@ -11,6 +11,7 @@ import {
   Tag,
   FileText,
   CreditCard,
+  CalendarCheck,
 } from "lucide-react";
 
 export function AdminSidebarNav() {
@@ -48,16 +49,22 @@ export function AdminSidebarNav() {
       exact: false,
     },
     {
+      title: "Devis",
+      href: "/admin/devis",
+      icon: FileText,
+      exact: false,
+    },
+    {
+      title: "Réservations",
+      href: "/admin/reservations",
+      icon: CalendarCheck,
+      exact: false,
+    },
+    {
       title: "Paiements & Transactions",
       href: "/admin/paiements",
       icon: CreditCard,
       exact: false,
-    },
-    {
-      title: "Espace Client (Devis)",
-      href: "/dashboard",
-      icon: FileText,
-      exact: true,
     },
   ];
 

@@ -89,14 +89,11 @@ export function TravelSection({
         </div>
 
         <SelectField
-          label="Circuit d'inspiration (facultatif)"
+          label="Circuit d'inspiration *"
           id="circuitId"
           icon={<Compass className="w-4 h-4" />}
           options={[
-            {
-              value: "",
-              label: "Création 100% sur-mesure (sans circuit modèle)",
-            },
+            { value: "", label: "Sélectionnez un circuit…" },
             ...circuits.map((c) => ({
               value: String(c.id),
               label: `Inspiration : ${c.titre}`,
@@ -104,7 +101,7 @@ export function TravelSection({
           ]}
           value={data.circuitId}
           onChange={(e) => updateData({ circuitId: e.target.value })}
-          sublabel="Choisissez un circuit pour adapter un itinéraire existant"
+          sublabel="Le devis doit être rattaché à un circuit existant"
         />
       </div>
 

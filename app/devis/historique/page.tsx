@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 
 export default async function HistoriqueDevisPage() {
   const session = await auth.api.getSession({
@@ -17,6 +18,7 @@ export default async function HistoriqueDevisPage() {
     where: { userId: session.user.id },
     include: {
       circuit: { select: { titre: true } },
+      reservation: { select: { id: true } },
     },
     orderBy: { dateDemande: "desc" },
   });
@@ -54,12 +56,22 @@ export default async function HistoriqueDevisPage() {
                 {devis.statut}
               </span>
             </div>
-            <Link
-              href={`/devis/${devis.id}`}
-              className="text-blue-600 hover:underline text-sm"
-            >
-              Voir le détail →
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href={`/devis/${devis.id}`}
+                className="text-blue-600 hover:underline text-sm"
+              >
+                Voir le détail →
+              </Link>
+              {!devis.reservation && (
+                <DeleteDevisButton
+                  devisId={devis.id}
+                  label="Supprimer"
+                  variant="outline"
+                  size="xs"
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>

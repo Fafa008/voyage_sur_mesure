@@ -15,6 +15,7 @@ import {
 import { buttonVariants } from "@/components/ui/Button";
 import { DevisResponseActions } from "@/components/devis/DevisResponseActions";
 import { PaymentForm } from "@/components/reservation/PaymentForm";
+import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import {
   FileText,
   Clock,
@@ -85,6 +86,7 @@ export default async function DevisDetailPage({
   const isOwner = devis.userId === session.user.id;
   const isStaff =
     dbUser?.role?.nom === "admin" || dbUser?.role?.nom === "conseiller";
+  const isAdmin = dbUser?.role?.nom === "admin";
 
   if (!isOwner && !isStaff) redirect("/dashboard");
 
@@ -95,6 +97,8 @@ export default async function DevisDetailPage({
       devis.statut === StatutDevis.reserve) &&
     !devis.reservation;
   const hasReservation = !!devis.reservation;
+
+  const canDelete = isAdmin || (isOwner && !hasReservation);
 
   return (
     <main className="max-w-4xl mx-auto py-10 px-4 space-y-6">
@@ -112,11 +116,19 @@ export default async function DevisDetailPage({
             Demandé le {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
           </p>
         </div>
-        <Badge
-          className={`text-sm px-3 py-1 border ${statutColors[devis.statut]}`}
-        >
-          {statutLabels[devis.statut]}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            className={`text-sm px-3 py-1 border ${statutColors[devis.statut]}`}
+          >
+            {statutLabels[devis.statut]}
+          </Badge>
+          {canDelete && (
+            <DeleteDevisButton
+              devisId={devis.id}
+              redirectTo={isAdmin ? "/admin/devis" : "/devis/historique"}
+            />
+          )}
+        </div>
       </div>
 
       {/* Actions client : accepter / refuser */}

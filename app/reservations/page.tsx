@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CalendarCheck, ArrowRight, MapPin } from "lucide-react";
+import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
 
 const statutColors: Record<StatutReservation, string> = {
   [StatutReservation.confirmee]:
@@ -141,6 +142,16 @@ export default async function ReservationsPage() {
                   Voir le détail
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
+
+                {res.status !== "PAYEE" && (
+                  <DeleteReservationButton
+                    reservationId={res.id}
+                    label="Supprimer cette réservation"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-destructive hover:text-destructive"
+                  />
+                )}
               </CardContent>
             </Card>
           ))}

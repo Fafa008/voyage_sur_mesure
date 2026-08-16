@@ -187,6 +187,11 @@ export function DevisWizard({
         return;
       }
 
+      if (currentStep === 1 && !formData.circuitId) {
+        setError("Veuillez sélectionner un circuit d'inspiration.");
+        return;
+      }
+
       setError(null);
 
       if (currentStep < contentSteps.length - 1) {

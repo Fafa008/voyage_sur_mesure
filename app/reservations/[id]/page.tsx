@@ -6,6 +6,7 @@ import Link from "next/link";
 import { StatutReservation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/Button";
+import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
 import {
   Card,
   CardContent,
@@ -72,8 +73,11 @@ export default async function ReservationDetailPage({ params }: Props) {
   const isOwner = ownerId === session.user.id;
   const isStaff =
     dbUser?.role?.nom === "admin" || dbUser?.role?.nom === "conseiller";
+  const isAdmin = dbUser?.role?.nom === "admin";
 
   if (!isOwner && !isStaff) redirect("/dashboard");
+
+  const canDelete = isAdmin || (isOwner && reservation.status !== "PAYEE");
 
   const { devis, paiement } = reservation;
   if (!devis) notFound();
@@ -293,6 +297,16 @@ export default async function ReservationDetailPage({ params }: Props) {
           >
             Tableau de bord
           </Link>
+        </div>
+      )}
+
+      {canDelete && (
+        <div className="flex gap-3 border-t border-border/40 pt-4">
+          <DeleteReservationButton
+            reservationId={reservation.id}
+            label="Supprimer cette réservation"
+            redirectTo={isAdmin ? "/admin/reservations" : "/reservations"}
+          />
         </div>
       )}
     </main>

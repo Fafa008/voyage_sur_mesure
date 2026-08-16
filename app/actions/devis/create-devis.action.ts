@@ -16,7 +16,7 @@ const createDevisSchema = z.object({
   telephone: z.string().min(1, 'Téléphone requis'),
 
   // Voyage
-  circuitId: z.string().optional(),
+  circuitId: z.string().min(1, 'Le circuit est requis'),
   typeVoyage: z.array(z.string()).optional(),
   themeIds: z.array(z.string()).optional(),
   regionIds: z.array(z.string()).optional(),
@@ -92,11 +92,21 @@ export async function createDevis(prevState: unknown, formData: FormData) {
 
   const data = parsed.data;
 
-  // 4. Création du devis avec tous les champs
+  // 4. Le circuit référencé doit exister (un devis ne peut pas exister sans circuit)
+  const circuitId = parseInt(data.circuitId, 10);
+  const circuit = await prisma.circuit.findUnique({
+    where: { id: circuitId },
+    select: { id: true },
+  });
+  if (!circuit) {
+    return { error: 'Circuit invalide ou introuvable.' };
+  }
+
+  // 5. Création du devis avec tous les champs
   const devis = await prisma.devis.create({
     data: {
       userId: session.user.id,
-      circuitId: data.circuitId ? parseInt(data.circuitId) : null,
+      circuitId,
       prenom: data.prenom,
       nom: data.nom,
       telephone: data.telephone,

@@ -33,6 +33,8 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import { MarkNotificationReadButton } from "@/components/notifications/MarkNotificationReadButton";
+import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
+import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
 import { formatCurrency } from "@/lib/format";
 
 const statutColors: Record<StatutDevis, string> = {
@@ -61,6 +63,9 @@ export default async function DashboardPage() {
     include: {
       circuit: {
         select: { titre: true, slug: true },
+      },
+      reservation: {
+        select: { id: true },
       },
     },
     orderBy: { dateDemande: "desc" },
@@ -104,7 +109,6 @@ export default async function DashboardPage() {
     orderBy: { dateReservation: "desc" },
     take: 3,
   });
-
   // Statistiques
   const totalDevis = await prisma.devis.count({ where: { userId } });
   const devisEnAttente = await prisma.devis.count({
@@ -282,15 +286,26 @@ export default async function DashboardPage() {
                       — {formatCurrency(res.montantFinal)}
                     </p>
                   </div>
-                  <Link
-                    href={`/reservations/${res.id}`}
-                    className={buttonVariants({
-                      variant: "outline",
-                      size: "sm",
-                    })}
-                  >
-                    Détail
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/reservations/${res.id}`}
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "sm",
+                      })}
+                    >
+                      Détail
+                    </Link>
+                    {res.status !== "PAYEE" && (
+                      <DeleteReservationButton
+                        reservationId={res.id}
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        label=""
+                      />
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -365,15 +380,26 @@ export default async function DashboardPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link
-                        href={`/devis/${devis.id}`}
-                        className={buttonVariants({
-                          variant: "outline",
-                          size: "sm",
-                        })}
-                      >
-                        Détail
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/devis/${devis.id}`}
+                          className={buttonVariants({
+                            variant: "outline",
+                            size: "sm",
+                          })}
+                        >
+                          Détail
+                        </Link>
+                        {!devis.reservation && (
+                          <DeleteDevisButton
+                            devisId={devis.id}
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            label=""
+                          />
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

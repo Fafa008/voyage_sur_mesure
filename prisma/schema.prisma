@@ -128,8 +128,8 @@ model Devis {
   id        Int      @id @default(autoincrement())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  circuitId Int?
-  circuit   Circuit? @relation(fields: [circuitId], references: [id])
+  circuitId Int
+  circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
 
   // Champs existants
   dateDemande           DateTime    @default(now())

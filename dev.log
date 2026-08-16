@@ -1,0 +1,37 @@
+
+> mon-voyage-app@0.1.0 dev C:\Users\Best\Desktop\DevWeb\voyage_sur_mesure
+> next dev
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.88.49:3000
+- Environments: .env.local
+✓ Ready in 3.5s
+- Experiments (use with caution):
+  · optimizePackageImports
+
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Circuit"."id" FROM "public"."Circuit" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."session"."id", "public"."session"."expiresAt", "public"."session"."token", "public"."session"."createdAt", "public"."session"."updatedAt", "public"."session"."ipAddress", "public"."session"."userAgent", "public"."session"."userId" FROM "public"."session" WHERE "public"."session"."token" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."user"."id", "public"."user"."name", "public"."user"."email", "public"."user"."emailVerified", "public"."user"."image", "public"."user"."createdAt", "public"."user"."updatedAt", "public"."user"."prenom", "public"."user"."telephone", "public"."user"."dateInscription", "public"."user"."roleId" FROM "public"."user" WHERE "public"."user"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."user"."id", "public"."user"."name", "public"."user"."email", "public"."user"."emailVerified", "public"."user"."image", "public"."user"."createdAt", "public"."user"."updatedAt", "public"."user"."prenom", "public"."user"."telephone", "public"."user"."dateInscription", "public"."user"."roleId" FROM "public"."user" WHERE ("public"."user"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Role"."id", "public"."Role"."nom"::text FROM "public"."Role" WHERE "public"."Role"."id" = $1 OFFSET $2
+prisma:query SELECT COUNT(*) AS "_count$_all", "public"."Devis"."statut"::text FROM "public"."Devis" WHERE 1=1 GROUP BY "public"."Devis"."statut" OFFSET $1
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."user"."id" FROM "public"."user" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Reservation"."id" FROM "public"."Reservation" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Avis"."id" FROM "public"."Avis" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Avis"."id" FROM "public"."Avis" WHERE "public"."Avis"."estModere" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."session"."id", "public"."session"."expiresAt", "public"."session"."token", "public"."session"."createdAt", "public"."session"."updatedAt", "public"."session"."ipAddress", "public"."session"."userAgent", "public"."session"."userId" FROM "public"."session" WHERE "public"."session"."token" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Devis"."id" FROM "public"."Devis" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all", "public"."Reservation"."statut"::text FROM "public"."Reservation" WHERE 1=1 GROUP BY "public"."Reservation"."statut" OFFSET $1
+prisma:query SELECT "public"."user"."id", "public"."user"."name", "public"."user"."email", "public"."user"."emailVerified", "public"."user"."image", "public"."user"."createdAt", "public"."user"."updatedAt", "public"."user"."prenom", "public"."user"."telephone", "public"."user"."dateInscription", "public"."user"."roleId" FROM "public"."user" WHERE "public"."user"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."user"."id", "public"."user"."name", "public"."user"."email", "public"."user"."emailVerified", "public"."user"."image", "public"."user"."createdAt", "public"."user"."updatedAt", "public"."user"."prenom", "public"."user"."telephone", "public"."user"."dateInscription", "public"."user"."roleId" FROM "public"."user" WHERE ("public"."user"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Role"."id", "public"."Role"."nom"::text FROM "public"."Role" WHERE "public"."Role"."id" = $1 OFFSET $2
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Notification"."id" FROM "public"."Notification" WHERE ("public"."Notification"."userId" = $1 AND "public"."Notification"."lu" = $2) OFFSET $3) AS "sub"
+ GET /admin/dashboard 200 in 24.9s (next.js: 4.9s, proxy.ts: 2.7s, application-code: 17.3s)
+○ Compiling /admin/devis ...
+prisma:query SELECT "public"."Devis"."id", "public"."Devis"."userId", "public"."Devis"."circuitId", "public"."Devis"."dateDemande", "public"."Devis"."statut"::text, "public"."Devis"."nombrePersonnes", "public"."Devis"."commentaireClient", "public"."Devis"."commentaireConseiller", "public"."Devis"."montantTotal", "public"."Devis"."prenom", "public"."Devis"."nom", "public"."Devis"."telephone", "public"."Devis"."dateDebutSouhaitee", "public"."Devis"."dateFinSouhaitee", "public"."Devis"."dureeFlexible", "public"."Devis"."adultes", "public"."Devis"."enfants", "public"."Devis"."ados", "public"."Devis"."enfantsAge", "public"."Devis"."typeHebergement", "public"."Devis"."regime", "public"."Devis"."regimePrecision", "public"."Devis"."budgetMin", "public"."Devis"."budgetMax", "public"."Devis"."source", "public"."Devis"."newsletter", "public"."Devis"."themeIds", "public"."Devis"."regionIds", "public"."Devis"."typeVoyage", "public"."Devis"."activites", "public"."Devis"."transport" FROM "public"."Devis" WHERE 1=1 ORDER BY "public"."Devis"."dateDemande" DESC OFFSET $1
+prisma:query SELECT "public"."user"."id", "public"."user"."name", "public"."user"."prenom", "public"."user"."email" FROM "public"."user" WHERE "public"."user"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Circuit"."id", "public"."Circuit"."titre", "public"."Circuit"."slug" FROM "public"."Circuit" WHERE "public"."Circuit"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Reservation"."id", "public"."Reservation"."devisId" FROM "public"."Reservation" WHERE "public"."Reservation"."devisId" IN ($1) OFFSET $2
+ GET /admin/devis 200 in 27.4s (next.js: 19.6s, proxy.ts: 26ms, application-code: 7.8s)
+✓ Finished filesystem cache database compaction in 21.6s
