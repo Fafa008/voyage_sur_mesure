@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface SearchButtonProps {
   loading?: boolean;
@@ -21,7 +21,7 @@ export function SearchButton({
       type="button"
       onClick={onClick}
       disabled={loading}
-      className={`w-full py-6 font-semibold text-sm shadow-md hover:shadow-lg transition-all rounded-xl ${className}`}
+      className={`w-full py-6 font-semibold text-sm shadow-md hover:shadow-lg transition-all h-9 rounded-lg ${className}`}
     >
       {loading ? (
         <>

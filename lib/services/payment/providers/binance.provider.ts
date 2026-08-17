@@ -3,7 +3,6 @@ import { IPaymentProvider, PaymentOptions, PaymentResult, WebhookResult } from "
 
 export class BinanceProvider implements IPaymentProvider {
   async createCharge(amount: number, currency: string, options: PaymentOptions): Promise<PaymentResult> {
-    // Simulation d'un appel API vers Binance Pay
     const providerRef = `BINANCE-${Date.now()}-${options.reservationId}`;
     
     return {
@@ -15,18 +14,49 @@ export class BinanceProvider implements IPaymentProvider {
   }
 
   async verifyPayment(providerRef: string): Promise<{ status: PaymentStatus; amount?: number }> {
-    // Simulation de vérification (dans la vraie vie, appel API de l'ordre)
-    return { status: PaymentStatus.PAID, amount: 100 };
+    const apiKey = process.env.BINANCE_API_KEY;
+    const apiSecret = process.env.BINANCE_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      console.warn("[Binance] API credentials not configured — returning PENDING");
+      return { status: PaymentStatus.PENDING };
+    }
+
+    try {
+      const baseUrl = process.env.BINANCE_BASE_URL || "https://bpay.binanceapi.com";
+      const response = await fetch(`${baseUrl}/binancepay/v3/order/${providerRef}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "API-KEY": apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`[Binance] Verify request failed: ${response.status}`);
+        return { status: PaymentStatus.PENDING };
+      }
+
+      const data = await response.json() as { status?: string; totalAmount?: string };
+      let status: PaymentStatus = PaymentStatus.PENDING;
+      if (data.status === "PAID") status = PaymentStatus.PAID;
+      else if (data.status === "CLOSED") status = PaymentStatus.CANCELLED;
+
+      const amount = data.totalAmount ? Number(data.totalAmount) : undefined;
+      return { status, amount };
+    } catch (error) {
+      console.error("[Binance] verifyPayment error:", error);
+      return { status: PaymentStatus.PENDING };
+    }
   }
 
   async handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult> {
-    // Simulation de validation d'un webhook (vérifier la signature)
     const bizId = typeof payload.bizId === "string" ? payload.bizId : "";
     const bizStatus = typeof payload.bizStatus === "string" ? payload.bizStatus : undefined;
 
     let status: PaymentStatus = PaymentStatus.PENDING;
     if (bizStatus === "PAY_SUCCESS") status = PaymentStatus.PAID;
-    if (bizStatus === "PAY_CLOSED") status = PaymentStatus.CANCELLED;
+    else if (bizStatus === "PAY_CLOSED") status = PaymentStatus.CANCELLED;
 
     return {
       providerRef: bizId,
@@ -36,7 +66,33 @@ export class BinanceProvider implements IPaymentProvider {
   }
 
   async refund(providerRef: string, amount: number): Promise<boolean> {
-    // Simulation API Refund
-    return true;
+    const apiKey = process.env.BINANCE_API_KEY;
+    const apiSecret = process.env.BINANCE_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      console.warn("[Binance] API credentials not configured — cannot process refund");
+      return false;
+    }
+
+    try {
+      const baseUrl = process.env.BINANCE_BASE_URL || "https://bpay.binanceapi.com";
+      const merchantId = process.env.BINANCE_MERCHANT_ID;
+      const response = await fetch(`${baseUrl}/binancepay/v3/order/${providerRef}/refund`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "API-KEY": apiKey,
+        },
+        body: JSON.stringify({
+          merchantId,
+          refundAmount: amount,
+        }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("[Binance] refund error:", error);
+      return false;
+    }
   }
 }

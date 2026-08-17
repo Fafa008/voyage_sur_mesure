@@ -52,7 +52,7 @@ export function PaymentMethodCard({
       className={cn(
         "relative flex items-start gap-4 p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer w-full",
         selected
-          ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm"
+          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
           : "border-border hover:border-primary/40 bg-card hover:bg-muted/30"
       )}
     >

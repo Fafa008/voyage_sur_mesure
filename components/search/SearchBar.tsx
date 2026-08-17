@@ -67,7 +67,7 @@ function SearchBarContent({
 
   if (variant === "sidebar") {
     return (
-      <div className={`bg-card border border-border/60 rounded-2xl p-5 space-y-4 shadow-sm ${className}`}>
+      <div className={`bg-card border border-border/60 rounded-xl p-5 space-y-4 shadow-xs ${className}`}>
         <h3 className="font-bold text-base text-foreground pb-2 border-b border-border/40">
           Filtrer les circuits
         </h3>
@@ -119,7 +119,7 @@ function SearchBarContent({
 
   return (
     <div
-      className={`bg-card border border-border/60 rounded-2xl shadow-xl p-4 sm:p-6 transition-all ${className}`}
+      className={`bg-card border border-border/60 rounded-xl shadow-md p-4 sm:p-6 transition-all ${className}`}
     >
       {/* Top Header if variant is 'full' */}
       {variant === "full" && (
@@ -184,7 +184,7 @@ function SearchBarContent({
 
 function SearchBarFallback({ className = "" }: { className?: string }) {
   return (
-    <div className={`bg-card border border-border/60 rounded-2xl shadow-xl p-4 sm:p-6 space-y-4 ${className}`}>
+    <div className={`bg-card border border-border/60 rounded-xl shadow-md p-4 sm:p-6 space-y-4 ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         <Skeleton className="h-10 w-full rounded-xl" />
         <Skeleton className="h-10 w-full rounded-xl" />

@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
 import { CalendarCheck, Users } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
@@ -82,40 +82,38 @@ export default async function AdminReservationsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Gestion des Réservations
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Consultez, suivez et supprimez les réservations de tous les clients.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+          Gestion des Réservations
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Consultez, suivez et supprimez les réservations de tous les clients.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Réservations
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold">{totalReservations}</div>
+            <div className="text-3xl font-bold">{totalReservations}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Dossiers enregistrés
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Payées
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-emerald-600">
+            <div className="text-3xl font-bold text-emerald-600">
               {payees}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -124,14 +122,14 @@ export default async function AdminReservationsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               En attente de paiement
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-amber-600">
+            <div className="text-3xl font-bold text-amber-600">
               {enAttente}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -141,7 +139,7 @@ export default async function AdminReservationsPage() {
         </Card>
       </div>
 
-      <Card className="border border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base font-bold">
             Liste des Réservations

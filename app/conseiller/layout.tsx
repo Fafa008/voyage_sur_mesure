@@ -3,10 +3,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RoleNom } from "@prisma/client";
-import LogoutButton from "@/components/auth/LogoutButton";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Compass, User as UserIcon, LayoutDashboard, FileCheck } from "lucide-react";
 
 export default async function ConseillerLayout({
   children,

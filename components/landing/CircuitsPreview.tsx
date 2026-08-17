@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { ArrowRight, Clock, MapPin, Star, Route } from "lucide-react";
@@ -34,7 +34,7 @@ export default async function CircuitsPreview() {
             <span className="text-xs uppercase tracking-widest font-semibold text-primary">
               Inspiration de voyage
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               Circuits Choisis Juste Pour Vous
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
@@ -75,7 +75,7 @@ export default async function CircuitsPreview() {
             {circuits.map((circuit, index) => (
               <div key={circuit.id} className="group relative">
                 <Link href={`/circuits/${circuit.slug}`}>
-                  <Card className="overflow-hidden border border-border/60 bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                  <Card className="overflow-hidden bg-card hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                     {/* Image */}
                     <div className="relative h-52 w-full overflow-hidden bg-muted">
                       {circuit.images[0] ? (
@@ -146,7 +146,7 @@ export default async function CircuitsPreview() {
                         {circuit.titre}
                       </CardTitle>
 
-                      <p className="text-lg font-extrabold text-foreground mt-1">
+                      <p className="text-lg font-bold text-foreground mt-1">
                         {circuit.prixEstime
                           ? formatCurrency(circuit.prixEstime)
                           : "Sur devis"}

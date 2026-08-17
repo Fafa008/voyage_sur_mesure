@@ -1,203 +1,270 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* =========================================================
+   LIGHT MODE
+   Palette douce, neutre et professionnelle
+   ========================================================= */
+
 :root {
-  /* Arrière-plan & Textes */
-  --background: #fdfcfb;
-  --foreground: #1c1917;
+  /* Background */
+  --background: #f6f7f9;
+  --foreground: #20242b;
 
-  /* Cartes & Popovers */
+  /* Cards */
   --card: #ffffff;
-  --card-foreground: #1c1917;
+  --card-foreground: #20242b;
 
+  /* Popovers / Dropdowns */
   --popover: #ffffff;
-  --popover-foreground: #1c1917;
+  --popover-foreground: #20242b;
 
-  /* Couleur Principale (Rouge Crimson Madaventure du Logo #731B1A) */
-  --primary: #731b1a;
+  /* Primary */
+  --primary: #3b6eea;
   --primary-foreground: #ffffff;
-  --primary-hover: #8b2221;
+  --primary-hover: #315fd2;
 
-  /* Couleur Secondaire (Vert Émeraude Madaventure du Logo #21734B) */
-  --secondary: #21734b;
-  --secondary-foreground: #ffffff;
-  --secondary-hover: #185a3a;
+  /* Secondary */
+  --secondary: #eef0f4;
+  --secondary-foreground: #343942;
+  --secondary-hover: #e4e7ec;
 
-  /* Fond discret & Éléments mutés */
-  --muted: #f4efed;
-  --muted-foreground: #6e5e5b;
+  /* Muted */
+  --muted: #eef0f3;
+  --muted-foreground: #6b7280;
 
-  /* Accent & Hover neutre */
-  --accent: #f8eef0;
-  --accent-foreground: #731b1a;
+  /* Accent */
+  --accent: #f0f2f5;
+  --accent-foreground: #20242b;
 
-  /* Statuts / Danger */
-  --destructive: #dc2626;
+  /* Status */
+  --destructive: #dc4a4a;
   --destructive-foreground: #ffffff;
 
-  /* Bordures & Focus Ring */
-  --border: #e7ded9;
-  --input: #e7ded9;
-  --ring: #731b1a;
+  /* Borders / Inputs */
+  --border: #dfe3e8;
+  --input: #d5dae1;
+  --ring: #3b6eea;
 
-  --radius: 0.75rem;
+  --radius: 0.625rem;
 
-  /* Graphiques & Dashboard */
-  --chart-1: #731b1a;
-  --chart-2: #21734b;
-  --chart-3: #d97706;
-  --chart-4: #0284c7;
-  --chart-5: #7c3aed;
+  /* Charts */
+  --chart-1: #3b6eea;
+  --chart-2: #35a66f;
+  --chart-3: #d99a28;
+  --chart-4: #8567d9;
+  --chart-5: #329bb8;
 
   /* Sidebar */
   --sidebar: #ffffff;
-  --sidebar-foreground: #1c1917;
-  --sidebar-primary: #731b1a;
+  --sidebar-foreground: #20242b;
+
+  --sidebar-primary: #3b6eea;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f8eef0;
-  --sidebar-accent-foreground: #731b1a;
-  --sidebar-border: #e7ded9;
-  --sidebar-ring: #731b1a;
+
+  --sidebar-accent: #f0f2f5;
+  --sidebar-accent-foreground: #20242b;
+
+  --sidebar-border: #dfe3e8;
+  --sidebar-ring: #3b6eea;
 }
+
+
+/* =========================================================
+   DARK MODE
+   Gris profond — pas de noir pur
+   ========================================================= */
 
 .dark {
-  /* Arrière-plan sombre élégant aux nuances acajou */
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  /* Background */
+  --background: #15171c;
+  --foreground: #e8eaed;
 
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
+  /* Cards */
+  --card: #1d2026;
+  --card-foreground: #e8eaed;
 
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
+  /* Popovers / Dropdowns */
+  --popover: #20232a;
+  --popover-foreground: #eef0f2;
 
-  /* Primary en mode sombre (Crimson vibrant) */
-  --primary: #9e2a28;
-  --primary-foreground: #ffffff;
-  --primary-hover: #b83634;
+  /* Primary */
+  --primary: #6f96f5;
+  --primary-foreground: #101522;
+  --primary-hover: #82a5f7;
 
-  /* Secondary en mode sombre (Vert Émeraude lumineux) */
-  --secondary: #288a59;
-  --secondary-foreground: #ffffff;
-  --secondary-hover: #32a86d;
+  /* Secondary */
+  --secondary: #292d35;
+  --secondary-foreground: #e5e7eb;
+  --secondary-hover: #343943;
 
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
+  /* Muted */
+  --muted: #282c33;
+  --muted-foreground: #9da3ae;
 
-  --accent: #334155;
-  --accent-foreground: #f8fafc;
+  /* Accent */
+  --accent: #292d35;
+  --accent-foreground: #eef0f2;
 
-  --destructive: #ef4444;
+  /* Status */
+  --destructive: #ef6464;
   --destructive-foreground: #ffffff;
 
-  --border: #334155;
-  --input: #334155;
-  --ring: #9e2a28;
+  /* Borders / Inputs */
+  --border: #30343c;
+  --input: #3a3f48;
+  --ring: #6f96f5;
 
-  --chart-1: #9e2a28;
-  --chart-2: #288a59;
-  --chart-3: #f59e0b;
-  --chart-4: #38bdf8;
-  --chart-5: #a78bfa;
+  /* Charts */
+  --chart-1: #6f96f5;
+  --chart-2: #58c58b;
+  --chart-3: #e4ad4c;
+  --chart-4: #a58be8;
+  --chart-5: #54b9d3;
 
-  --sidebar: #0f172a;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #9e2a28;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #334155;
-  --sidebar-ring: #9e2a28;
+  /* Sidebar */
+  --sidebar: #17191e;
+  --sidebar-foreground: #e8eaed;
+
+  --sidebar-primary: #6f96f5;
+  --sidebar-primary-foreground: #101522;
+
+  --sidebar-accent: #24272e;
+  --sidebar-accent-foreground: #eef0f2;
+
+  --sidebar-border: #30343c;
+  --sidebar-ring: #6f96f5;
 }
+
+
+/* =========================================================
+   BASE
+   ========================================================= */
 
 @layer base {
   * {
     border-color: var(--border);
-    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+
+    outline-color: color-mix(
+      in srgb,
+      var(--ring) 45%,
+      transparent
+    );
   }
 
   html {
     font-family: var(--font-geist-sans);
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
+    min-height: 100vh;
+
     background: var(--background);
     color: var(--foreground);
+
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  /* Sélection */
+  ::selection {
+    background: color-mix(
+      in srgb,
+      var(--primary) 20%,
+      transparent
+    );
+
+    color: var(--foreground);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
   }
 }
 
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+
 @layer utilities {
+  /* Container */
   .container-page {
-    @apply max-w-7xl mx-auto px-6 lg:px-10;
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
+  /* Sections */
   .section {
-    @apply py-20;
+    @apply py-16 md:py-20;
   }
 
   .section-title {
-    @apply text-4xl md:text-5xl font-bold tracking-tight;
+    @apply text-3xl font-semibold tracking-tight sm:text-4xl;
   }
 
   .section-subtitle {
-    @apply text-lg mt-4 max-w-3xl;
+    @apply mt-3 max-w-3xl text-base leading-7 sm:text-lg;
+
     color: var(--muted-foreground);
   }
 
+  /* =======================================================
+     CARDS
+     ======================================================= */
+
   .card-hover {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgb(0 0 0 / 0.12);
+    transform: translateY(-1px);
+
+    box-shadow:
+      0 6px 18px rgb(0 0 0 / 0.05);
   }
 
-  .btn-primary {
-    @apply rounded-xl px-6 py-3 transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
-    background-color: var(--primary);
-    color: var(--primary-foreground);
+  .dark .card-hover:hover {
+    box-shadow:
+      0 8px 24px rgb(0 0 0 / 0.20);
   }
 
-  .btn-primary:hover {
-    background-color: var(--primary-hover);
-  }
+  /* =======================================================
+     SURFACE
+     ======================================================= */
 
-  .btn-secondary {
-    @apply rounded-xl px-6 py-3 transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
-    background-color: var(--secondary);
-    color: var(--secondary-foreground);
-  }
-
-  .btn-secondary:hover {
-    background-color: var(--secondary-hover);
-  }
-
-  .card {
-    background-color: var(--card);
+  .surface {
+    background: var(--card);
     color: var(--card-foreground);
+
     border: 1px solid var(--border);
-    border-radius: var(--radius);
   }
 
-  .input-custom {
-    background-color: var(--card);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
+  /* =======================================================
+     TEXTE SECONDAIRE
+     ======================================================= */
 
   .text-muted {
     color: var(--muted-foreground);
-  }
-
-  .bg-primary-custom {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-  }
-
-  .bg-secondary-custom {
-    background-color: var(--secondary);
-    color: var(--secondary-foreground);
   }
 }

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2,
@@ -63,10 +63,10 @@ export default async function PaymentConfirmationPage({ params }: Props) {
   return (
     <main className="max-w-3xl mx-auto py-12 px-4 space-y-8 text-center sm:text-left">
       {/* Banner Succès */}
-      <div className="flex flex-col items-center sm:items-start gap-4 p-6 rounded-2xl bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900">
+      <div className="flex flex-col items-center sm:items-start gap-4 p-6 rounded-xl bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900">
         <CheckCircle2 className="w-14 h-14 text-emerald-600 shrink-0" />
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-emerald-900 dark:text-emerald-200">
+          <h1 className="text-xl sm:text-2xl font-bold text-emerald-900 dark:text-emerald-200">
             Merci ! Votre réservation est confirmée
           </h1>
           <p className="text-emerald-700 dark:text-emerald-400 text-sm">
@@ -78,7 +78,7 @@ export default async function PaymentConfirmationPage({ params }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Détails du Voyage */}
-        <Card className="border-border/60">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <MapPin className="w-4 h-4 text-primary" />
@@ -122,7 +122,7 @@ export default async function PaymentConfirmationPage({ params }: Props) {
         </Card>
 
         {/* Détails de la Transaction */}
-        <Card className="border-border/60">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
@@ -134,7 +134,7 @@ export default async function PaymentConfirmationPage({ params }: Props) {
               <span className="text-muted-foreground text-xs uppercase tracking-wider block">
                 Montant
               </span>
-              <p className="text-2xl font-extrabold text-primary">
+              <p className="text-xl font-bold text-primary">
                 {amount} MGA
               </p>
             </div>

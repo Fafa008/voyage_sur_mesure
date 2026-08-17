@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConseillerPricingForm } from "@/components/devis/ConseillerPricingForm";
 import { formatCurrency } from "@/lib/format";

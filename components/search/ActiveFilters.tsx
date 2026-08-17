@@ -2,7 +2,7 @@
 
 import { X, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import type { SearchFilters, SearchOptionsData } from "@/types/search";
 

@@ -71,7 +71,7 @@ export default async function PaymentTunnelPage({ params }: Props) {
       </Link>
 
       <div className="space-y-2 text-center sm:text-left">
-        <h1 className="text-3xl font-extrabold tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Espace de Paiement Sécurisé
         </h1>
         <p className="text-muted-foreground">
@@ -82,7 +82,7 @@ export default async function PaymentTunnelPage({ params }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Résumé voyage (1 col) */}
         <div className="md:col-span-1 space-y-6">
-          <Card className="border-border/60">
+          <Card className="">
             <CardHeader className="pb-3">
               <Badge
                 variant="outline"
@@ -121,7 +121,7 @@ export default async function PaymentTunnelPage({ params }: Props) {
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                   Montant à régler
                 </p>
-                <p className="text-3xl font-extrabold text-primary mt-1">
+                <p className="text-xl font-bold text-primary mt-1">
                   {amount} MGA
                 </p>
               </div>
@@ -149,7 +149,6 @@ export default async function PaymentTunnelPage({ params }: Props) {
           <PaymentCheckoutForm
             reservationId={reservation.id}
             amount={amount}
-            userId={session.user.id}
             latestTransaction={
               latestTransaction
                 ? {

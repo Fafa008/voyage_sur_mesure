@@ -44,7 +44,7 @@ export default function FAQ() {
               <span className="text-xs uppercase tracking-widest font-semibold text-primary">
                 Aide & Support
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Questions Fréquentes
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">

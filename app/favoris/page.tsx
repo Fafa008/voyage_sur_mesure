@@ -11,7 +11,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/format";
 
@@ -42,7 +42,7 @@ export default async function FavorisPage() {
   return (
     <main className="max-w-7xl mx-auto py-10 px-4 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Mes Circuits Favoris</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Mes Circuits Favoris</h1>
         <p className="text-muted-foreground mt-1">
           Retrouvez les circuits que vous avez sauvegardés pour votre futur
           voyage.

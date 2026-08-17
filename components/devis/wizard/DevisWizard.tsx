@@ -289,7 +289,7 @@ export function DevisWizard({
       )}
 
       {/* Conteneur de l'étape active */}
-      <div className="mt-6 p-6 sm:p-8 rounded-3xl border border-border bg-card shadow-sm transition-all duration-300">
+      <div className="mt-6 p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-xs transition-all duration-300">
         {!isAuthStep && StepComponent && (
           <StepComponent
             data={formData}

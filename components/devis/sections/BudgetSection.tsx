@@ -1,7 +1,7 @@
 // components/devis/sections/BudgetSection.tsx
 "use client";
 
-import { InputField } from "@/components/ui/InputField";
+import { InputField } from "@/components/ui/input-field";
 import { Coins, Banknote, Check } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
@@ -30,11 +30,11 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
     <div className="space-y-8">
       {/* En-tête */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           5
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Votre Enveloppe Budgétaire
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -59,14 +59,14 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
                 key={preset.label}
                 type="button"
                 onClick={() => applyPreset(preset.min, preset.max)}
-                className={`relative flex flex-col justify-between p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                className={`relative flex flex-col justify-between p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                   isMatch
                     ? "bg-primary/10 border-primary shadow-xs"
                     : "bg-card border-border hover:border-primary/40 hover:bg-accent/40"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1 mb-1">
-                  <span className="font-bold text-sm text-foreground">
+                  <span className="font-semibold text-sm text-foreground">
                     {preset.label}
                   </span>
                   <div
@@ -80,7 +80,7 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
                   </div>
                 </div>
 
-                <span className="text-xs font-bold text-primary">
+                <span className="text-xs font-semibold text-primary">
                   {formatCurrency(preset.min)} - {formatCurrency(preset.max)}
                 </span>
                 <span className="text-[10px] text-muted-foreground mt-1">
@@ -93,10 +93,10 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
       </div>
 
       {/* Champs manuels */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Coins className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Budget Personnalisé (par personne)
           </h3>
         </div>

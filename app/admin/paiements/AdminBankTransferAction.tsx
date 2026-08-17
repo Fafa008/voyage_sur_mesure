@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { markBankTransferAsPaidAction } from "@/actions/payments.actions";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 interface Props {

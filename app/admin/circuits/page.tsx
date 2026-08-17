@@ -1,7 +1,7 @@
 // app/admin/circuits/page.tsx
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import { Plus } from "lucide-react";
 import {
@@ -33,7 +33,7 @@ export default async function AdminCircuitsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Circuits</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Circuits</h1>
           <p className="text-muted-foreground text-sm">
             {circuits.length} circuit(s) au total
           </p>

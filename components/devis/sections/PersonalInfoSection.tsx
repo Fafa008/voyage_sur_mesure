@@ -1,7 +1,7 @@
 // components/devis/sections/PersonalInfoSection.tsx
 "use client";
 
-import { InputField } from "@/components/ui/InputField";
+import { InputField } from "@/components/ui/input-field";
 import { User, Mail, Phone, Lock } from "lucide-react";
 
 interface PersonalInfoSectionProps {
@@ -22,11 +22,11 @@ export function PersonalInfoSection({
     <div className="space-y-6">
       {/* En-tête de section */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           1
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Vos Informations Personnelles
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -36,7 +36,7 @@ export function PersonalInfoSection({
       </div>
 
       {/* Grille de champs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 rounded-2xl border border-border bg-card shadow-xs">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-6 rounded-xl bg-card">
         <InputField
           label="Prénom *"
           id="prenom"
@@ -78,7 +78,7 @@ export function PersonalInfoSection({
         />
       </div>
 
-      <div className="flex items-center gap-2 p-3.5 rounded-xl bg-muted/60 text-xs text-muted-foreground border border-border/60">
+      <div className="flex items-center gap-2 p-3.5 rounded-xl bg-muted/60 text-xs text-muted-foreground">
         <Lock className="w-4 h-4 text-primary shrink-0" />
         <span>Vos données personnelles restent strictement confidentielles et ne seront jamais revendues.</span>
       </div>

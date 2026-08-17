@@ -2,12 +2,12 @@
 import Link from "next/link";
 import { CheckCircle2, LayoutDashboard, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function MerciPage() {
   return (
     <main className="max-w-2xl mx-auto py-16 px-4">
-      <Card className="border border-border/60 shadow-xl overflow-hidden text-center p-8 sm:p-12 relative">
+      <Card className="rounded-xl overflow-hidden text-center p-8 sm:p-12 relative">
         <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none -z-10" />
         <CardContent className="space-y-6 pt-2">
           <div className="w-20 h-20 mx-auto rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-inner">
@@ -15,7 +15,7 @@ export default function MerciPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Demande envoyée !
             </h1>
             <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">

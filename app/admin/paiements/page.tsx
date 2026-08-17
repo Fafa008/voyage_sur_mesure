@@ -67,58 +67,56 @@ export default async function AdminPaiementsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Gestion des Transactions & Paiements
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Suivez les règlements Papi, Binance Pay, Virements bancaires et mettez à jour les statuts.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+          Gestion des Transactions & Paiements
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Suivez les règlements Papi, Binance Pay, Virements bancaires et mettez à jour les statuts.
+        </p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Volume Encaissé
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-emerald-600">{formatCurrency(totalVolume)}</div>
+            <div className="text-3xl font-bold text-emerald-600">{formatCurrency(totalVolume)}</div>
             <p className="text-[11px] text-muted-foreground mt-1">{totalPaid} transactions validées</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Paiements En Attente
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-amber-600">{totalPending}</div>
+            <div className="text-3xl font-bold text-amber-600">{totalPending}</div>
             <p className="text-[11px] text-muted-foreground mt-1">À valider ou en cours de traitement</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Transactions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold">{transactions.length}</div>
+            <div className="text-3xl font-bold">{transactions.length}</div>
             <p className="text-[11px] text-muted-foreground mt-1">Historique complet</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Transactions Table */}
-      <Card className="border border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base font-bold">Historique des Transactions</CardTitle>
           <CardDescription className="text-xs">

@@ -8,7 +8,7 @@ import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
 import { PapiPayPanel } from "@/components/payment/PapiPayPanel";
 import { BinancePayPanel } from "@/components/payment/BinancePayPanel";
 import { BankTransferPanel } from "@/components/payment/BankTransferPanel";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -22,7 +22,6 @@ import { PaymentResult } from "@/types/payment.types";
 interface Props {
   reservationId: number;
   amount: string;
-  userId: string;
   latestTransaction: {
     id: string;
     method: PaymentMethod;
@@ -34,7 +33,6 @@ interface Props {
 export function PaymentCheckoutForm({
   reservationId,
   amount,
-  userId,
   latestTransaction,
 }: Props) {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(
@@ -46,22 +44,28 @@ export function PaymentCheckoutForm({
   const [activePayment, setActivePayment] = useState<{
     method: PaymentMethod;
     result: PaymentResult;
-  } | null>(
-    latestTransaction && latestTransaction.status === PaymentStatus.PENDING
-      ? {
-          method: latestTransaction.method,
-          result: {
-            success: true,
-            transactionId: latestTransaction.id,
-            providerRef: latestTransaction.providerRef || undefined,
-            checkoutUrl:
-              latestTransaction.method === PaymentMethod.BINANCE_PAY
-                ? `https://pay.binance.com/checkout/${latestTransaction.providerRef}`
-                : undefined,
-          },
-        }
-      : null,
-  );
+  } | null>(() => {
+    if (!latestTransaction || latestTransaction.status !== PaymentStatus.PENDING) {
+      return null;
+    }
+
+    if (latestTransaction.method === PaymentMethod.PAPI) {
+      return null;
+    }
+
+    return {
+      method: latestTransaction.method,
+      result: {
+        success: true,
+        transactionId: latestTransaction.id,
+        providerRef: latestTransaction.providerRef || undefined,
+        checkoutUrl:
+          latestTransaction.method === PaymentMethod.BINANCE_PAY
+            ? `https://pay.binance.com/checkout/${latestTransaction.providerRef}`
+            : undefined,
+      },
+    };
+  });
 
   const handleInitiate = async () => {
     setLoading(true);
@@ -71,17 +75,10 @@ export function PaymentCheckoutForm({
       const res = await initiatePaymentAction(
         reservationId,
         selectedMethod,
-        userId,
       );
       if (!res.success || !res.data) {
         setError(res.error || "Erreur lors de l'initiation du paiement");
       } else {
-        if (selectedMethod === PaymentMethod.PAPI && res.data.checkoutUrl) {
-          window.location.assign(res.data.checkoutUrl);
-          console.log(res.data.checkoutUrl);
-          return;
-        }
-
         setActivePayment({
           method: selectedMethod,
           result: res.data,
@@ -129,7 +126,7 @@ export function PaymentCheckoutForm({
   }
 
   return (
-    <Card className="border-border/60">
+    <Card>
       <CardHeader>
         <CardTitle className="text-xl font-bold">
           Sélection du mode de paiement
@@ -168,7 +165,7 @@ export function PaymentCheckoutForm({
         <Button
           onClick={handleInitiate}
           disabled={loading}
-          className="w-full h-12 text-base font-bold shadow-md cursor-pointer"
+          className="w-full h-12 text-base font-bold shadow-sm cursor-pointer"
           size="lg"
         >
           {loading ? (

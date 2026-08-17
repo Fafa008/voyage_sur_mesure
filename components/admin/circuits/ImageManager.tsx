@@ -3,7 +3,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImagePlus, GripVertical, Loader2, X } from "lucide-react";
 
@@ -121,7 +121,7 @@ export function ImageManager({
           {images.map((img, index) => (
             <div
               key={img.url}
-              className="group overflow-hidden rounded-xl border bg-card shadow-sm transition hover:shadow-lg"
+              className="group overflow-hidden rounded-xl border bg-card transition"
             >
               <div className="relative">
                 <img
@@ -133,7 +133,7 @@ export function ImageManager({
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  className="absolute right-2 top-2 rounded-full bg-background/80 p-2 backdrop-blur hover:bg-red-600 hover:text-white"
+                  className="absolute right-2 top-2 rounded-full bg-background/80 p-2 backdrop-blur hover:bg-destructive hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>

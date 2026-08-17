@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -128,11 +128,11 @@ export default async function DashboardPage() {
   return (
     <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Banner / En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              👋 Bonjour, {session.user.name}
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Bonjour, {session.user.name}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
           href="/devis/nouveau"
           className={
             buttonVariants({ variant: "default", size: "lg" }) +
-            " shrink-0 shadow-md"
+            " shrink-0 shadow-sm"
           }
         >
           <PlusCircle className="w-4 h-4 mr-2" />
@@ -155,7 +155,7 @@ export default async function DashboardPage() {
 
       {/* Cartes de statistiques */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Devis
@@ -163,14 +163,14 @@ export default async function DashboardPage() {
             <FileText className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">{totalDevis}</div>
+            <div className="text-xl font-bold">{totalDevis}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Demande(s) soumise(s)
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               En Étude
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
             <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-amber-600">
+            <div className="text-xl font-bold text-amber-600">
               {devisEnAttente}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -187,7 +187,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Réservations
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
             <CalendarCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-emerald-600">
+            <div className="text-xl font-bold text-emerald-600">
               {totalReservations}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -206,7 +206,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Favoris
@@ -214,14 +214,14 @@ export default async function DashboardPage() {
             <Star className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">{totalFavoris}</div>
+            <div className="text-xl font-bold">{totalFavoris}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Circuits sauvegardés
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Alertes
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
             <Bell className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">
+            <div className="text-xl font-bold">
               {notificationsNonLues > 0 ? (
                 <span className="text-rose-500 font-bold">
                   {notificationsNonLues}
@@ -247,7 +247,7 @@ export default async function DashboardPage() {
 
       {/* Réservations récentes */}
       {reservations.length > 0 && (
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-lg font-bold">

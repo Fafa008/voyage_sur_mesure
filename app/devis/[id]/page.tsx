@@ -12,7 +12,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { DevisResponseActions } from "@/components/devis/DevisResponseActions";
 import { PaymentForm } from "@/components/reservation/PaymentForm";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
@@ -111,7 +111,7 @@ export default async function DevisDetailPage({
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Demande de Devis #{devis.id}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Demande de Devis #{devis.id}</h1>
           <p className="text-sm text-muted-foreground">
             Demandé le {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
           </p>
@@ -184,8 +184,8 @@ export default async function DevisDetailPage({
               <Link
                 href={`/paiement/${devis.reservation.id}`}
                 className={
-                  buttonVariants({ variant: "default", size: "lg" }) +
-                  " font-bold shadow-md"
+                buttonVariants({ variant: "default", size: "lg" }) +
+                " font-bold shadow-sm"
                 }
               >
                 <CreditCard className="w-4 h-4 mr-2" />

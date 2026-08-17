@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { removeFavori } from "@/app/actions/favori/remove-favori.action";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { HeartOff, Loader2 } from "lucide-react";
 
 interface RemoveFavoriButtonProps {

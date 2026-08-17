@@ -28,7 +28,7 @@ export function NavigationButtons({
         type="button"
         onClick={onPrevious}
         disabled={currentStep === 0}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-foreground font-semibold text-sm bg-card hover:bg-accent transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card shadow-xs active:scale-98"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-foreground font-semibold text-sm bg-card hover:bg-accent transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card"
       >
         <ArrowLeft className="w-4 h-4" />
         Précédent
@@ -39,7 +39,7 @@ export function NavigationButtons({
           type="button"
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200 shadow-md disabled:opacity-60 disabled:cursor-not-allowed active:scale-98"
+          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
@@ -57,7 +57,7 @@ export function NavigationButtons({
         <button
           type="button"
           onClick={onNext}
-          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200 shadow-md active:scale-98"
+          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-95 transition-all duration-200"
         >
           Suivant
           <ArrowRight className="w-4 h-4" />

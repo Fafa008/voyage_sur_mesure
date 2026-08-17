@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Compass,
   ShieldCheck,
@@ -56,7 +56,7 @@ export default function WhyUs() {
               <span className="text-xs uppercase tracking-widest font-semibold text-primary">
                 L'Esprit Mon Voyage
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                 Voyager, Simplifié
                 <br />
                 et Fiable
@@ -86,7 +86,7 @@ export default function WhyUs() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-border/40">
               {stats.map((stat, i) => (
                 <div key={i} className="text-center sm:text-left space-y-0.5">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-primary leading-none">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary leading-none">
                     {stat.value}
                   </div>
                   <p className="text-[11px] text-muted-foreground font-medium">
@@ -104,7 +104,7 @@ export default function WhyUs() {
               return (
                 <Card
                   key={index}
-                  className="group border border-border/60 bg-background hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="group bg-background hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <CardContent className="p-5 space-y-3">
                     <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">

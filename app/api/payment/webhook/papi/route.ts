@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       await prisma.paymentWebhook.create({
         data: {
           provider: "PAPI",
-          payload: payload,
+          payload: JSON.parse(JSON.stringify(payload)),
           isProcessed: false,
           error: `Transaction not found for ref: ${reference}`,
         },

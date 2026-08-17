@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Compass, Mail, Phone, MapPin, Send } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const quickLinks = [
   { label: "Accueil", href: "/home" },
@@ -37,10 +38,10 @@ export default function Footer() {
               className="flex items-center gap-2 w-full sm:w-auto max-w-md"
               onSubmit={(e) => e.preventDefault()}
             >
-              <input
+              <Input
                 type="email"
                 placeholder="Votre adresse email"
-                className="flex-1 px-4 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                className="flex-1"
               />
               <Button type="submit" className="px-5 shrink-0">
                 <Send className="w-4 h-4 mr-1.5" />

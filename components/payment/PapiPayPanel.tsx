@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { PaymentResult } from "@/types/payment.types";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -129,7 +129,7 @@ export function PapiPayPanel({
 
       <CardContent className="space-y-6">
         {/* Payment info */}
-        <div className="bg-card rounded-xl border border-border/80 shadow-xs p-5 space-y-4 max-w-sm mx-auto">
+        <div className="bg-card rounded-xl border border-border/80 p-5 space-y-4 max-w-sm mx-auto">
           <div className="flex items-center gap-3 text-sm">
             <Shield className="w-5 h-5 text-emerald-600 shrink-0" />
             <span className="text-muted-foreground">
@@ -156,7 +156,7 @@ export function PapiPayPanel({
               href={paymentResult.checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm transition-colors shadow-md"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm transition-colors"
             >
               Payer maintenant
               <ExternalLink className="w-4 h-4" />

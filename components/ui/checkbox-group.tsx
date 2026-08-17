@@ -1,26 +1,25 @@
-// components/ui/CheckboxGroup.tsx
-"use client";
+"use client"
 
-import { Check } from "lucide-react";
+import { Check } from "lucide-react"
 
 interface Option {
-  value: string;
-  label: string;
-  sublabel?: string;
-  icon?: React.ReactNode;
+  value: string
+  label: string
+  sublabel?: string
+  icon?: React.ReactNode
 }
 
 interface CheckboxGroupProps {
-  label: string;
-  name: string;
-  options: Option[];
-  values: string[];
-  onChange: (value: string, checked: boolean) => void;
-  className?: string;
-  sublabel?: string;
+  label: string
+  name: string
+  options: Option[]
+  values: string[]
+  onChange: (value: string, checked: boolean) => void
+  className?: string
+  sublabel?: string
 }
 
-export function CheckboxGroup({
+function CheckboxGroup({
   label,
   name,
   options,
@@ -30,7 +29,7 @@ export function CheckboxGroup({
   sublabel,
 }: CheckboxGroupProps) {
   return (
-    <div className={`space-y-2.5 ${className}`}>
+    <div data-slot="checkbox-group" className={`space-y-2.5 ${className}`}>
       <div>
         <div className="flex items-center justify-between">
           <span className="block text-sm font-semibold text-foreground">
@@ -51,17 +50,18 @@ export function CheckboxGroup({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
         {options.map(({ value, label: itemLabel, sublabel: itemSublabel, icon }) => {
-          const isSelected = values.includes(value);
+          const isSelected = values.includes(value)
 
           return (
             <button
               key={value}
               type="button"
               onClick={() => onChange(value, !isSelected)}
-              className={`relative flex items-center justify-between p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer select-none ${
+              data-slot="checkbox-item"
+              className={`relative flex items-center justify-between p-3 rounded-xl border text-left transition-all duration-150 cursor-pointer select-none ${
                 isSelected
-                  ? "bg-primary/10 border-primary text-foreground shadow-xs font-medium"
-                  : "bg-card border-border hover:border-primary/40 hover:bg-accent/40 text-foreground"
+                  ? "bg-primary/10 border-primary/50 text-foreground"
+                  : "bg-card border-border hover:border-primary/30 hover:bg-muted/30 text-foreground"
               }`}
             >
               <div className="flex items-center gap-2.5 pr-2 min-w-0">
@@ -101,13 +101,15 @@ export function CheckboxGroup({
                 name={name}
                 value={value}
                 checked={isSelected}
-                onChange={() => {}} // géré par le bouton parent
+                onChange={() => {}}
                 className="sr-only"
               />
             </button>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }
+
+export { CheckboxGroup }

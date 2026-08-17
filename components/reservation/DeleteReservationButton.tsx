@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteReservationAction } from "@/app/actions/reservation/delete-reservation.action";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 interface DeleteReservationButtonProps {

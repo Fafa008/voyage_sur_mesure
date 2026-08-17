@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { deleteAvis } from "@/app/admin/avis/actions/delete-avis.action";
 
 interface DeleteAvisFormProps {

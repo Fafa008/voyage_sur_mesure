@@ -1,10 +1,10 @@
 // components/devis/sections/TravelSection.tsx
 "use client";
 
-import { InputField } from "@/components/ui/InputField";
-import { SelectField } from "@/components/ui/SelectField";
-import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
-import { CounterInput } from "@/components/ui/CounterInput";
+import { InputField } from "@/components/ui/input-field";
+import { SelectField } from "@/components/ui/select-field";
+import { CheckboxGroup } from "@/components/ui/checkbox-group";
+import { CounterInput } from "@/components/ui/counter-input";
 import type { DevisFormData, DevisOption } from "@/types/devis";
 import { Compass, Calendar, Users, Sparkles, MapPin, Tag } from "lucide-react";
 
@@ -65,11 +65,11 @@ export function TravelSection({
     <div className="space-y-8">
       {/* En-tête */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           2
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Votre Projet de Voyage
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -80,10 +80,10 @@ export function TravelSection({
       </div>
 
       {/* 1. Circuit d'inspiration */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Point de départ
           </h3>
         </div>
@@ -100,16 +100,16 @@ export function TravelSection({
             })),
           ]}
           value={data.circuitId}
-          onChange={(e) => updateData({ circuitId: e.target.value })}
+          onValueChange={(val) => updateData({ circuitId: val })}
           sublabel="Le devis doit être rattaché à un circuit existant"
         />
       </div>
 
       {/* 2. Type de voyage & Thèmes */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-6 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-6">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Style & Environnement
           </h3>
         </div>
@@ -153,10 +153,10 @@ export function TravelSection({
       </div>
 
       {/* 3. Dates & Durée */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Période & Durée
           </h3>
         </div>
@@ -193,22 +193,22 @@ export function TravelSection({
             },
           ]}
           value={data.dureeFlexible ? "true" : "false"}
-          onChange={(e) =>
-            updateData({ dureeFlexible: e.target.value === "true" })
+          onValueChange={(val) =>
+            updateData({ dureeFlexible: val === "true" })
           }
         />
       </div>
 
       {/* 4. Composition des voyageurs */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
               Les Voyageurs
             </h3>
           </div>
-          <span className="text-xs font-bold text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <span className="text-xs font-semibold text-primary px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
             Total : {data.adultes + data.enfants + data.ados} personne(s)
           </span>
         </div>

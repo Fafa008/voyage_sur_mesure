@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PaymentMethod } from "@prisma/client";
 import { initiatePaymentFromDevisAction } from "@/actions/payments.actions";
 import { PaymentMethodCard } from "@/components/payment/PaymentMethodCard";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -46,12 +46,12 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Dynamic Amount Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-5 flex items-center justify-between">
+      <div className="rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-5 flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
             Montant total à régler
           </p>
-          <p className="text-3xl font-extrabold text-primary">{montant} MGA</p>
+          <p className="text-3xl font-bold text-primary">{montant} MGA</p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
           <CreditCard className="w-6 h-6" />
@@ -60,7 +60,7 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
 
       {/* Payment Methods Selection */}
       <div className="space-y-3">
-        <label className="text-sm font-bold text-foreground block">
+        <label className="text-sm font-semibold text-foreground block">
           Choisissez votre mode de paiement
         </label>
 
@@ -105,7 +105,7 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-12 text-base font-bold shadow-md cursor-pointer"
+        className="w-full h-12 text-base font-bold cursor-pointer"
         size="lg"
       >
         {loading ? (

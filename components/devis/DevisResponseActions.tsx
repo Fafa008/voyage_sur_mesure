@@ -6,7 +6,7 @@ import {
   acceptDevis,
   refuseDevis,
 } from "@/app/actions/devis/accept-devis.action";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 interface DevisResponseActionsProps {

@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { InputField } from "@/components/ui/InputField";
-import { SelectField } from "@/components/ui/SelectField";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
+import { SelectField } from "@/components/ui/select-field";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { updateCircuit } from "@/app/admin/circuits/actions/update-circuit.action";
 
@@ -45,7 +47,7 @@ export default async function EditCircuitPage({
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Modifier le circuit</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Modifier le circuit</h1>
           <p className="text-muted-foreground text-sm">ID #{circuit.id}</p>
         </div>
         <Button variant="outline">
@@ -53,7 +55,7 @@ export default async function EditCircuitPage({
         </Button>
       </div>
 
-      <form action={updateCircuit} className="space-y-6">
+      <form action={updateCircuit} className="space-y-5">
         <input type="hidden" name="id" value={circuit.id} />
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -137,23 +139,19 @@ export default async function EditCircuitPage({
         </div>
 
         <div className="space-y-1.5">
-          <label
-            htmlFor="description"
-            className="block text-sm font-semibold text-foreground"
-          >
+          <Label htmlFor="description">
             Description
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             id="description"
             name="description"
             defaultValue={circuit.description ?? ""}
             rows={5}
             placeholder="Décrivez l'itinéraire, les points forts et le programme du circuit..."
-            className="w-full p-3 border border-border rounded-xl bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all text-sm placeholder:text-muted-foreground/60"
           />
         </div>
 
-        <div className="border border-border/60 p-5 rounded-2xl bg-card/60">
+        <div className="p-5 rounded-xl bg-card">
           <ImageManager
             initialImages={circuit.images.map((img) => ({
               url: img.url,

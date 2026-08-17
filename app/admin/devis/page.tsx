@@ -17,15 +17,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import { FileText, Users } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 const statutColors: Record<StatutDevis, string> = {
-  [StatutDevis.en_cours]: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  [StatutDevis.en_modification]:
-    "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  [StatutDevis.en_cours]: "bg-muted text-foreground/80 border-border",
+  [StatutDevis.en_modification]: "bg-muted text-foreground/80 border-border",
   [StatutDevis.valide]: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   [StatutDevis.accepte]:
     "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -67,41 +66,39 @@ export default async function AdminDevisPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Gestion des Devis
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Consultez, suivez et supprimez les demandes de devis de tous les
-            clients.
-          </p>
-        </div>
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+          Gestion des Devis
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Consultez, suivez et supprimez les demandes de devis de tous les
+          clients.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Devis
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold">{totalDevis}</div>
+            <div className="text-3xl font-bold">{totalDevis}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Demandes enregistrées
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               En Étude
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-amber-600">
+            <div className="text-3xl font-bold text-amber-600">
               {devisEnCours}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -110,14 +107,14 @@ export default async function AdminDevisPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Convertis en Réservation
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-extrabold text-emerald-600">
+            <div className="text-3xl font-bold text-emerald-600">
               {devisAvecReservation}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -127,7 +124,7 @@ export default async function AdminDevisPage() {
         </Card>
       </div>
 
-      <Card className="border border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base font-bold">
             Liste des Devis

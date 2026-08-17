@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
 
 // Routes publiques accessibles sans session.
 const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register", "/contact"];
 
-export function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Routes qui gèrent leur propre authentification/autorisation :
@@ -28,16 +29,29 @@ export function proxy(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  // Pas de session et route non publique → connexion requise.
-  if (!sessionCookie && !isPublic) {
+  // Valider la session côté serveur (pas juste la présence du cookie)
+  let session = null;
+  if (sessionCookie) {
+    try {
+      session = await auth.api.getSession({
+        headers: new Headers({ cookie: request.headers.get("cookie") || "" }),
+      });
+    } catch {
+      session = null;
+    }
+  }
+
+  // Pas de session valide et route non publique → connexion requise.
+  if (!session && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Déjà connecté → ne pas laisser revoir login/register.
-  if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
+  // Session valide → ne pas laisser revoir login/register.
+  if (session && (pathname === "/login" || pathname === "/register")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Cookie stale/expiré sur login/register → on laisse passer (évite la boucle).
   return NextResponse.next();
 }
 

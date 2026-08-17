@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Sparkles,
   ArrowRight,
@@ -31,7 +31,7 @@ export default function Hero() {
                 <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                 Trouvez votre voyage idéal
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
                 Là Où Les Rêves <br className="hidden sm:inline" />
                 Deviennent Des{" "}
                 <span className="text-primary font-serif italic font-normal relative">
@@ -65,7 +65,7 @@ export default function Hero() {
                 href="/devis/nouveau"
                 className={
                   buttonVariants({ variant: "default", size: "lg" }) +
-                  " px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                  " px-8 py-6 text-base font-semibold shadow-lg hover:shadow-lg transition-all"
                 }
               >
                 Demander un devis
@@ -101,7 +101,7 @@ export default function Hero() {
 
           {/* Right Column - Hero Image + Floating Card */}
           <div className="relative order-1 lg:order-2">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[3/2] lg:aspect-[3/2]">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[3/2] lg:aspect-[3/2]">
               <Image
                 src="/hero-baobabs.png"
                 alt="Allée des Baobabs au coucher du soleil à Madagascar"
@@ -115,7 +115,7 @@ export default function Hero() {
             </div>
 
             {/* Floating Card (Featured Circuit) */}
-            <div className="absolute -bottom-6 -left-4 sm:left-4 lg:-left-8 max-w-[260px] bg-card border border-border/60 rounded-xl shadow-xl p-4 backdrop-blur-sm">
+            <div className="absolute -bottom-6 -left-4 sm:left-4 lg:-left-8 max-w-[260px] bg-card rounded-xl shadow-lg p-4 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted">
                   <Image
@@ -130,7 +130,7 @@ export default function Hero() {
                   <h3 className="text-sm font-bold text-foreground truncate">
                     Allée des Baobabs
                   </h3>
-                  <p className="text-lg font-extrabold text-primary leading-tight">
+                  <p className="text-lg font-bold text-primary leading-tight">
                     890 000 MGA
                     <span className="text-[10px] font-normal text-muted-foreground ml-1">
                       /personne

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PaymentResult } from "@/types/payment.types";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -98,13 +98,13 @@ export function BinancePayPanel({
   }
 
   return (
-    <Card className="border-amber-200/60 bg-amber-500/5">
+      <Card className="border-amber-200/60 bg-amber-500/5">
       <CardHeader className="pb-3 text-center">
-        <div className="flex items-center justify-center gap-2 mb-1 text-amber-600 font-bold text-sm">
+        <div className="flex items-center justify-center gap-2 mb-1 text-amber-600 font-semibold text-sm">
           <QrCode className="w-4 h-4" />
           Paiement via Binance Pay
         </div>
-        <CardTitle className="text-2xl font-extrabold text-primary">
+        <CardTitle className="text-base font-semibold text-primary">
           {amount} MGA
         </CardTitle>
         <CardDescription>
@@ -115,7 +115,7 @@ export function BinancePayPanel({
 
       <CardContent className="space-y-6">
         {/* QR Code Container */}
-        <div className="flex flex-col items-center justify-center p-6 bg-card rounded-xl border border-border/80 shadow-xs max-w-xs mx-auto text-center space-y-3">
+        <div className="flex flex-col items-center justify-center p-6 bg-card rounded-xl border border-border/80 max-w-xs mx-auto text-center space-y-3">
           <div className="w-44 h-44 bg-gradient-to-br from-amber-400/20 to-amber-600/20 rounded-xl p-3 flex items-center justify-center border border-amber-500/30 relative group">
             {/* SVG QR Code Simulation */}
             <svg
@@ -168,7 +168,7 @@ export function BinancePayPanel({
               href={paymentResult.checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-sm transition-colors shadow-xs"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-sm transition-colors"
             >
               Payer sur Binance.com
               <ExternalLink className="w-4 h-4" />

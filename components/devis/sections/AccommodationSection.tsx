@@ -1,8 +1,8 @@
 // components/devis/sections/AccommodationSection.tsx
 "use client";
 
-import { SelectField } from "@/components/ui/SelectField";
-import { InputField } from "@/components/ui/InputField";
+import { SelectField } from "@/components/ui/select-field";
+import { InputField } from "@/components/ui/input-field";
 import {
   Building,
   Utensils,
@@ -69,11 +69,11 @@ export function AccommodationSection({
     <div className="space-y-8">
       {/* En-tête */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           3
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Hébergement & Restauration
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -99,7 +99,7 @@ export function AccommodationSection({
                 key={item.id}
                 type="button"
                 onClick={() => onChange("typeHebergement", item.id)}
-                className={`relative flex flex-col justify-between p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
+                className={`relative flex flex-col justify-between p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? "bg-primary/10 border-primary shadow-xs"
                     : "bg-card border-border hover:border-primary/40 hover:bg-accent/40"
@@ -128,7 +128,7 @@ export function AccommodationSection({
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-sm text-foreground">
+                  <h4 className="font-semibold text-sm text-foreground">
                     {item.title}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1 leading-snug">
@@ -142,10 +142,10 @@ export function AccommodationSection({
       </div>
 
       {/* 2. Restauration & Régimes */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-5">
         <div className="flex items-center gap-2">
           <Utensils className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Régime alimentaire & Restauration
           </h3>
         </div>
@@ -164,7 +164,7 @@ export function AccommodationSection({
               { value: "autre", label: "Autre précision" },
             ]}
             value={data.regime || "aucun"}
-            onChange={(e) => onChange("regime", e.target.value)}
+            onValueChange={(val) => onChange("regime", val)}
           />
 
           <InputField

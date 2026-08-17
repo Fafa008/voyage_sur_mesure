@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { updateUserRole } from "@/app/admin/utilisateurs/actions/update-user-role.action";
 import { RoleNom } from "@prisma/client";
 
@@ -46,7 +46,7 @@ export default async function AdminUtilisateursPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">👥 Utilisateurs</h1>
+        <h1 className="text-xl font-bold">Utilisateurs</h1>
         <p className="text-muted-foreground text-sm">
           {users.length} compte(s) inscrit(s) — gérez les rôles et accès
         </p>
@@ -137,13 +137,13 @@ export default async function AdminUtilisateursPage() {
                             <select
                               name="roleId"
                               defaultValue={user.roleId ?? undefined}
-                              className="h-8 rounded-lg border border-border bg-card text-foreground px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
+                              className="h-8 rounded-lg border border-input bg-background text-foreground px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer dark:bg-muted"
                             >
                               {roles.map((role) => (
                                 <option
                                   key={role.id}
                                   value={role.id}
-                                  className="bg-card text-foreground"
+                                  className="bg-popover text-popover-foreground"
                                 >
                                   {roleLabels[role.nom]}
                                 </option>

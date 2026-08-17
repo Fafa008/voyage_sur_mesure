@@ -32,13 +32,11 @@ export default function LogoutButton() {
       className="
         flex items-center gap-1.5
         rounded-md
-        px-2 py-3
+        px-2.5 py-1.5
         text-xs font-medium
         text-muted-foreground
         transition-colors duration-200
-        hover:bg-red-50
-        hover:text-red-600
-        dark:hover:bg-red-950/30
+        hover:text-destructive
         disabled:pointer-events-none
         disabled:opacity-50
       "

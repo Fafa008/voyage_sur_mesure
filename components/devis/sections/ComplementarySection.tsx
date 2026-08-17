@@ -1,8 +1,10 @@
 // components/devis/sections/ComplementarySection.tsx
 "use client";
 
-import { SelectField } from "@/components/ui/SelectField";
-import { MessageSquare, Share2, Mail, CheckCircle2 } from "lucide-react";
+import { SelectField } from "@/components/ui/select-field";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { MessageSquare, Share2 } from "lucide-react";
 
 interface ComplementarySectionProps {
   data: {
@@ -21,11 +23,11 @@ export function ComplementarySection({
     <div className="space-y-8">
       {/* En-tête */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           6
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Précisions Complémentaires
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -35,21 +37,21 @@ export function ComplementarySection({
       </div>
 
       {/* Commentaire libre */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-3 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-primary" />
-          <label htmlFor="commentaire" className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <Label htmlFor="commentaire" className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Vos souhaits particuliers, envies ou contraintes
-          </label>
+          </Label>
         </div>
 
-        <textarea
+        <Textarea
           id="commentaire"
           name="commentaire"
           rows={5}
           value={data.commentaire}
           onChange={(e) => onChange("commentaire", e.target.value)}
-          className="w-full p-3.5 text-sm text-foreground bg-card border border-border rounded-xl shadow-xs transition-all duration-200 focus:outline-hidden focus:ring-2 focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground/60 resize-none hover:border-primary/40"
+          className="resize-none"
           placeholder="Ex: Nous célébrons nos 10 ans de mariage. Nous aimerions une nuit insolite sous les étoiles, et un guide francophone pour les visites."
         />
         <p className="text-[11px] text-muted-foreground">
@@ -58,7 +60,7 @@ export function ComplementarySection({
       </div>
 
       {/* Source & Newsletter */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-5 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-5">
         <SelectField
           label="Comment avez-vous découvert Mon Voyage Sur Mesure ?"
           id="source"
@@ -73,10 +75,10 @@ export function ComplementarySection({
             { value: "autre", label: "Autre" },
           ]}
           value={data.source}
-          onChange={(e) => onChange("source", e.target.value)}
+          onValueChange={(val) => onChange("source", val)}
         />
 
-        <div className="pt-2 border-t border-border/60">
+        <div className="pt-2 border-t border-border">
           <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-muted/30 cursor-pointer hover:bg-accent/40 transition-colors">
             <input
               type="checkbox"

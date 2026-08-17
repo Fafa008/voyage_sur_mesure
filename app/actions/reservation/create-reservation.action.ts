@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { Prisma, StatutDevis, StatutReservation } from "@prisma/client";
+import { Prisma, ReservationStatus, StatutDevis, StatutReservation } from "@prisma/client";
 
 const paymentSchema = z.object({
   devisId: z.coerce.number().int().positive(),
@@ -72,6 +72,7 @@ export async function createReservation(prevState: unknown, formData: FormData) 
         data: {
           devisId,
           montantFinal: montant,
+          status: ReservationStatus.EN_ATTENTE,
           statut: StatutReservation.confirmee,
         },
       });

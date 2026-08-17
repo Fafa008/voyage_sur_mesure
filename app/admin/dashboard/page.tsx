@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Users,
@@ -56,9 +56,9 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Vue d&apos;ensemble de l&apos;Administration
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ export default async function AdminDashboardPage() {
 
       {/* Grid de 4 statistiques principales */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Utilisateurs
@@ -88,14 +88,14 @@ export default async function AdminDashboardPage() {
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">{totalUsers}</div>
+            <div className="text-xl font-bold">{totalUsers}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Comptes inscrits
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Circuits
@@ -103,14 +103,14 @@ export default async function AdminDashboardPage() {
             <Compass className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">{totalCircuits}</div>
+            <div className="text-xl font-bold">{totalCircuits}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Itinéraires au catalogue
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Devis Reçus
@@ -118,22 +118,22 @@ export default async function AdminDashboardPage() {
             <FileText className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold">{totalDevis}</div>
+            <div className="text-xl font-bold">{totalDevis}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Demandes enregistrées
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Réservations
             </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-emerald-500" />
+            <CalendarCheck className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-emerald-600">
+            <div className="text-xl font-bold">
               {totalReservations}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -145,7 +145,7 @@ export default async function AdminDashboardPage() {
 
       {/* Grid 3 cartes d'analyses avancées */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Taux de Conversion
@@ -153,10 +153,10 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-3xl font-extrabold text-foreground">
+              <span className="text-2xl font-bold text-foreground">
                 {tauxConversion}%
               </span>
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
+              <TrendingUp className="h-5 w-5 text-primary" />
             </div>
             <CardDescription className="text-xs">
               Devis convertis en réservations
@@ -164,7 +164,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Modération des Avis
@@ -172,11 +172,11 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-3xl font-extrabold text-foreground">
+              <span className="text-2xl font-bold text-foreground">
                 {avisNonModeres}
               </span>
               {avisNonModeres > 0 && (
-                <AlertCircle className="h-5 w-5 text-amber-500 animate-pulse" />
+                <AlertCircle className="h-5 w-5 text-primary animate-pulse" />
               )}
             </div>
             <CardDescription className="text-xs">
@@ -185,7 +185,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Avis Clients
@@ -193,10 +193,10 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-3xl font-extrabold text-foreground">
+              <span className="text-2xl font-bold text-foreground">
                 {totalAvis}
               </span>
-              <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+              <Star className="h-5 w-5 text-primary fill-primary" />
             </div>
             <CardDescription className="text-xs">
               Retours d'expérience déposés
@@ -207,7 +207,7 @@ export default async function AdminDashboardPage() {
 
       {/* Répartition par statut */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base font-bold">
               Statut des Devis
@@ -221,7 +221,7 @@ export default async function AdminDashboardPage() {
               {devisParStatut.map((item) => (
                 <li
                   key={item.statut}
-                  className="flex items-center justify-between p-2.5 rounded-lg border border-border/40 bg-muted/20"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
                 >
                   <span className="capitalize text-sm font-medium text-foreground">
                     {item.statut.replace("_", " ")}
@@ -235,7 +235,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border border-border/60">
+        <Card>
           <CardHeader>
             <CardTitle className="text-base font-bold">
               Statut des Réservations
@@ -254,7 +254,7 @@ export default async function AdminDashboardPage() {
                 reservationsParStatut.map((item) => (
                   <li
                     key={item.statut}
-                    className="flex items-center justify-between p-2.5 rounded-lg border border-border/40 bg-muted/20"
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
                   >
                     <span className="capitalize text-sm font-medium text-foreground">
                       {item.statut}
@@ -271,10 +271,10 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Actions rapides */}
-      <Card className="border border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base font-bold">
-            ⚡ Actions d&apos;Administration Rapides
+            Actions rapides
           </CardTitle>
           <CardDescription className="text-xs">
             Raccourcis vers la gestion du catalogue et la modération

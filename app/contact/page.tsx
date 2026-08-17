@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -5,14 +7,25 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 export default function ContactPage() {
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
   return (
     <main className="max-w-4xl mx-auto py-12 px-4 space-y-8">
       <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl font-extrabold tracking-tight">
-          📞 Contactez-nous
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+          Contactez-nous
         </h1>
         <p className="text-muted-foreground mt-2">
           Notre équipe d&apos;experts est à votre disposition pour concrétiser
@@ -52,7 +65,7 @@ export default function ContactPage() {
             </div>
             <div>
               <span className="font-semibold block text-foreground">
-                Horaires d'ouverture :
+                Horaires d&apos;ouverture :
               </span>
               <p className="text-muted-foreground">
                 Lundi - Vendredi : 8h00 - 18h00
@@ -71,45 +84,52 @@ export default function ContactPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nom complet
-                </label>
-                <input
-                  type="text"
-                  placeholder="Votre nom"
-                  className="w-full p-2 border rounded-md text-sm"
-                  required
-                />
+            {submitted ? (
+              <div className="text-center py-8 space-y-2">
+                <p className="text-lg font-semibold text-foreground">
+                  Message envoyé !
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Nous vous répondrons dans les plus brefs délais.
+                </p>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="nom">Nom complet</Label>
+                  <Input
+                    id="nom"
+                    type="text"
+                    placeholder="Votre nom"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input
-                  type="email"
-                  placeholder="votre.email@example.com"
-                  className="w-full p-2 border rounded-md text-sm"
-                  required
-                />
-              </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="votre.email@example.com"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Message
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Expliquez-nous votre demande..."
-                  className="w-full p-2 border rounded-md text-sm"
-                  required
-                />
-              </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    rows={4}
+                    placeholder="Expliquez-nous votre demande..."
+                    required
+                  />
+                </div>
 
-              <Button type="submit" className="w-full">
-                Envoyer le message
-              </Button>
-            </form>
+                <Button type="submit" className="w-full">
+                  Envoyer le message
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>

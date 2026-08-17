@@ -1,7 +1,7 @@
 // components/devis/sections/ActivitiesTransportSection.tsx
 "use client";
 
-import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
+import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import type { DevisFormData } from "@/types/devis";
 import { Activity, Car, Compass, Waves, Trees, Bike, Footprints, ShieldCheck } from "lucide-react";
 
@@ -40,11 +40,11 @@ export function ActivitiesTransportSection({
     <div className="space-y-8">
       {/* En-tête */}
       <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-xs">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
           4
         </div>
         <div>
-          <h2 className="text-xl font-bold text-foreground tracking-tight">
+          <h2 className="text-base font-semibold text-foreground tracking-tight">
             Activités & Transport
           </h2>
           <p className="text-xs text-muted-foreground">
@@ -54,10 +54,10 @@ export function ActivitiesTransportSection({
       </div>
 
       {/* 1. Activités */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Activités souhaitées
           </h3>
         </div>
@@ -75,10 +75,10 @@ export function ActivitiesTransportSection({
       </div>
 
       {/* 2. Transports */}
-      <div className="p-6 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+      <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Car className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
             Mode de Transport
           </h3>
         </div>

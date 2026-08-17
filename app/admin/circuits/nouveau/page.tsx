@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { InputField } from "@/components/ui/InputField";
-import { SelectField } from "@/components/ui/SelectField";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
+import { SelectField } from "@/components/ui/select-field";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { createCircuit } from "@/app/admin/circuits/actions/create-circuit.action";
 
@@ -21,7 +23,7 @@ export default async function NewCircuitPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Ajouter un nouveau circuit</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Ajouter un nouveau circuit</h1>
           <p className="text-muted-foreground text-sm">
             Créer un circuit pour l&apos;administration.
           </p>
@@ -31,7 +33,7 @@ export default async function NewCircuitPage() {
         </Button>
       </div>
 
-      <form action={createCircuit} className="space-y-6">
+      <form action={createCircuit} className="space-y-5">
         <div className="grid gap-6 md:grid-cols-2">
           <InputField id="titre" label="Titre" required />
           <InputField id="slug" label="Slug" required />
@@ -99,22 +101,18 @@ export default async function NewCircuitPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label
-            htmlFor="description"
-            className="block text-sm font-semibold text-foreground"
-          >
+          <Label htmlFor="description">
             Description
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             id="description"
             name="description"
             rows={5}
             placeholder="Décrivez l'itinéraire, les points forts et le programme du circuit..."
-            className="w-full p-3 border border-border rounded-xl bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all text-sm placeholder:text-muted-foreground/60"
           />
         </div>
 
-        <div className="border border-border/60 p-5 rounded-2xl bg-card/60">
+        <div className="p-5 rounded-xl bg-card">
           <ImageManager />
         </div>
 

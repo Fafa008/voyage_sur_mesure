@@ -3,8 +3,10 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { validateDevisWithPricing } from "@/app/actions/devis/update-devis-pricing.action";
-import { InputField } from "@/components/ui/InputField";
-import { Button } from "@/components/ui/Button";
+import { InputField } from "@/components/ui/input-field";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { StatutDevis } from "@prisma/client";
 
 interface ConseillerPricingFormProps {
@@ -55,20 +57,17 @@ export function ConseillerPricingForm({
       />
 
       <div className="space-y-1.5">
-        <label
-          htmlFor="commentaireConseiller"
-          className="block text-sm font-semibold text-foreground"
-        >
+        <Label htmlFor="commentaireConseiller">
           Message au client
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="commentaireConseiller"
           name="commentaireConseiller"
           required
           rows={4}
           defaultValue={defaultCommentaire ?? ""}
           placeholder="Détaillez le chiffrage, les inclusions, les conditions…"
-          className="w-full py-2.5 px-3.5 text-sm text-foreground bg-card border border-border rounded-xl shadow-xs transition-all focus:outline-hidden focus:ring-2 focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground/60 resize-y min-h-[100px]"
+          className="resize-y min-h-[100px]"
         />
       </div>
 

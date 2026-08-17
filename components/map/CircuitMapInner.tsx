@@ -24,7 +24,7 @@ import {
   PointOfInterest,
 } from "@/lib/data/madagascar-pois";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   MapPin,
   Hotel,

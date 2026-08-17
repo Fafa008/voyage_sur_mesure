@@ -5,7 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutReservation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
 import {
   Card,
@@ -109,7 +109,7 @@ export default async function ReservationDetailPage({ params }: Props) {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Réservation #{reservation.id}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Réservation #{reservation.id}</h1>
           <p className="text-sm text-muted-foreground">
             Confirmée le{" "}
             {new Date(reservation.dateReservation).toLocaleDateString("fr-FR", {
@@ -227,7 +227,7 @@ export default async function ReservationDetailPage({ params }: Props) {
               <span className="text-muted-foreground block text-xs uppercase tracking-wider">
                 Montant réglé
               </span>
-              <p className="text-2xl font-extrabold text-primary">
+              <p className="text-xl font-bold text-primary">
                 {reservation.montantFinal?.toString()} MGA
               </p>
             </div>

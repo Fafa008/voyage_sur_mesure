@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { approveAvis } from "@/app/admin/avis/actions/moderate-avis.action";
 import DeleteAvisForm from "@/components/admin/avis/DeleteAvisForm";
 import { Star } from "lucide-react";
@@ -52,7 +52,7 @@ export default async function AdminAvisPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Modération des avis</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Modération des avis</h1>
         <p className="text-muted-foreground text-sm">
           {avisList.length} avis au total
           {pendingCount > 0 && (

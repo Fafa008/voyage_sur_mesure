@@ -16,6 +16,12 @@ export class PaymentService {
     if (!reservation) throw new Error("Reservation not found");
     if (!reservation.montantFinal) throw new Error("Amount is not defined");
 
+    // Vérifier la propriété de la réservation
+    const isOwner =
+      reservation.userId === userId ||
+      reservation.devis?.userId === userId;
+    if (!isOwner) throw new Error("Accès refusé : vous ne pouvez payer que vos propres réservations");
+
     const amount = Number(reservation.montantFinal);
     const currency = "MGA";
 
@@ -49,12 +55,17 @@ export class PaymentService {
     }
 
     // 3. Initiate Charge on Provider
+    const appUrl =
+      process.env.APP_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
+
     const result = await provider.createCharge(amount, currency, {
       reservationId,
       userId,
       description: `Paiement Réservation #${reservationId}`,
-      returnUrl: `${process.env.APP_URL}/paiement/${reservationId}/confirmation`,
-      cancelUrl: `${process.env.APP_URL}/paiement/${reservationId}`,
+      returnUrl: `${appUrl}/paiement/${reservationId}/confirmation`,
+      cancelUrl: `${appUrl}/paiement/${reservationId}`,
       clientName,
     });
 
@@ -135,14 +146,16 @@ export class PaymentService {
       reservationId = devis.reservation.id;
     } else {
       const reservation = await prisma.$transaction(async (tx) => {
-        if (devis.circuit && devis.circuit.nbPlacesDisponibles !== null && devis.circuit.nbPlacesDisponibles >= 0) {
-          const remainingPlaces = devis.circuit.nbPlacesDisponibles - devis.nombrePersonnes;
-          if (remainingPlaces < 0) {
-            await tx.circuit.update({
-              where: { id: devis.circuitId! },
-              data: { nbPlacesDisponibles: 0 }
-            });
+        if (devis.circuit && devis.circuitId) {
+          const circuit = await tx.circuit.findUnique({ where: { id: devis.circuitId }, select: { nbPlacesDisponibles: true } });
+          if (circuit && circuit.nbPlacesDisponibles < devis.nombrePersonnes) {
+            throw new Error("Plus assez de places disponibles pour ce circuit");
           }
+
+          await tx.circuit.update({
+            where: { id: devis.circuitId },
+            data: { nbPlacesDisponibles: { decrement: devis.nombrePersonnes } }
+          });
         }
 
         const newRes = await tx.reservation.create({
@@ -159,13 +172,6 @@ export class PaymentService {
           where: { id: devisId },
           data: { statut: StatutDevis.reserve }
         });
-
-        if (devis.circuitId && devis.circuit) {
-          await tx.circuit.update({
-            where: { id: devis.circuitId },
-            data: { nbPlacesDisponibles: { decrement: devis.nombrePersonnes } }
-          });
-        }
 
         return newRes;
       });

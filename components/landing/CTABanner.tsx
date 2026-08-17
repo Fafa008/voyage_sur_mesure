@@ -1,13 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight, Plane } from "lucide-react";
 
 export default function CTABanner() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
       <div className="max-w-7xl mx-auto">
-        <div className="relative overflow-hidden rounded-2xl bg-card border border-border/60 shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl bg-card shadow-lg">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Left - Image */}
             <div className="relative h-64 lg:h-auto min-h-[320px] overflow-hidden">
@@ -33,7 +33,7 @@ export default function CTABanner() {
                   Partez à l'aventure
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                   Ouvrez la Porte de
                   <br />
                   <span className="text-primary">Votre Prochain Voyage</span>
@@ -50,7 +50,7 @@ export default function CTABanner() {
                     href="/devis/nouveau"
                     className={
                       buttonVariants({ variant: "default", size: "lg" }) +
-                      " px-8 font-semibold shadow-lg hover:shadow-xl transition-all"
+                      " px-8 font-semibold shadow-lg hover:shadow-lg transition-all"
                     }
                   >
                     Créer Mon Voyage

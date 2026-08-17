@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Bell, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -43,7 +43,7 @@ export default async function NotificationsPage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             Retour au tableau de bord
           </Link>
-          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
             <Bell className="w-7 h-7 text-primary" />
             Notifications
           </h1>

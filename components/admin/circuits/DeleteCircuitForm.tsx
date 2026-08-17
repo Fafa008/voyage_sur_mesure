@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { deleteCircuit } from "@/app/admin/circuits/actions/delete-circuit.action";
 
 interface DeleteCircuitFormProps {

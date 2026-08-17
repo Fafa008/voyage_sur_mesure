@@ -10,9 +10,13 @@ import type { PaymentResult } from "@/types/payment.types";
 export async function initiatePaymentAction(
   reservationId: number,
   method: PaymentMethod,
-  userId: string
 ) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) return { success: false, error: "Non authentifié" };
+
+    const userId = session.user.id;
+
     console.log(
       `[initiatePaymentAction] Starting for reservation=${reservationId}, method=${method}`
     );
@@ -108,12 +112,19 @@ export async function initiatePaymentFromDevisAction(devisId: number, method: Pa
 
 export async function checkPaymentStatusAction(transactionId: string) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) return { success: false, error: "Non authentifié" };
+
     const { prisma } = await import("@/lib/prisma");
     const transaction = await prisma.paymentTransaction.findUnique({
       where: { id: transactionId },
     });
 
     if (!transaction) throw new Error("Transaction non trouvée");
+
+    if (transaction.userId !== session.user.id) {
+      return { success: false, error: "Accès refusé" };
+    }
 
     return { success: true, data: { status: transaction.status } };
   } catch (error: unknown) {
@@ -125,6 +136,9 @@ export async function checkPaymentStatusAction(transactionId: string) {
 
 export async function markBankTransferAsPaidAction(transactionId: string) {
   try {
+    const { requireAdmin } = await import("@/lib/admin-auth");
+    await requireAdmin();
+
     await paymentService.updateTransactionStatus(transactionId, PaymentStatus.PAID);
     revalidatePath("/admin/paiements");
     revalidatePath("/admin/dashboard");

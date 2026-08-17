@@ -82,10 +82,10 @@ export function AdminSidebarNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-200",
+              "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
               isActive
-                ? "bg-primary/15 text-primary font-bold shadow-xs border border-primary/20"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"
+                ? "bg-primary/10 text-primary font-semibold"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <Icon className="w-4 h-4 shrink-0" />

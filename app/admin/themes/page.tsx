@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTheme } from "@/app/admin/themes/actions/create-theme.action";
 import { createRegion } from "@/app/admin/themes/actions/create-region.action";
@@ -30,7 +30,7 @@ export default async function AdminThemesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Thèmes &amp; Régions</h1>
+        <h1 className="text-xl font-bold">Thèmes &amp; Régions</h1>
         <p className="text-muted-foreground text-sm">
           Gérez les catégories utilisées pour classer les circuits
         </p>

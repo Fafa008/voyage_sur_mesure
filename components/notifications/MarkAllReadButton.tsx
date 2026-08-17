@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { markAllNotificationsRead } from "@/app/actions/notification/mark-notification-read.action";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CheckCheck, Loader2 } from "lucide-react";
 
 interface MarkAllReadButtonProps {

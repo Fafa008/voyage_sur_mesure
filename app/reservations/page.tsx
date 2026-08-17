@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutReservation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -51,7 +51,7 @@ export default async function ReservationsPage() {
   return (
     <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
       <div className="space-y-1">
-        <h1 className="text-3xl font-extrabold tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Mes Réservations
         </h1>
         <p className="text-muted-foreground">
@@ -80,7 +80,7 @@ export default async function ReservationsPage() {
           {reservations.map((res) => (
             <Card
               key={res.id}
-              className="border border-border/60 hover:border-primary/30 transition-colors"
+              className="hover:border-primary/30 transition-colors"
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">

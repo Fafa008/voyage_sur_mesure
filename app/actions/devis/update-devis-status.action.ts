@@ -6,11 +6,21 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { RoleNom } from '@prisma/client';
 
 export async function updateDevisStatus(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     throw new Error('Non authentifié');
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { role: true },
+  });
+
+  if (!user?.role || (user.role.nom !== RoleNom.admin && user.role.nom !== RoleNom.conseiller)) {
+    throw new Error('Accès refusé : seuls les conseillers et administrateurs peuvent modifier le statut d\'un devis');
   }
 
   const devisId = parseInt(formData.get('devisId') as string);

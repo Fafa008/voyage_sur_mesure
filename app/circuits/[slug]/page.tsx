@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, Hotel, Target, MapPin } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { CircuitMap } from "@/components/map/CircuitMap";
@@ -115,7 +115,7 @@ export default async function CircuitDetailPage({
         </div>
 
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-4xl font-extrabold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             {circuit.titre}
           </h1>
           <FavoriteButton circuitId={circuit.id} initialIsFavori={isFavori} />
@@ -125,7 +125,7 @@ export default async function CircuitDetailPage({
 
       {/* Galerie photos */}
       {circuit.images.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl overflow-hidden shadow-sm">
           {circuit.images.map((img, idx) => (
             <div
               key={img.id || idx}
@@ -151,7 +151,7 @@ export default async function CircuitDetailPage({
             <span className="text-sm text-muted-foreground block">
               Prix indicatif par personne
             </span>
-            <span className="text-3xl font-extrabold text-primary">
+            <span className="text-xl sm:text-2xl font-bold text-primary">
               {circuit.prixEstime
                 ? formatCurrency(circuit.prixEstime)
                 : "Sur mesure"}

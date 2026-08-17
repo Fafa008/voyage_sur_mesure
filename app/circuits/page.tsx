@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { formatCurrency } from "@/lib/format";
@@ -65,7 +65,7 @@ export default async function CircuitsPage({
   return (
     <main className="max-w-7xl mx-auto py-12 px-4 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Nos Circuits de Voyage
         </h1>
         <p className="text-muted-foreground mt-2">

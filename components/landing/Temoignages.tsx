@@ -45,7 +45,7 @@ export default function Temoignages() {
           <span className="text-xs uppercase tracking-widest font-semibold text-primary">
             Avis & Témoignages
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Approuvé par des Milliers de Voyageurs
           </h2>
         </div>
@@ -76,7 +76,7 @@ export default function Temoignages() {
           {avis.map((a, i) => (
             <Card
               key={i}
-              className="group border border-border/60 bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between p-6 space-y-6"
+              className="group bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between p-6 space-y-6"
             >
               <CardContent className="p-0 space-y-4">
                 <div className="flex items-center justify-between">

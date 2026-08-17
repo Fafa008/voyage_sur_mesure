@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -82,9 +82,9 @@ export default async function ConseillerDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Gestion des Demandes de Devis
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -94,7 +94,7 @@ export default async function ConseillerDashboardPage() {
         </div>
         <div className="text-sm text-muted-foreground bg-background px-4 py-2 rounded-xl border border-border shrink-0">
           En attente de traitement :{" "}
-          <span className="font-extrabold text-foreground">
+          <span className="font-bold text-foreground">
             {devisList.length}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default async function ConseillerDashboardPage() {
             <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-amber-600">
+            <div className="text-xl font-bold text-amber-600">
               {stats.en_cours}
             </div>
             <CardDescription className="text-xs mt-1">
@@ -127,7 +127,7 @@ export default async function ConseillerDashboardPage() {
             <FileText className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-orange-600">
+            <div className="text-xl font-bold text-orange-600">
               {stats.en_modification}
             </div>
             <CardDescription className="text-xs mt-1">
@@ -144,7 +144,7 @@ export default async function ConseillerDashboardPage() {
             <CheckCircle2 className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-blue-600">
+            <div className="text-xl font-bold text-blue-600">
               {stats.valide}
             </div>
             <CardDescription className="text-xs mt-1">
@@ -155,7 +155,7 @@ export default async function ConseillerDashboardPage() {
       </div>
 
       {/* Tableau des devis */}
-      <Card className="border border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg font-bold">
             Inbox des Demandes Client

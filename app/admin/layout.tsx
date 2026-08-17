@@ -3,8 +3,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RoleNom } from "@prisma/client";
-import LogoutButton from "@/components/auth/LogoutButton";
-import Link from "next/link";
 import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 
 export default async function AdminLayout({
@@ -26,9 +24,6 @@ export default async function AdminLayout({
   });
 
   if (!user || !user.role || user.role.nom !== RoleNom.admin) {
-    if (user?.role?.nom === RoleNom.admin) {
-      redirect("/admin/dashboard");
-    }
     redirect("/dashboard");
   }
 
@@ -36,7 +31,7 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Main Layout avec Sidebar */}
       <div className="flex-1 max-w-7xl w-full h-full mx-auto flex">
-        <aside className="w-64 border-r border-border/40 p-4 hidden md:block shrink-0 sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <aside className="w-60 border-r border-border/50 p-4 hidden md:block shrink-0 sticky top-16 self-start max-h-[calc(100vh-4rem)] overflow-y-auto">
           <AdminSidebarNav />
         </aside>
 
