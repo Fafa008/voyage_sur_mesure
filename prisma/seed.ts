@@ -12,6 +12,46 @@ const prisma = new PrismaClient({
   adapter,
 });
 
+const REGIONS_MADAGASCAR = [
+  "Diana",
+  "Sava",
+  "Itasy",
+  "Analamanga",
+  "Vakinankaratra",
+  "Bongolava",
+  "Sofia",
+  "Boeny",
+  "Betsiboka",
+  "Melaky",
+  "Alaotra-Mangoro",
+  "Atsinanana",
+  "Analanjirofo",
+  "Amoron'i Mania",
+  "Haute Matsiatra",
+  "Vatovavy",
+  "Fitovinany",
+  "Ihorombe",
+  "Atsimo-Atsinanana",
+  "Atsimo-Andrefana",
+  "Androy",
+  "Anosy",
+  "Menabe",
+  "Ambatosoa",
+];
+
+const THEMES_MADAGASCAR = [
+  "Écotourisme & Biodiversité",
+  "Aventure & Trekking",
+  "Plages & Balnéaire",
+  "Safari Baleines & Faune Marine",
+  "Culture & Traditions",
+  "Route Nationale 7 (RN7)",
+  "Descente de Fleuve & Pirogue",
+  "Lune de Miel & Évasion Romantique",
+  "Gastronomie & Route des Épices",
+  "Photographie & Paysages",
+];
+
 async function main() {
   console.log("🌱 Début du seed...");
 
@@ -46,10 +86,9 @@ async function main() {
   // ==========================
   // 2. UTILISATEURS (User + Account)
   // ==========================
-  // Fonction utilitaire pour hacher un mot de passe (compatible Better Auth)
-const hashPassword = async (plain: string) => {
-  return bcrypt.hash(plain, 12);
-};
+  const hashPassword = async (plain: string) => {
+    return bcrypt.hash(plain, 12);
+  };
 
   // Admin
   await prisma.user.upsert({
@@ -65,7 +104,6 @@ const hashPassword = async (plain: string) => {
       accounts: {
         create: [
           {
-            // id: "admin-account",
             providerId: "credential",
             accountId: "admin@voyage.com",
             password: await hashPassword("admin123"),
@@ -77,7 +115,7 @@ const hashPassword = async (plain: string) => {
 
   // Conseiller
   await prisma.user.upsert({
-    where: { email: "conseiller@voyage.com"},
+    where: { email: "conseiller@voyage.com" },
     update: {},
     create: {
       email: "conseiller@voyage.com",
@@ -88,7 +126,6 @@ const hashPassword = async (plain: string) => {
       roleId: conseillerRole.id,
       accounts: {
         create: {
-          // id: "conseiller-account",
           providerId: "credential",
           accountId: "conseiller@voyage.com",
           password: await hashPassword("conseiller123"),
@@ -99,7 +136,7 @@ const hashPassword = async (plain: string) => {
 
   // Client
   await prisma.user.upsert({
-    where: { email: "client@voyage.com"},
+    where: { email: "client@voyage.com" },
     update: {},
     create: {
       email: "client@voyage.com",
@@ -110,7 +147,6 @@ const hashPassword = async (plain: string) => {
       roleId: clientRole.id,
       accounts: {
         create: {
-          // id: "client-account",
           providerId: "credential",
           accountId: "client@voyage.com",
           password: await hashPassword("client123"),
@@ -122,24 +158,41 @@ const hashPassword = async (plain: string) => {
   console.log("✅ Utilisateurs et comptes créés");
 
   // ==========================
-  // 3. THÈME & RÉGION
+  // 3. LES 24 RÉGIONS DE MADAGASCAR
   // ==========================
-  const theme = await prisma.theme.upsert({
-    where: { nom: "Aventure" },
-    update: {},
-    create: { nom: "Aventure" },
-  });
+  for (const regNom of REGIONS_MADAGASCAR) {
+    await prisma.region.upsert({
+      where: { nom: regNom },
+      update: {},
+      create: { nom: regNom },
+    });
+  }
 
-  const region = await prisma.region.upsert({
+  const defaultRegion = await prisma.region.findUnique({
     where: { nom: "Menabe" },
-    update: {},
-    create: { nom: "Menabe" },
   });
 
-  console.log("✅ Thème et région créés");
+  console.log(`✅ 24 régions de Madagascar créées (${REGIONS_MADAGASCAR.length} au total)`);
 
   // ==========================
-  // 4. MODES DE PAIEMENT
+  // 4. THÈMES RÉELS DE VOYAGE À MADAGASCAR
+  // ==========================
+  for (const thNom of THEMES_MADAGASCAR) {
+    await prisma.theme.upsert({
+      where: { nom: thNom },
+      update: {},
+      create: { nom: thNom },
+    });
+  }
+
+  const defaultTheme = await prisma.theme.findUnique({
+    where: { nom: "Aventure & Trekking" },
+  });
+
+  console.log(`✅ Thèmes de voyage réels créés (${THEMES_MADAGASCAR.length} au total)`);
+
+  // ==========================
+  // 5. MODES DE PAIEMENT
   // ==========================
   await prisma.modePaiement.createMany({
     data: [
@@ -153,70 +206,72 @@ const hashPassword = async (plain: string) => {
   console.log("✅ Modes de paiement créés");
 
   // ==========================
-  // 5. CIRCUIT AVEC IMAGE, HÉBERGEMENT, ÉTAPE, ACTIVITÉ
+  // 6. CIRCUIT AVEC IMAGE, HÉBERGEMENT, ÉTAPE, ACTIVITÉ
   // ==========================
-await prisma.circuit.upsert({
-  where: {
-    slug: "les-tsingy-de-bemaraha",
-  },
-  update: {},
-  create: {
-    titre: "Les Tsingy de Bemaraha",
-    slug: "les-tsingy-de-bemaraha",
-    description: "Circuit découverte des Tsingy.",
-    dureeJours: 5,
-    prixEstime: 1200,
-    nbPlacesDisponibles: 15,
-    estGroupe: false,
-    themeId: theme.id,
-    regionId: region.id,
-
-    images: {
-      create: {
-        url: "/uploads/circuits/tsingy-placeholder.jpg",
-        legende: "Les Tsingy",
-        ordre: 1,
+  if (defaultRegion && defaultTheme) {
+    await prisma.circuit.upsert({
+      where: {
+        slug: "les-tsingy-de-bemaraha",
       },
-    },
-
-    etapes: {
+      update: {},
       create: {
-        ordre: 1,
-        ville: "Morondava",
-        description: "Arrivée à Morondava",
+        titre: "Les Tsingy de Bemaraha",
+        slug: "les-tsingy-de-bemaraha",
+        description: "Circuit découverte spectaculaire des Tsingy du Menabe.",
+        dureeJours: 5,
+        prixEstime: 1200000,
+        nbPlacesDisponibles: 15,
+        estGroupe: false,
+        themeId: defaultTheme.id,
+        regionId: defaultRegion.id,
 
-        hebergement: {
+        images: {
           create: {
-            nom: "Hôtel Baobab",
-            type: "Hôtel",
-            etoiles: 3,
-            adresse: "Morondava",
+            url: "/uploads/circuits/tsingy-placeholder.jpg",
+            legende: "Les Tsingy de Bemaraha",
+            ordre: 1,
           },
         },
 
-        activites: {
+        etapes: {
           create: {
-            nom: "Visite des Baobabs",
-            description: "Découverte de l'Allée des Baobabs",
-            duree: 3,
-            prix: 30,
+            ordre: 1,
+            ville: "Morondava",
+            description: "Arrivée à Morondava et visite guidée",
+
+            hebergement: {
+              create: {
+                nom: "Hôtel Baobab Café",
+                type: "Hôtel",
+                etoiles: 3,
+                adresse: "Morondava Boulevard",
+              },
+            },
+
+            activites: {
+              create: {
+                nom: "Visite de l'Allée des Baobabs au coucher du soleil",
+                description: "Découverte guidée de l'Allée des Baobabs et Baobab Amoureux",
+                duree: 3,
+                prix: 50000,
+              },
+            },
           },
         },
       },
-    },
-  },
-});
+    });
 
-  console.log("✅ Circuit créé avec ses étapes et hébergements");
+    console.log("✅ Circuit de démonstration créé");
+  }
 
-  console.log("🎉 Seed terminé avec succès !");
+  console.log("🎉 Seed des régions et thèmes terminé avec succès !");
 }
 
 main()
   .catch((error) => {
-  console.error("❌ Erreur lors du seed :", error);
-  process.exit(1);
-})
+    console.error("❌ Erreur lors du seed :", error);
+    process.exit(1);
+  })
   .finally(async () => {
     await prisma.$disconnect();
   });

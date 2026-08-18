@@ -129,7 +129,7 @@ model Devis {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   circuitId Int
-  circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
+  circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Restrict)
 
   // Champs existants
   dateDemande           DateTime    @default(now())
@@ -145,6 +145,8 @@ model Devis {
   telephone          String?
   dateDebutSouhaitee DateTime?
   dateFinSouhaitee   DateTime?
+  dateDebutConfirmee DateTime?
+  dateFinConfirmee   DateTime?
   dureeFlexible      Boolean?  @default(false)
   adultes            Int       @default(1)
   enfants            Int       @default(0)

@@ -6,12 +6,18 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { RoleNom } from "@prisma/client";
+import { RoleNom, StatutDevis } from "@prisma/client";
+import { calculateDevisBudget, PricingBreakdown } from "@/lib/services/devis-calculator.service";
 
 const pricingSchema = z.object({
   devisId: z.coerce.number().int().positive(),
-  montantTotal: z.coerce.number().positive("Le montant doit être supérieur à 0"),
   commentaireConseiller: z.string().min(1, "Un message au client est requis"),
+  typeHebergement: z.string().optional().nullable(),
+  transportType: z.string().optional().nullable(),
+  includeGuide: z.preprocess((val) => val === "true" || val === true || val === "on", z.boolean()),
+  remise: z.coerce.number().nonnegative("La remise ne peut pas être négative").default(0),
+  dateDebutConfirmee: z.string().optional().nullable(),
+  dateFinConfirmee: z.string().optional().nullable(),
 });
 
 async function requireStaff() {
@@ -31,87 +37,114 @@ async function requireStaff() {
   return session;
 }
 
-export async function updateDevisPricing(formData: FormData) {
-  await requireStaff();
-
-  const parsed = pricingSchema.safeParse({
-    devisId: formData.get("devisId"),
-    montantTotal: formData.get("montantTotal"),
-    commentaireConseiller: formData.get("commentaireConseiller"),
-  });
-
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides" };
+/**
+ * Calcule le budget d'un devis côté serveur en fonction des paramètres sélectionnés
+ */
+export async function calculateDevisPricingAction(
+  devisId: number,
+  params: {
+    typeHebergement?: string | null;
+    transportType?: string | null;
+    includeGuide?: boolean;
+    remise?: number;
   }
-
-  const { devisId, montantTotal, commentaireConseiller } = parsed.data;
-
-  const devis = await prisma.devis.findUnique({ where: { id: devisId } });
-  if (!devis) return { error: "Devis introuvable" };
-
-  await prisma.devis.update({
-    where: { id: devisId },
-    data: { montantTotal, commentaireConseiller },
-  });
-
-  revalidatePath(`/conseiller/devis/${devisId}`);
-  revalidatePath(`/devis/${devisId}`);
-
-  return { success: true };
+): Promise<{ success: true; breakdown: PricingBreakdown } | { error: string }> {
+  try {
+    await requireStaff();
+    const breakdown = await calculateDevisBudget(devisId, params);
+    return { success: true, breakdown };
+  } catch (error: any) {
+    return { error: error.message ?? "Erreur lors du calcul" };
+  }
 }
 
+/**
+ * Valide le devis en recalculant obligatoirement le chiffrage côté serveur et en scellant les dates confirmées
+ */
 export async function validateDevisWithPricing(_prevState: unknown, formData: FormData) {
-  await requireStaff();
+  try {
+    await requireStaff();
 
-  const parsed = pricingSchema.safeParse({
-    devisId: formData.get("devisId"),
-    montantTotal: formData.get("montantTotal"),
-    commentaireConseiller: formData.get("commentaireConseiller"),
-  });
+    const parsed = pricingSchema.safeParse({
+      devisId: formData.get("devisId"),
+      commentaireConseiller: formData.get("commentaireConseiller"),
+      typeHebergement: formData.get("typeHebergement"),
+      transportType: formData.get("transportType"),
+      includeGuide: formData.get("includeGuide"),
+      remise: formData.get("remise"),
+      dateDebutConfirmee: formData.get("dateDebutConfirmee"),
+      dateFinConfirmee: formData.get("dateFinConfirmee"),
+    });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides" };
-  }
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0]?.message ?? "Données invalides" };
+    }
 
-  const { devisId, montantTotal, commentaireConseiller } = parsed.data;
+    const {
+      devisId,
+      commentaireConseiller,
+      typeHebergement,
+      transportType,
+      includeGuide,
+      remise,
+      dateDebutConfirmee,
+      dateFinConfirmee,
+    } = parsed.data;
 
-  const devis = await prisma.devis.findUnique({
-    where: { id: devisId },
-    include: { user: { select: { id: true } } },
-  });
-
-  if (!devis) return { error: "Devis introuvable" };
-
-  if (
-    devis.statut !== "en_cours" &&
-    devis.statut !== "en_modification"
-  ) {
-    return { error: "Ce devis ne peut plus être validé" };
-  }
-
-  await prisma.$transaction([
-    prisma.devis.update({
+    const devis = await prisma.devis.findUnique({
       where: { id: devisId },
-      data: {
-        montantTotal,
-        commentaireConseiller,
-        statut: "valide",
-      },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: devis.userId,
-        titre: "Devis prêt",
-        message: `Votre devis #${devisId} a été chiffré à ${formatCurrency(montantTotal)}. Consultez-le pour accepter ou refuser.`,
-      },
-    }),
-  ]);
+      include: { user: { select: { id: true } } },
+    });
 
-  revalidatePath("/conseiller/dashboard");
-  revalidatePath(`/conseiller/devis/${devisId}`);
-  revalidatePath(`/devis/${devisId}`);
-  revalidatePath("/dashboard");
-  revalidatePath("/notifications");
+    if (!devis) return { error: "Devis introuvable" };
 
-  return { success: true };
+    // Seul un devis en_cours ou en_modification peut être chiffré/validé
+    if (devis.statut !== StatutDevis.en_cours && devis.statut !== StatutDevis.en_modification) {
+      return { error: "Ce devis est déjà validé ou finalisé. Pour le modifier, passez-le d'abord en révision." };
+    }
+
+    // Recalculer le montant exact côté serveur pour la sécurité
+    const breakdown = await calculateDevisBudget(devisId, {
+      typeHebergement,
+      transportType,
+      includeGuide,
+      remise,
+    });
+
+    const parsedDateDebut = dateDebutConfirmee ? new Date(dateDebutConfirmee) : null;
+    const parsedDateFin = dateFinConfirmee ? new Date(dateFinConfirmee) : null;
+
+    // Sauvegarde en BDD et notification client
+    await prisma.$transaction([
+      prisma.devis.update({
+        where: { id: devisId },
+        data: {
+          montantTotal: breakdown.montantTotal,
+          commentaireConseiller,
+          statut: StatutDevis.valide,
+          typeHebergement: typeHebergement ?? undefined,
+          transport: transportType ? [transportType] : [],
+          dateDebutConfirmee: parsedDateDebut ?? undefined,
+          dateFinConfirmee: parsedDateFin ?? undefined,
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: devis.userId,
+          titre: "Devis prêt",
+          message: `Votre devis #${devisId} a été chiffré à ${formatCurrency(breakdown.montantTotal)}. Consultez-le pour l'accepter ou le refuser.`,
+        },
+      }),
+    ]);
+
+    revalidatePath("/conseiller/dashboard");
+    revalidatePath(`/conseiller/devis/${devisId}`);
+    revalidatePath(`/devis/${devisId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/notifications");
+
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message ?? "Une erreur est survenue lors de la validation" };
+  }
 }

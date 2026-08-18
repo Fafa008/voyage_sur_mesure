@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { StatutDevis } from "@prisma/client";
+import { StatutDevis, Prisma } from "@prisma/client";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,50 +19,73 @@ import {
 } from "@/components/ui/table";
 import { buttonVariants } from "@/components/ui/button";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
-import { FileText, Users } from "lucide-react";
+import { DevisFilters } from "@/components/devis/DevisFilters";
+import { FileText, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
+import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
+import { cn } from "@/lib/utils";
 
-const statutColors: Record<StatutDevis, string> = {
-  [StatutDevis.en_cours]: "bg-muted text-foreground/80 border-border",
-  [StatutDevis.en_modification]: "bg-muted text-foreground/80 border-border",
-  [StatutDevis.valide]: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  [StatutDevis.accepte]:
-    "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  [StatutDevis.reserve]:
-    "bg-purple-500/10 text-purple-600 border-purple-500/20",
-  [StatutDevis.refuse]: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-};
+const DEVIS_PER_PAGE = 15;
 
-const statutLabels: Record<StatutDevis, string> = {
-  [StatutDevis.en_cours]: "En cours",
-  [StatutDevis.en_modification]: "En modification",
-  [StatutDevis.valide]: "Validé",
-  [StatutDevis.accepte]: "Accepté",
-  [StatutDevis.reserve]: "Réservé",
-  [StatutDevis.refuse]: "Refusé",
-};
+interface AdminDevisPageProps {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    statut?: string;
+  }>;
+}
 
-export default async function AdminDevisPage() {
-  const devisList = await prisma.devis.findMany({
-    include: {
-      user: {
-        select: { name: true, prenom: true, email: true },
-      },
-      circuit: {
-        select: { titre: true, slug: true },
-      },
-      reservation: {
-        select: { id: true },
-      },
-    },
-    orderBy: { dateDemande: "desc" },
-  });
+export default async function AdminDevisPage({
+  searchParams,
+}: AdminDevisPageProps) {
+  const { page, search, statut } = await searchParams;
 
-  const totalDevis = devisList.length;
-  const devisEnCours = devisList.filter(
-    (d) => d.statut === StatutDevis.en_cours,
-  ).length;
-  const devisAvecReservation = devisList.filter((d) => d.reservation).length;
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10));
+  const skip = (currentPage - 1) * DEVIS_PER_PAGE;
+
+  // Build Prisma filter
+  const where: Prisma.DevisWhereInput = {};
+
+  if (statut && Object.values(StatutDevis).includes(statut as StatutDevis)) {
+    where.statut = statut as StatutDevis;
+  }
+
+  if (search && search.trim() !== "") {
+    const term = search.trim();
+    where.OR = [
+      { user: { name: { contains: term, mode: "insensitive" } } },
+      { user: { prenom: { contains: term, mode: "insensitive" } } },
+      { user: { email: { contains: term, mode: "insensitive" } } },
+      { circuit: { titre: { contains: term, mode: "insensitive" } } },
+    ];
+  }
+
+  const [devisList, totalFiltered, totalOverall, devisEnCours, devisAvecReservation] =
+    await Promise.all([
+      prisma.devis.findMany({
+        where,
+        take: DEVIS_PER_PAGE,
+        skip,
+        include: {
+          user: {
+            select: { name: true, prenom: true, email: true },
+          },
+          circuit: {
+            select: { titre: true, slug: true },
+          },
+          reservation: {
+            select: { id: true },
+          },
+        },
+        orderBy: { dateDemande: "desc" },
+      }),
+      prisma.devis.count({ where }),
+      prisma.devis.count(),
+      prisma.devis.count({ where: { statut: StatutDevis.en_cours } }),
+      prisma.devis.count({ where: { reservation: { isNot: null } } }),
+    ]);
+
+  const totalPages = Math.ceil(totalFiltered / DEVIS_PER_PAGE);
 
   return (
     <div className="space-y-8">
@@ -71,8 +94,7 @@ export default async function AdminDevisPage() {
           Gestion des Devis
         </h1>
         <p className="text-sm text-muted-foreground">
-          Consultez, suivez et supprimez les demandes de devis de tous les
-          clients.
+          Consultez, recherchez, filtrez et gérez l&apos;ensemble des demandes de devis clients.
         </p>
       </div>
 
@@ -84,9 +106,9 @@ export default async function AdminDevisPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalDevis}</div>
+            <div className="text-3xl font-bold">{totalOverall}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              Demandes enregistrées
+              Demandes enregistrées au total
             </p>
           </CardContent>
         </Card>
@@ -125,19 +147,28 @@ export default async function AdminDevisPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-bold">
-            Liste des Devis
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Tous les devis de tous les clients, du plus récent au plus ancien.
-          </CardDescription>
+        <CardHeader className="space-y-4">
+          <div>
+            <CardTitle className="text-base font-bold">
+              Liste des Devis
+            </CardTitle>
+            <CardDescription className="text-xs">
+              {totalFiltered} dossier{totalFiltered > 1 ? "s" : ""} trouvé
+              {totalFiltered > 1 ? "s" : ""}
+            </CardDescription>
+          </div>
+          {/* Barre de recherche et filtres */}
+          <DevisFilters currentSearch={search} currentStatut={statut} />
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-6">
           {devisList.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto text-muted-foreground/30 mb-2" />
-              <p>Aucun devis enregistré pour le moment.</p>
+            <div className="text-center py-12 text-muted-foreground space-y-2">
+              <FileText className="w-12 h-12 mx-auto text-muted-foreground/30" />
+              <p className="font-medium">Aucun devis ne correspond à votre recherche.</p>
+              <p className="text-xs text-muted-foreground">
+                Essayez de modifier vos filtres ou le terme de recherche.
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -180,7 +211,7 @@ export default async function AdminDevisPage() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {new Date(devis.dateDemande).toLocaleDateString(
-                          "fr-FR",
+                          "fr-FR"
                         )}
                       </TableCell>
                       <TableCell className="text-sm">
@@ -192,9 +223,11 @@ export default async function AdminDevisPage() {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={`text-xs px-2.5 py-0.5 font-medium ${statutColors[devis.statut]}`}
+                          className={`text-xs px-2.5 py-0.5 font-medium ${
+                            statutDevisColors[devis.statut] || ""
+                          }`}
                         >
-                          {statutLabels[devis.statut]}
+                          {statutDevisLabels[devis.statut] || devis.statut}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-bold text-primary text-sm">
@@ -225,6 +258,46 @@ export default async function AdminDevisPage() {
                 </TableBody>
               </Table>
             </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav
+              className="flex items-center justify-between border-t border-border/40 pt-4"
+              aria-label="Pagination des devis"
+            >
+              <span className="text-xs text-muted-foreground">
+                Page {currentPage} sur {totalPages} ({totalFiltered} résultats)
+              </span>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/admin/devis?page=${currentPage - 1}${
+                    search ? `&search=${encodeURIComponent(search)}` : ""
+                  }${statut ? `&statut=${statut}` : ""}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    currentPage <= 1 && "pointer-events-none opacity-50"
+                  )}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Précédent
+                </Link>
+
+                <Link
+                  href={`/admin/devis?page=${currentPage + 1}${
+                    search ? `&search=${encodeURIComponent(search)}` : ""
+                  }${statut ? `&statut=${statut}` : ""}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    currentPage >= totalPages && "pointer-events-none opacity-50"
+                  )}
+                >
+                  Suivant
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Link>
+              </div>
+            </nav>
           )}
         </CardContent>
       </Card>

@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
 
 // Routes publiques accessibles sans session.
 const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register", "/contact"];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Routes qui gèrent leur propre authentification/autorisation :
-  // - Better Auth (/api/auth)
-  // - Webhooks de paiement (/api/payment/webhook/*) appelés par Papi/Binance
-  //   côté serveur, sans cookie de session : il ne faut pas les rediriger.
+  // Routes API et webhooks autonomes (Better Auth, Webhooks paiement, upload)
   if (
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/payment/webhook")
+    pathname.startsWith("/api/payment/webhook") ||
+    pathname.startsWith("/api/upload")
   ) {
     return NextResponse.next();
   }
@@ -29,29 +26,18 @@ export async function middleware(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  // Valider la session côté serveur (pas juste la présence du cookie)
-  let session = null;
-  if (sessionCookie) {
-    try {
-      session = await auth.api.getSession({
-        headers: new Headers({ cookie: request.headers.get("cookie") || "" }),
-      });
-    } catch {
-      session = null;
-    }
+  // Si l'utilisateur n'est pas connecté et tente d'accéder à une route privée
+  if (!sessionCookie && !isPublic) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // Pas de session valide et route non publique → connexion requise.
-  if (!session && !isPublic) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // Session valide → ne pas laisser revoir login/register.
-  if (session && (pathname === "/login" || pathname === "/register")) {
+  // Si l'utilisateur est déjà connecté et tente d'accéder aux pages de login/register
+  if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Cookie stale/expiré sur login/register → on laisse passer (évite la boucle).
   return NextResponse.next();
 }
 

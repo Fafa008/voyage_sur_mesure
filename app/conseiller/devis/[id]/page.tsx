@@ -3,28 +3,85 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ConseillerPricingForm } from "@/components/devis/ConseillerPricingForm";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { DevisCalculator } from "@/components/devis/DevisCalculator";
 import { formatCurrency } from "@/lib/format";
-import { CalendarCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  User,
+  MapPin,
+  Clock,
+  Compass,
+  Utensils,
+  Car,
+  Activity,
+  FileText,
+  Mail,
+  Phone,
+  Users,
+  Calendar,
+  Wallet,
+  Hotel,
+  Sparkles,
+  ChevronRight,
+  CreditCard,
+  MessageSquare,
+} from "lucide-react";
+import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
+import { cn } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-const statutColors = {
-  [StatutDevis.en_cours]: "bg-yellow-100 text-yellow-800",
-  [StatutDevis.en_modification]: "bg-orange-100 text-orange-800",
-  [StatutDevis.valide]: "bg-blue-100 text-blue-800",
-  [StatutDevis.accepte]: "bg-green-100 text-green-800",
-  [StatutDevis.reserve]: "bg-purple-100 text-purple-800",
-  [StatutDevis.refuse]: "bg-red-100 text-red-800",
-};
+// Generate a consistent color from a string (for avatar backgrounds)
+function getAvatarColor(name: string): string {
+  const colors = [
+    "from-violet-500 to-purple-600",
+    "from-blue-500 to-indigo-600",
+    "from-emerald-500 to-teal-600",
+    "from-amber-500 to-orange-600",
+    "from-rose-500 to-pink-600",
+    "from-cyan-500 to-sky-600",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function getInitials(prenom?: string | null, nom?: string | null): string {
+  const p = prenom?.trim()?.[0]?.toUpperCase() || "";
+  const n = nom?.trim()?.[0]?.toUpperCase() || "";
+  return p + n || "?";
+}
+
+// Status dot color mapping
+function getStatutDotColor(statut: StatutDevis): string {
+  const map: Record<StatutDevis, string> = {
+    [StatutDevis.en_cours]: "bg-amber-500",
+    [StatutDevis.en_modification]: "bg-orange-500",
+    [StatutDevis.valide]: "bg-blue-500",
+    [StatutDevis.accepte]: "bg-emerald-500",
+    [StatutDevis.reserve]: "bg-purple-500",
+    [StatutDevis.refuse]: "bg-rose-500",
+  };
+  return map[statut] || "bg-gray-400";
+}
 
 export default async function ConseillerDevisDetailPage({ params }: Props) {
   const { id } = await params;
   const devisId = parseInt(id);
+  if (isNaN(devisId)) notFound();
 
   const devis = await prisma.devis.findUnique({
     where: { id: devisId },
@@ -37,7 +94,19 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
           telephone: true,
         },
       },
-      circuit: { select: { titre: true, slug: true } },
+      circuit: {
+        include: {
+          region: true,
+          theme: true,
+          etapes: {
+            orderBy: { ordre: "asc" },
+            include: {
+              hebergement: true,
+              activites: true,
+            },
+          },
+        },
+      },
       reservation: {
         include: {
           paiement: { include: { mode: true } },
@@ -48,186 +117,454 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
 
   if (!devis) notFound();
 
-  const commentaire = devis.commentaireClient || "Aucun commentaire";
+  const isFinalized =
+    devis.statut !== StatutDevis.en_cours &&
+    devis.statut !== StatutDevis.en_modification;
+
+  const clientName = `${devis.prenom || devis.user.prenom || ""} ${devis.nom || devis.user.name}`.trim();
+  const initials = getInitials(devis.prenom || devis.user.prenom, devis.nom || devis.user.name);
+  const avatarColor = getAvatarColor(clientName);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap justify-between items-start gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Devis #{devis.id}</h1>
-          <p className="text-muted-foreground">
-            Demandé le {new Date(devis.dateDemande).toLocaleDateString("fr-FR")}
-          </p>
+      {/* ───── Hero Header with Breadcrumb & Status ───── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/15 p-5 sm:p-6">
+        {/* Decorative */}
+        <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
+
+        <div className="relative space-y-4">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link
+              href="/conseiller/dashboard"
+              className="hover:text-foreground transition-colors font-medium"
+            >
+              Demandes
+            </Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-foreground font-semibold">Dossier #{devis.id}</span>
+          </div>
+
+          {/* Title Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white text-sm font-bold shadow-lg shrink-0",
+                  avatarColor
+                )}
+              >
+                {initials}
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-foreground leading-tight">
+                  {clientName}
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Demande reçue le{" "}
+                  {new Date(devis.dateDemande).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[11px] px-3 py-1 font-semibold gap-1.5",
+                  statutDevisColors[devis.statut] || ""
+                )}
+              >
+                <span className={cn("w-2 h-2 rounded-full shrink-0", getStatutDotColor(devis.statut))} />
+                {statutDevisLabels[devis.statut] || devis.statut}
+              </Badge>
+              <Link
+                href="/conseiller/dashboard"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "gap-1.5 text-xs"
+                )}
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Retour
+              </Link>
+            </div>
+          </div>
         </div>
-        <Badge className={statutColors[devis.statut]}>
-          {devis.statut.replace("_", " ")}
-        </Badge>
       </div>
 
+      {/* ───── Reservation Banner (if booked) ───── */}
       {devis.reservation && (
-        <Card className="border-purple-200 bg-purple-50/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CalendarCheck className="w-5 h-5" />
-              Réservation #{devis.reservation.id}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-2">
-            <p>
-              Statut :{" "}
-              <strong className="capitalize">{devis.reservation.statut}</strong>
-            </p>
-            <p>
-              Montant :{" "}
-              <strong>{formatCurrency(devis.reservation.montantFinal)}</strong>
-            </p>
-            {devis.reservation.paiement && (
-              <p>
-                Paiement : {devis.reservation.paiement.mode.nom} —{" "}
-                <span className="font-mono text-xs">
-                  {devis.reservation.paiement.referenceTransaction}
-                </span>
-              </p>
-            )}
+        <Card className="relative overflow-hidden border-purple-200/60 dark:border-purple-900/60">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-purple-600" />
+          <CardContent className="pt-5 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                  <CalendarCheck className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-foreground">
+                    Réservation #{devis.reservation.id} associée
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Statut : <span className="font-medium capitalize text-foreground">{devis.reservation.status}</span>
+                    {" · "}
+                    Montant : <span className="font-bold text-primary">{formatCurrency(devis.reservation.montantFinal)}</span>
+                  </p>
+                </div>
+              </div>
+              {devis.reservation.paiement && (
+                <div className="flex items-center gap-2 bg-purple-500/5 border border-purple-500/15 rounded-lg px-3 py-2 text-xs">
+                  <CreditCard className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <span className="text-muted-foreground">
+                    {devis.reservation.paiement.mode.nom}
+                    {" — "}
+                    <span className="font-mono text-[11px] text-foreground">
+                      {devis.reservation.paiement.referenceTransaction}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Client</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div>
-              <p className="text-muted-foreground">Nom</p>
-              <p className="font-medium">
-                {devis.user.prenom} {devis.user.name}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Email</p>
-              <p>{devis.user.email}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Téléphone</p>
-              <p>{devis.user.telephone || "Non renseigné"}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Circuit</p>
-              <p>{devis.circuit?.titre || "Personnalisé"}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* ───── Main Grid View ───── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ═══ Left Column (3/5) - Client & Circuit Details ═══ */}
+        <div className="lg:col-span-6 space-y-6">
 
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Détails du voyage</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Dates souhaitées</p>
-                <p>
-                  {devis.dateDebutSouhaitee
-                    ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
-                        "fr-FR",
-                      )
-                    : "Non renseigné"}{" "}
-                  →{" "}
-                  {devis.dateFinSouhaitee
-                    ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
-                        "fr-FR",
-                      )
-                    : "Non renseigné"}
-                </p>
+          {/* ── Card: Client Profile ── */}
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-muted/20 border-b border-border/40 pb-4">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                </div>
+                Fiche Voyageur
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              {/* Contact Info Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <User className="w-3.5 h-3.5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Client</p>
+                    <p className="text-[13px] font-semibold text-foreground">{clientName}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Email</p>
+                    <p className="text-[13px] font-medium text-foreground truncate">{devis.user.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Téléphone</p>
+                    <p className="text-[13px] font-medium text-foreground">
+                      {devis.telephone || devis.user.telephone || "Non renseigné"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground">Nombre de personnes</p>
-                <p>{devis.nombrePersonnes}</p>
+
+              {/* Trip Details Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border/30">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Users className="w-3.5 h-3.5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Voyageurs</p>
+                    <p className="text-[13px] font-semibold text-foreground">
+                      {devis.nombrePersonnes} personne{devis.nombrePersonnes > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {devis.adultes} adulte{devis.adultes > 1 ? "s" : ""}
+                      {devis.enfants > 0 && ` · ${devis.enfants} enfant${devis.enfants > 1 ? "s" : ""}`}
+                      {devis.ados > 0 && ` · ${devis.ados} ado${devis.ados > 1 ? "s" : ""}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Dates souhaitées</p>
+                    <p className="text-[13px] font-semibold text-foreground">
+                      {devis.dateDebutSouhaitee
+                        ? new Date(devis.dateDebutSouhaitee).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                        : "Flexible"}
+                      {" → "}
+                      {devis.dateFinSouhaitee
+                        ? new Date(devis.dateFinSouhaitee).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                        : "Flexible"}
+                    </p>
+                    {devis.dureeFlexible && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded mt-1">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Dates flexibles
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Wallet className="w-3.5 h-3.5 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Budget client</p>
+                    <p className="text-[13px] font-bold text-primary">
+                      {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"}
+                      {" – "}
+                      {devis.budgetMax ? formatCurrency(devis.budgetMax) : "Illimité"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground">Adultes</p>
-                <p>{devis.adultes || 0}</p>
+
+              {/* Preferences Tags */}
+              {(devis.typeHebergement || devis.regime || (devis.transport && devis.transport.length > 0) || (devis.activites && devis.activites.length > 0)) && (
+                <div className="pt-4 border-t border-border/30 space-y-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Préférences du voyageur
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {devis.typeHebergement && (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-muted/60 border border-border/40 rounded-lg px-2.5 py-1.5">
+                        <Hotel className="w-3 h-3 text-muted-foreground" />
+                        <span className="capitalize">{devis.typeHebergement}</span>
+                      </span>
+                    )}
+                    {devis.regime && (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-muted/60 border border-border/40 rounded-lg px-2.5 py-1.5">
+                        <Utensils className="w-3 h-3 text-muted-foreground" />
+                        {devis.regime}
+                        {devis.regimePrecision && ` (${devis.regimePrecision})`}
+                      </span>
+                    )}
+                    {devis.transport && devis.transport.length > 0 && devis.transport.map((t, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-muted/60 border border-border/40 rounded-lg px-2.5 py-1.5">
+                        <Car className="w-3 h-3 text-muted-foreground" />
+                        {t}
+                      </span>
+                    ))}
+                    {devis.activites && devis.activites.length > 0 && devis.activites.map((a, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-primary/5 border border-primary/15 rounded-lg px-2.5 py-1.5 text-primary">
+                        <Activity className="w-3 h-3" />
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Client Comment */}
+              {devis.commentaireClient && (
+                <div className="pt-4 border-t border-border/30">
+                  <div className="bg-muted/30 border border-border/40 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Message du client
+                      </span>
+                    </div>
+                    <p className="text-xs italic text-foreground/85 leading-relaxed">
+                      &ldquo;{devis.commentaireClient}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── Card: Circuit & Itinerary ── */}
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-muted/20 border-b border-border/40 pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Compass className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  Circuit Associé
+                </CardTitle>
+                {devis.circuit.region?.nom && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-muted/60 border border-border/40 rounded-full px-2.5 py-1">
+                    <MapPin className="w-2.5 h-2.5 text-muted-foreground" />
+                    {devis.circuit.region.nom}
+                  </span>
+                )}
               </div>
-              <div>
-                <p className="text-muted-foreground">Enfants / Ados</p>
-                <p>
-                  {devis.enfants || 0} / {devis.ados || 0}
-                </p>
+              <CardDescription className="text-xs mt-1">
+                {devis.circuit.titre}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              {/* Circuit Quick Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 rounded-xl bg-muted/30 border border-border/30">
+                  <Clock className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Durée</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {devis.circuit.dureeJours ? `${devis.circuit.dureeJours} jours` : "Flexible"}
+                  </p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-muted/30 border border-border/30">
+                  <MapPin className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Région</p>
+                  <p className="text-sm font-bold text-foreground truncate">
+                    {devis.circuit.region?.nom || "—"}
+                  </p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-muted/30 border border-border/30">
+                  <Sparkles className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Thème</p>
+                  <p className="text-sm font-bold text-foreground truncate">
+                    {devis.circuit.theme?.nom || "—"}
+                  </p>
+                </div>
               </div>
-              {(devis.budgetMin || devis.budgetMax) && (
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Budget client</p>
-                  <p>
-                    {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"} →{" "}
-                    {devis.budgetMax ? formatCurrency(devis.budgetMax) : "—"}
+
+              {/* Description */}
+              {devis.circuit.description && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Description
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {devis.circuit.description}
                   </p>
                 </div>
               )}
-              {devis.montantTotal && (
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Montant proposé</p>
-                  <p className="text-xl font-bold text-primary">
-                    {formatCurrency(devis.montantTotal)}
+
+              {/* ── Itinerary Timeline ── */}
+              <div className="space-y-4 pt-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold flex items-center gap-2">
+                  <span className="w-5 h-[2px] bg-primary/40 rounded-full" />
+                  Itinéraire ({devis.circuit.etapes.length} étape{devis.circuit.etapes.length > 1 ? "s" : ""})
+                </p>
+
+                {devis.circuit.etapes.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic py-4 text-center">
+                    Aucune étape renseignée sur ce circuit.
                   </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                ) : (
+                  <div className="relative space-y-0">
+                    {/* Timeline line */}
+                    <div className="absolute left-[15px] top-4 bottom-4 w-[2px] bg-border/50 rounded-full" />
+
+                    {devis.circuit.etapes.map((etape, index) => (
+                      <div key={etape.id} className="relative flex gap-4 pb-4 last:pb-0">
+                        {/* Timeline node */}
+                        <div className="relative z-10 shrink-0">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold",
+                            index === 0
+                              ? "bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25"
+                              : "bg-background border-border text-muted-foreground"
+                          )}>
+                            {etape.ordre}
+                          </div>
+                        </div>
+
+                        {/* Etape Content */}
+                        <div className="flex-1 min-w-0 pb-3 border-b border-border/20 last:border-b-0">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-foreground">
+                                {etape.ville || "Ville flexible"}
+                              </p>
+                              {etape.description && (
+                                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                  {etape.description}
+                                </p>
+                              )}
+                              {/* Activities */}
+                              {etape.activites.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 pt-1.5">
+                                  {etape.activites.map((act) => (
+                                    <Badge
+                                      key={act.id}
+                                      variant="outline"
+                                      className="text-[10px] bg-background/60 border-border/50 text-foreground font-medium h-5"
+                                    >
+                                      <Activity className="w-2.5 h-2.5 mr-0.5 text-muted-foreground" />
+                                      {act.nom}
+                                      {act.prix && (
+                                        <span className="text-muted-foreground ml-0.5">
+                                          ({formatCurrency(Number(act.prix))})
+                                        </span>
+                                      )}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Accommodation chip */}
+                            {etape.hebergement && (
+                              <div className="shrink-0 bg-muted/40 border border-border/30 p-2.5 rounded-lg space-y-0.5 sm:text-right min-w-[140px]">
+                                <div className="flex items-center gap-1 sm:justify-end">
+                                  <Hotel className="w-3 h-3 text-muted-foreground" />
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">
+                                    Hébergement
+                                  </span>
+                                </div>
+                                <p className="font-semibold text-[11px] text-foreground">
+                                  {etape.hebergement.nom}
+                                </p>
+                                {etape.hebergement.type && (
+                                  <p className="text-[10px] text-muted-foreground capitalize">
+                                    {etape.hebergement.type}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ═══ Right Column (2/5) - Calculator & Validation ═══ */}
+        <div className="lg:col-span-6 space-y-6">
+          <div className="lg:sticky lg:top-20">
+            <DevisCalculator
+              devisId={devis.id}
+              statut={devis.statut}
+              initialTypeHebergement={devis.typeHebergement}
+              initialTransportType={devis.transport?.[0]}
+              initialRemise={devis.montantTotal ? 0 : 0}
+              initialCommentaire={devis.commentaireConseiller}
+              initialMontantTotal={devis.montantTotal ? Number(devis.montantTotal) : null}
+              budgetMin={devis.budgetMin ? Number(devis.budgetMin) : null}
+              budgetMax={devis.budgetMax ? Number(devis.budgetMax) : null}
+            />
+          </div>
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Commentaire du client</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-muted/50 p-4 rounded-lg whitespace-pre-wrap text-sm">
-            {commentaire}
-          </div>
-        </CardContent>
-      </Card>
-
-      {devis.commentaireConseiller && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Votre message au client</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{devis.commentaireConseiller}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardContent className="pt-6">
-          <ConseillerPricingForm
-            devisId={devis.id}
-            statut={devis.statut}
-            defaultMontant={devis.montantTotal?.toString()}
-            defaultCommentaire={devis.commentaireConseiller}
-          />
-
-          {devis.statut === StatutDevis.valide && (
-            <p className="text-sm text-muted-foreground mt-4 pt-4 border-t">
-              Devis validé — en attente de la réponse du client.
-            </p>
-          )}
-
-          {devis.statut === StatutDevis.accepte && !devis.reservation && (
-            <p className="text-sm text-amber-600 mt-4 pt-4 border-t">
-              Devis accepté par le client — en attente du paiement.
-            </p>
-          )}
-
-          <div className="mt-6">
-            <Button variant="outline">
-              <Link href="/conseiller/dashboard">← Retour</Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

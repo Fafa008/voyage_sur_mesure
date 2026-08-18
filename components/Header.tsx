@@ -10,6 +10,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { getCachedUserWithRole } from "@/lib/auth-utils";
 import { getUnreadNotificationCount } from "@/lib/notifications-utils";
 import LoginButton from "./auth/LoginButton";
+import { MobileNav } from "@/components/MobileNav";
 
 export default async function Header() {
   const session = await auth.api.getSession({
@@ -74,6 +75,11 @@ export default async function Header() {
         {/* Actions et authentification */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
+          <MobileNav
+            user={session?.user}
+            userRole={userRole}
+            unreadNotifications={unreadNotifications}
+          />
 
           {!session ? (
             <>

@@ -1,10 +1,20 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDevisAction } from "@/app/actions/devis/delete-devis.action";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
 
 interface DeleteDevisButtonProps {
   devisId: number;
@@ -24,20 +34,13 @@ export function DeleteDevisButton({
   redirectTo,
 }: DeleteDevisButtonProps) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, action, pending] = useActionState(deleteDevisAction, null);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (
-      !confirm(
-        "Supprimer définitivement ce devis ? Cette action est irréversible.",
-      )
-    ) {
-      event.preventDefault();
-    }
-  };
 
   useEffect(() => {
     if (state?.success) {
+      setOpen(false);
       if (redirectTo) {
         router.push(redirectTo);
       } else {
@@ -47,23 +50,64 @@ export function DeleteDevisButton({
   }, [state, router, redirectTo]);
 
   return (
-    <form action={action} onSubmit={handleSubmit} className="inline">
-      <input type="hidden" name="devisId" value={devisId} />
-      <Button
-        type="submit"
-        variant={variant}
-        size={size}
-        disabled={pending}
-        className={className}
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-        {pending ? "Suppression…" : label}
-      </Button>
-      {state?.error && (
-        <p className="text-destructive text-xs font-medium mt-1">
-          {state.error}
-        </p>
-      )}
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={
+        <Button
+          variant={variant}
+          size={size}
+          className={className}
+          aria-label={`Supprimer le devis #${devisId}`}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          {label && <span>{label}</span>}
+        </Button>
+      } />
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="space-y-2">
+          <div className="w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <DialogTitle className="text-base font-bold">
+            Supprimer la demande de devis #{devisId} ?
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Cette action est irréversible. Toutes les données associées à cette demande de devis seront définitivement supprimées.
+          </DialogDescription>
+        </DialogHeader>
+
+        {state?.error && (
+          <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium">
+            {state.error}
+          </div>
+        )}
+
+        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 mt-4">
+          <DialogClose render={
+            <Button variant="outline" size="sm" disabled={pending}>
+              Annuler
+            </Button>
+          } />
+          <form ref={formRef} action={action}>
+            <input type="hidden" name="devisId" value={devisId} />
+            <Button
+              type="submit"
+              variant="destructive"
+              size="sm"
+              disabled={pending}
+              className="w-full sm:w-auto"
+            >
+              {pending ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  Suppression...
+                </>
+              ) : (
+                "Confirmer la suppression"
+              )}
+            </Button>
+          </form>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

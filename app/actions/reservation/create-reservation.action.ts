@@ -71,6 +71,11 @@ export async function createReservation(prevState: unknown, formData: FormData) 
       const newReservation = await tx.reservation.create({
         data: {
           devisId,
+          circuitId: devis.circuitId,
+          userId: devis.userId,
+          dateDebut: devis.dateDebutConfirmee ?? devis.dateDebutSouhaitee ?? undefined,
+          dateFin: devis.dateFinConfirmee ?? devis.dateFinSouhaitee ?? undefined,
+          nbVoyageurs: devis.nombrePersonnes,
           montantFinal: montant,
           status: ReservationStatus.EN_ATTENTE,
           statut: StatutReservation.confirmee,

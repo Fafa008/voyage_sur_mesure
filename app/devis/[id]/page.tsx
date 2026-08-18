@@ -16,39 +16,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { DevisResponseActions } from "@/components/devis/DevisResponseActions";
 import { PaymentForm } from "@/components/reservation/PaymentForm";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
-import {
-  FileText,
-  Clock,
-  User,
-  CreditCard,
-  CheckCircle2,
-  AlertCircle,
-  CalendarCheck,
-} from "lucide-react";
+import { DevisTimeline } from "@/components/devis/DevisTimeline";
+import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
+import { CreditCard, CheckCircle2, CalendarCheck } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 interface DevisDetailPageProps {
   params: Promise<{ id: string }>;
 }
-
-const statutColors: Record<StatutDevis, string> = {
-  [StatutDevis.en_cours]: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  [StatutDevis.en_modification]:
-    "bg-orange-100 text-orange-800 border-orange-300",
-  [StatutDevis.valide]: "bg-blue-100 text-blue-800 border-blue-300",
-  [StatutDevis.accepte]: "bg-green-100 text-green-800 border-green-300",
-  [StatutDevis.reserve]: "bg-purple-100 text-purple-800 border-purple-300",
-  [StatutDevis.refuse]: "bg-red-100 text-red-800 border-red-300",
-};
-
-const statutLabels: Record<StatutDevis, string> = {
-  [StatutDevis.en_cours]: "En cours d'étude",
-  [StatutDevis.en_modification]: "En modification",
-  [StatutDevis.valide]: "Validé — en attente de votre réponse",
-  [StatutDevis.accepte]: "Accepté — en attente de paiement",
-  [StatutDevis.reserve]: "Réservé",
-  [StatutDevis.refuse]: "Refusé",
-};
 
 export default async function DevisDetailPage({
   params,
@@ -97,6 +72,7 @@ export default async function DevisDetailPage({
       devis.statut === StatutDevis.reserve) &&
     !devis.reservation;
   const hasReservation = !!devis.reservation;
+  const isReservationPaid = devis.reservation?.status === "PAYEE";
 
   const canDelete = isAdmin || (isOwner && !hasReservation);
 
@@ -104,7 +80,7 @@ export default async function DevisDetailPage({
     <main className="max-w-4xl mx-auto py-10 px-4 space-y-6">
       <Link
         href="/dashboard"
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         ← Retour au tableau de bord
       </Link>
@@ -118,9 +94,11 @@ export default async function DevisDetailPage({
         </div>
         <div className="flex items-center gap-2">
           <Badge
-            className={`text-sm px-3 py-1 border ${statutColors[devis.statut]}`}
+            className={`text-sm px-3 py-1 border ${
+              statutDevisColors[devis.statut] || ""
+            }`}
           >
-            {statutLabels[devis.statut]}
+            {statutDevisLabels[devis.statut] || devis.statut}
           </Badge>
           {canDelete && (
             <DeleteDevisButton
@@ -130,6 +108,13 @@ export default async function DevisDetailPage({
           )}
         </div>
       </div>
+
+      {/* Stepper visuel de progression de la demande */}
+      <DevisTimeline
+        statut={devis.statut}
+        hasReservation={hasReservation}
+        isReservationPaid={isReservationPaid}
+      />
 
       {/* Actions client : accepter / refuser */}
       {showClientActions && (
@@ -184,8 +169,8 @@ export default async function DevisDetailPage({
               <Link
                 href={`/paiement/${devis.reservation.id}`}
                 className={
-                buttonVariants({ variant: "default", size: "lg" }) +
-                " font-bold shadow-sm"
+                  buttonVariants({ variant: "default", size: "lg" }) +
+                  " font-bold shadow-sm"
                 }
               >
                 <CreditCard className="w-4 h-4 mr-2" />
@@ -221,7 +206,7 @@ export default async function DevisDetailPage({
                   </span>
                   <p>
                     {new Date(
-                      devis.reservation.dateReservation,
+                      devis.reservation.dateReservation
                     ).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
@@ -256,7 +241,7 @@ export default async function DevisDetailPage({
                 href={`/reservations/${devis.reservation.id}`}
                 className={buttonVariants({ variant: "default", size: "sm" })}
               >
-                <CalendarCheck className="w-4 h-4" />
+                <CalendarCheck className="w-4 h-4 mr-1.5" />
                 Voir le détail de la réservation
               </Link>
             </CardContent>
@@ -293,25 +278,38 @@ export default async function DevisDetailPage({
               </p>
             </div>
 
-            {(devis.dateDebutSouhaitee || devis.dateFinSouhaitee) && (
+            {(devis.dateDebutConfirmee || devis.dateFinConfirmee) ? (
+              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                <span className="font-bold block text-xs uppercase tracking-wider">Dates confirmées par l&apos;agence :</span>
+                <p className="font-semibold">
+                  {devis.dateDebutConfirmee
+                    ? new Date(devis.dateDebutConfirmee).toLocaleDateString("fr-FR")
+                    : "?"}{" "}
+                  au{" "}
+                  {devis.dateFinConfirmee
+                    ? new Date(devis.dateFinConfirmee).toLocaleDateString("fr-FR")
+                    : "?"}
+                </p>
+              </div>
+            ) : (devis.dateDebutSouhaitee || devis.dateFinSouhaitee) ? (
               <div>
                 <span className="font-semibold block">Dates souhaitées :</span>
                 <p>
                   {devis.dateDebutSouhaitee
                     ? new Date(devis.dateDebutSouhaitee).toLocaleDateString(
-                        "fr-FR",
+                        "fr-FR"
                       )
                     : "?"}{" "}
                   au{" "}
                   {devis.dateFinSouhaitee
                     ? new Date(devis.dateFinSouhaitee).toLocaleDateString(
-                        "fr-FR",
+                        "fr-FR"
                       )
                     : "?"}
                   {devis.dureeFlexible ? " (Dates flexibles)" : ""}
                 </p>
               </div>
-            )}
+            ) : null}
 
             {devis.typeHebergement && (
               <div>
