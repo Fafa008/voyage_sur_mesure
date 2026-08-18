@@ -48,15 +48,18 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
+  alignItemWithTrigger = false,
   ...props
-}: SelectPrimitive.Popup.Props) {
+}: SelectPrimitive.Popup.Props & {
+  alignItemWithTrigger?: boolean
+}) {
   return (
     <SelectPrimitive.Portal>
-      <SelectPrimitive.Positioner sideOffset={4}>
+      <SelectPrimitive.Positioner sideOffset={4} alignItemWithTrigger={alignItemWithTrigger}>
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "z-50 max-h-96 min-w-[8rem] overflow-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
+            "z-50 max-h-96 min-w-[8rem] overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
             className
           )}
           {...props}

@@ -56,6 +56,7 @@ function SelectField({
           </div>
         )}
         <Select
+          items={filteredOptions}
           defaultValue={defaultValue || null}
           value={value || null}
           onValueChange={(val) => {

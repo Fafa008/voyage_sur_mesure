@@ -48,21 +48,17 @@ function SearchBarContent({
     field: keyof SearchFilters,
     val: string | number | null
   ) => {
-    setFilters((prev) => {
-      const next = { ...prev, [field]: val, page: 1 };
-      if (autoSearchOnSelect) {
-        search(next);
-      }
-      return next;
-    });
+    const next = { ...filters, [field]: val, page: 1 };
+    setFilters(next);
+    if (autoSearchOnSelect) {
+      search(next);
+    }
   };
 
   const handleRemoveFilter = (field: keyof SearchFilters) => {
-    setFilters((prev) => {
-      const next = { ...prev, [field]: field === "destination" ? "" : null, page: 1 };
-      search(next);
-      return next;
-    });
+    const next = { ...filters, [field]: field === "destination" ? "" : null, page: 1 };
+    setFilters(next);
+    search(next);
   };
 
   if (variant === "sidebar") {

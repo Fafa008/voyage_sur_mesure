@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sparkles,
   ArrowRight,
@@ -12,7 +12,6 @@ import {
   Route,
 } from "lucide-react";
 import { SearchBar } from "@/components/search";
-
 export default function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border/40">
@@ -60,26 +59,25 @@ export default function Hero() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-start gap-3">
-              <Link
-                href="/devis/nouveau"
-                className={
-                  buttonVariants({ variant: "default", size: "lg" }) +
-                  " px-8 py-6 text-base font-semibold shadow-lg hover:shadow-lg transition-all"
-                }
+            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+              <Button
+                size="lg"
+                className="group px-8 py-6 text-base font-semibold rounded-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                render={<Link href="/devis/nouveau" />}
               >
-                Demander un devis
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-              <Link
-                href="/circuits"
-                className={
-                  buttonVariants({ variant: "outline", size: "lg" }) +
-                  " px-8 py-6 text-base font-semibold"
-                }
+                <Sparkles className="w-5 h-5 mr-2" />
+                Créer mon voyage sur mesure
+                <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="px-8 py-6 text-base font-semibold rounded-full border-2 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                render={<Link href="/circuits" />}
               >
-                Voir les circuits
-              </Link>
+                Explorer les circuits
+              </Button>
             </div>
 
             {/* Trust Badges */}

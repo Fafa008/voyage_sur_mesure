@@ -1,7 +1,13 @@
 "use client"
 
 import { MapPin } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 
 interface DestinationSelectProps {
@@ -16,7 +22,7 @@ export function DestinationSelect({
   value = "",
   onChange,
   options = [],
-  placeholder = "Où souhaitez-vous aller ?",
+  placeholder = "Toutes les destinations",
   className = "",
 }: DestinationSelectProps) {
   return (
@@ -25,22 +31,23 @@ export function DestinationSelect({
         Destination
       </Label>
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0" />
-        <Input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          list="destinations-list"
-          className="pl-10 h-9 rounded-lg"
-        />
-        {options.length > 0 && (
-          <datalist id="destinations-list">
-            {options.map((dest, i) => (
-              <option key={i} value={dest} />
+        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0 z-10" />
+        <Select
+          items={options.map((dest) => ({ label: dest, value: dest }))}
+          value={value || null}
+          onValueChange={(val) => onChange(val ?? "")}
+        >
+          <SelectTrigger className="pl-10 h-9 rounded-lg">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((dest) => (
+              <SelectItem key={dest} value={dest}>
+                {dest}
+              </SelectItem>
             ))}
-          </datalist>
-        )}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )

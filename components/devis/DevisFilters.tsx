@@ -105,6 +105,13 @@ export function DevisFilters({
       {showStatusFilter && (
         <div className="w-full sm:w-56 shrink-0">
           <Select
+            items={[
+              { label: "Tous les statuts", value: "all" },
+              ...Object.entries(statutDevisLabels).map(([key, label]) => ({
+                label,
+                value: key,
+              })),
+            ]}
             value={currentStatut || "all"}
             onValueChange={(val) => updateFilters(undefined, val)}
           >

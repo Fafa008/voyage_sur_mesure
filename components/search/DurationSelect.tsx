@@ -36,6 +36,7 @@ export function DurationSelect({
       <div className="relative">
         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0 z-10" />
         <Select
+          items={durationOptions}
           value={value ?? null}
           onValueChange={(val) => onChange(val || null)}
         >

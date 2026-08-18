@@ -144,6 +144,11 @@ export function DevisCalculator({
                     Catégorie d&apos;hébergement
                   </Label>
                   <Select
+                    items={[
+                      { label: "Standard / Hôtel (Prix de base)", value: "hotel" },
+                      { label: "Lodge (+80 000 MGA / j / pers)", value: "lodge" },
+                      { label: "Luxe / Palace (+150 000 MGA / j / pers)", value: "luxe" },
+                    ]}
                     value={typeHebergement}
                     onValueChange={(val) => {
                       setTypeHebergement(val || "hotel");
@@ -167,6 +172,12 @@ export function DevisCalculator({
                     Mode de transport
                   </Label>
                   <Select
+                    items={[
+                      { label: "Aucun / De base", value: "aucun" },
+                      { label: "Véhicule 4x4 (+120 000 MGA / jour)", value: "4x4" },
+                      { label: "Vols intérieurs (+350 000 MGA / pers)", value: "avion" },
+                      { label: "Transfert bateau (+90 000 MGA / pers)", value: "bateau" },
+                    ]}
                     value={transportType}
                     onValueChange={(val) => {
                       setTransportType(val || "aucun");

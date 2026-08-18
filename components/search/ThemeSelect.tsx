@@ -32,6 +32,7 @@ export function ThemeSelect({
       <div className="relative">
         <Compass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0 z-10" />
         <Select
+          items={options.map((theme) => ({ label: theme.nom, value: theme.id.toString() }))}
           value={value?.toString() ?? null}
           onValueChange={(val) => onChange(val ? Number(val) : null)}
         >
