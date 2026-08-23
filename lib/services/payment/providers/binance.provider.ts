@@ -18,7 +18,6 @@ export class BinanceProvider implements IPaymentProvider {
     const apiSecret = process.env.BINANCE_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      console.warn("[Binance] API credentials not configured — returning PENDING");
       return { status: PaymentStatus.PENDING };
     }
 
@@ -33,8 +32,7 @@ export class BinanceProvider implements IPaymentProvider {
       });
 
       if (!response.ok) {
-        console.error(`[Binance] Verify request failed: ${response.status}`);
-        return { status: PaymentStatus.PENDING };
+          return { status: PaymentStatus.PENDING };
       }
 
       const data = await response.json() as { status?: string; totalAmount?: string };
@@ -45,7 +43,6 @@ export class BinanceProvider implements IPaymentProvider {
       const amount = data.totalAmount ? Number(data.totalAmount) : undefined;
       return { status, amount };
     } catch (error) {
-      console.error("[Binance] verifyPayment error:", error);
       return { status: PaymentStatus.PENDING };
     }
   }
@@ -70,7 +67,6 @@ export class BinanceProvider implements IPaymentProvider {
     const apiSecret = process.env.BINANCE_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      console.warn("[Binance] API credentials not configured — cannot process refund");
       return false;
     }
 
@@ -91,7 +87,6 @@ export class BinanceProvider implements IPaymentProvider {
 
       return response.ok;
     } catch (error) {
-      console.error("[Binance] refund error:", error);
       return false;
     }
   }

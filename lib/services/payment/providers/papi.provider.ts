@@ -102,12 +102,6 @@ export class PapiProvider implements IPaymentProvider {
     try {
       const endpoint = `${this.baseUrl}/payment-links`;
 
-      console.log("[PAPI] Creating payment link...");
-      console.log("[PAPI] Endpoint:", endpoint);
-      console.log("[PAPI] Reservation:", options.reservationId);
-      console.log("[PAPI] Amount:", amount);
-      console.log("[PAPI] Currency:", currency);
-      console.log("[PAPI] Test mode:", isTestMode);
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -128,7 +122,6 @@ export class PapiProvider implements IPaymentProvider {
       try {
         responseData = JSON.parse(responseText);
       } catch {
-        console.error("[PAPI] Invalid JSON response:", responseText);
 
         return {
           success: false,
@@ -140,10 +133,6 @@ export class PapiProvider implements IPaymentProvider {
        * Gestion des erreurs HTTP.
        */
       if (!response.ok) {
-        console.error("[PAPI] API error:", {
-          status: response.status,
-          response: responseData,
-        });
 
         const apiError = responseData.error;
 
@@ -182,9 +171,6 @@ export class PapiProvider implements IPaymentProvider {
           ? (responseData.data as Record<string, unknown>)
           : responseData;
 
-      console.log("[PAPI] Response received.");
-      console.log("[PAPI] Response keys:", Object.keys(responseData));
-      console.log("[PAPI] Data keys:", Object.keys(papiData));
 
       /**
        * Récupération du lien de paiement.
@@ -197,9 +183,6 @@ export class PapiProvider implements IPaymentProvider {
             : undefined;
 
       if (!checkoutUrl) {
-        console.error(
-          "[PAPI] Missing paymentLink/paymentUrl in response."
-        );
 
         return {
           success: false,
@@ -256,17 +239,6 @@ export class PapiProvider implements IPaymentProvider {
         }
       }
 
-      console.log("[PAPI] Payment link created successfully.");
-      console.log("[PAPI] Provider reference:", providerRef);
-      console.log(
-        "[PAPI] Papi payment reference:",
-        papiPaymentReference || "(none)"
-      );
-      console.log(
-        "[PAPI] Notification token:",
-        Boolean(notificationToken)
-      );
-      console.log("[PAPI] Checkout URL:", Boolean(checkoutUrl));
 
       return {
         success: true,
@@ -281,7 +253,6 @@ export class PapiProvider implements IPaymentProvider {
           ? error.message
           : String(error);
 
-      console.error("[PAPI] Connection error:", message);
 
       return {
         success: false,
@@ -301,9 +272,6 @@ export class PapiProvider implements IPaymentProvider {
     status: PaymentStatus;
     amount?: number;
   }> {
-    console.log(
-      `[PAPI] Payment verification requested: ${providerRef}`
-    );
 
     return {
       status: PaymentStatus.PENDING,
@@ -380,13 +348,6 @@ export class PapiProvider implements IPaymentProvider {
         status = PaymentStatus.PENDING;
     }
 
-    console.log("[PAPI] Webhook received:", {
-      providerRef,
-      paymentStatus,
-      status,
-      providerPaymentMethod,
-      hasNotificationToken: Boolean(notificationToken),
-    });
 
     return {
       providerRef,

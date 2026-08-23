@@ -27,7 +27,6 @@ export class BankTransferProvider implements IPaymentProvider {
 
   async refund(providerRef: string, amount: number): Promise<boolean> {
     // Le remboursement se fait manuellement
-    console.log(`Manual refund required for bank transfer ${providerRef}, amount: ${amount}`);
     return true;
   }
 }

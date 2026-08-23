@@ -17,7 +17,6 @@ export async function createReservationAction(data: CreateReservationDTO) {
     return { success: true, data: reservation };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    console.error("Erreur lors de la création de la réservation:", error);
     return { success: false, error: message };
   }
 }
@@ -28,7 +27,6 @@ export async function getReservationAction(id: number) {
     return { success: true, data: reservation };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    console.error("Erreur récupération réservation:", error);
     return { success: false, error: message };
   }
 }

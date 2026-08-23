@@ -99,7 +99,7 @@ export default function Hero() {
 
           {/* Right Column - Hero Image + Floating Card */}
           <div className="relative order-1 lg:order-2">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[3/2] lg:aspect-[3/2]">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[3/2] lg:aspect-[3/2]" style={{ position: 'relative' }}>
               <Image
                 src="/hero-baobabs.png"
                 alt="Allée des Baobabs au coucher du soleil à Madagascar"

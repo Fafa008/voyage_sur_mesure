@@ -12,7 +12,6 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import "./leaflet-styles.css";
 import {
   MADAGASCAR_REGIONS,
   getMadagascarGeoJSON,

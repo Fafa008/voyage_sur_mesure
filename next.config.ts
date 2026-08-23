@@ -9,15 +9,16 @@ const nextConfig: NextConfig = {
     // Conversion automatique en AVIF puis WebP — réduit le poids des images de 40-60%
     formats: ["image/avif", "image/webp"],
     // Autoriser les URLs externes stockées en base de données
-    // ⚠️ À restreindre au domaine de votre CDN/stockage avant la mise en production
+    // Restreint aux domaines approuvés pour la sécurité
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : "localhost",
       },
       {
         protocol: "http",
-        hostname: "**",
+        hostname: "localhost",
+        port: "3000",
       },
     ],
   },

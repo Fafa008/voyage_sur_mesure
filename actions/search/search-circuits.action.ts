@@ -153,7 +153,6 @@ export async function searchCircuitsAction(
       },
     };
   } catch (error) {
-    console.error("Error in searchCircuitsAction:", error);
     return {
       success: false,
       error: "Une erreur est survenue lors de la recherche des circuits.",
@@ -189,7 +188,6 @@ export async function getSearchOptionsAction(): Promise<{
       },
     };
   } catch (error) {
-    console.error("Error in getSearchOptionsAction:", error);
     return {
       success: false,
       error: "Impossible de charger les options de filtre.",

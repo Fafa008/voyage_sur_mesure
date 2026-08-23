@@ -1,15 +1,16 @@
+// CircuitsPreview – version alignée sur le design de CircuitsPage
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
-import { ArrowRight, Clock, MapPin, Star, Route } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
+import { ArrowRight, Clock3, MapPin } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default async function CircuitsPreview() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -17,10 +18,20 @@ export default async function CircuitsPreview() {
 
   const circuits = await prisma.circuit.findMany({
     take: 4,
-    include: {
-      region: true,
-      theme: true,
-      images: { take: 1 },
+    select: {
+      id: true,
+      titre: true,
+      slug: true,
+      description: true,
+      dureeJours: true,
+      prixEstime: true,
+      theme: { select: { id: true, nom: true } },
+      region: { select: { id: true, nom: true } },
+      images: {
+        select: { id: true, url: true },
+        take: 1,
+        orderBy: { ordre: "asc" },
+      },
     },
     orderBy: { id: "asc" },
   });
@@ -45,22 +56,22 @@ export default async function CircuitsPreview() {
 
           <Link
             href="/circuits"
-            className={
-              buttonVariants({ variant: "default", size: "sm" }) +
-              " shrink-0 self-start sm:self-auto shadow-md"
-            }
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "shrink-0 self-start sm:self-auto shadow-md",
+            )}
           >
             Voir Tous les Circuits
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </Link>
         </div>
 
-        {/* Circuits Grid */}
+        {/* Grille de cartes */}
         {circuits.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent className="space-y-3">
               <p className="text-muted-foreground">
-                Aucun circuit n'est affiché pour le moment.
+                Aucun circuit n&apos;est affiché pour le moment.
               </p>
               <Link
                 href="/devis/nouveau"
@@ -72,47 +83,109 @@ export default async function CircuitsPreview() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {circuits.map((circuit, index) => (
-              <div key={circuit.id} className="group relative">
-                <Link href={`/circuits/${circuit.slug}`}>
-                  <Card className="overflow-hidden bg-card hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                    {/* Image */}
-                    <div className="relative h-52 w-full overflow-hidden bg-muted">
-                      {circuit.images[0] ? (
-                        <Image
-                          src={circuit.images[0].url}
-                          alt={circuit.titre}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                          priority={index === 0}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                          Image à venir
-                        </div>
-                      )}
+            {circuits.map((circuit) => (
+              <Card
+                key={circuit.id}
+                className={`
+                  group
+                  flex
+                  h-full
+                  flex-col
+                  overflow-hidden
+                  rounded-[22px]
+                  border-border/60
+                  bg-card
+                  p-0
 
-                      {/* Overlay gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  shadow-[0_8px_30px_rgba(0,0,0,0.06)]
 
-                      {/* Featured badge */}
-                      {index === 0 && (
-                        <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground border-0 text-[10px] px-2.5 py-1 shadow-md">
-                          À la une
-                        </Badge>
-                      )}
+                  transition-shadow
+                  duration-300
 
-                      {/* Region badge */}
-                      {circuit.region && (
-                        <Badge className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md text-white border-0 text-[10px] px-2 py-0.5">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {circuit.region.nom}
-                        </Badge>
-                      )}
+                  hover:border-border
+                  hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]
 
-                      {/* Heart icon */}
-                      <div className="absolute top-3 right-3 z-10">
+                  dark:shadow-[0_8px_30px_rgba(0,0,0,0.20)]
+                  dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.30)]
+                `}
+              >
+                {/* Bloc image */}
+                <div className="relative p-2.5 pb-0">
+                  <div className="relative h-[230px] overflow-hidden rounded-[16px] bg-muted">
+                    {circuit.images[0] ? (
+                      <Image
+                        src={circuit.images[0].url}
+                        alt={circuit.titre}
+                        fill
+                        className="
+                          object-cover
+                          transition-transform
+                          duration-500
+                          group-hover:scale-[1.04]
+                        "
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+                        Pas d&apos;image
+                      </div>
+                    )}
+
+                    {/* Dégradé léger en bas */}
+                    <div
+                      className="
+                        pointer-events-none
+                        absolute
+                        inset-x-0
+                        bottom-0
+                        h-24
+                        bg-gradient-to-t
+                        from-black/30
+                        to-transparent
+                      "
+                    />
+
+                    {/* Badge région (en haut à gauche) */}
+                    {circuit.region && (
+                      <div
+                        className="
+                          absolute
+                          left-3.5
+                          top-3.5
+                          flex
+                          items-center
+                          gap-1.5
+                          rounded-lg
+                          border
+                          border-white/30
+                          bg-black/55
+                          px-2.5
+                          py-1.5
+                          text-xs
+                          font-medium
+                          text-white
+                          shadow-sm
+                          backdrop-blur-md
+                        "
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        {circuit.region.nom}
+                      </div>
+                    )}
+
+                    {/* Bouton favori (en haut à droite) */}
+                    <div className="absolute right-3.5 top-3.5">
+                      <div
+                        className="
+                          rounded-full
+                          border
+                          border-white/30
+                          bg-black/40
+                          p-1
+                          shadow-sm
+                          backdrop-blur-md
+                        "
+                      >
                         <FavoriteButton
                           circuitId={circuit.id}
                           initialIsFavori={favoriteIds.has(circuit.id)}
@@ -121,60 +194,145 @@ export default async function CircuitsPreview() {
                       </div>
                     </div>
 
-                    {/* Content */}
-                    <CardHeader className="p-4 pb-2 flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        {circuit.theme ? (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-medium"
-                          >
-                            {circuit.theme.nom}
-                          </Badge>
-                        ) : (
-                          <div />
-                        )}
-                        <div className="flex items-center gap-0.5 text-amber-500">
-                          <Star className="w-3 h-3 fill-amber-500" />
-                          <span className="text-[11px] font-semibold text-foreground">
-                            4.9
-                          </span>
-                        </div>
+                    {/* Durée (en bas à gauche) */}
+                    {circuit.dureeJours && (
+                      <div
+                        className="
+                          absolute
+                          bottom-3.5
+                          left-3.5
+                          flex
+                          items-center
+                          gap-1.5
+                          rounded-full
+                          bg-black/50
+                          px-3
+                          py-1.5
+                          text-xs
+                          font-medium
+                          text-white
+                          backdrop-blur-md
+                        "
+                      >
+                        <Clock3 className="h-3.5 w-3.5" />
+                        {circuit.dureeJours} jour
+                        {circuit.dureeJours > 1 ? "s" : ""}
                       </div>
+                    )}
+                  </div>
+                </div>
 
-                      <CardTitle className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {circuit.titre}
-                      </CardTitle>
+                {/* Contenu de la carte */}
+                <CardContent className="flex flex-1 flex-col px-4 pb-4 pt-4">
+                  {/* Titre + prix */}
+                  <div className="flex items-start justify-between gap-4">
+                    <h3
+                      className="
+                        min-w-0
+                        flex-1
+                        text-xl
+                        font-semibold
+                        leading-tight
+                        tracking-tight
+                        text-foreground
+                      "
+                    >
+                      {circuit.titre}
+                    </h3>
 
-                      <p className="text-lg font-bold text-foreground mt-1">
+                    <div className="shrink-0 text-right">
+                      <span className="block text-[10px] text-muted-foreground">
+                        À partir de
+                      </span>
+                      <span
+                        className="
+                          whitespace-nowrap
+                          text-lg
+                          font-bold
+                          text-foreground
+                        "
+                      >
                         {circuit.prixEstime
                           ? formatCurrency(circuit.prixEstime)
                           : "Sur devis"}
-                        <span className="text-[11px] font-normal text-muted-foreground ml-1">
-                          /personne
-                        </span>
-                      </p>
-                    </CardHeader>
+                      </span>
+                    </div>
+                  </div>
 
-                    {/* Footer */}
-                    <CardContent className="p-4 pt-0">
-                      <div className="flex items-center gap-3 pt-3 border-t border-border/40 text-[11px] text-muted-foreground">
-                        {circuit.dureeJours && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> {circuit.dureeJours}j
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Route className="w-3 h-3" /> Étapes
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> Madagascar
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </div>
+                  {/* Thème */}
+                  {circuit.theme && (
+                    <div className="mt-2">
+                      <span
+                        className="
+                          inline-flex
+                          items-center
+                          rounded-full
+                          bg-primary/10
+                          px-2.5
+                          py-1
+                          text-xs
+                          font-medium
+                          text-primary
+                        "
+                      >
+                        {circuit.theme.nom}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  <p
+                    className="
+                      mt-3
+                      min-h-[60px]
+                      line-clamp-3
+                      text-sm
+                      leading-5
+                      text-muted-foreground
+                    "
+                  >
+                    {circuit.description || "Aucune description fournie."}
+                  </p>
+
+                  {/* Bouton Voir le circuit */}
+                  <Link
+                    href={`/circuits/${circuit.slug}`}
+                    className="
+                      mt-auto
+                      flex
+                      h-11
+                      w-full
+                      items-center
+                      justify-center
+                      gap-2
+                      rounded-full
+
+                      bg-primary
+                      text-primary-foreground
+
+                      text-sm
+                      font-semibold
+
+                      shadow-sm
+
+                      transition-colors
+                      duration-200
+
+                      hover:bg-primary/90
+
+                      focus-visible:outline-none
+                      focus-visible:ring-2
+                      focus-visible:ring-primary
+                      focus-visible:ring-offset-2
+
+                      dark:focus-visible:ring-offset-background
+                    "
+                  >
+                    Voir le circuit
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}

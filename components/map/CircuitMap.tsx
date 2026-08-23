@@ -5,6 +5,7 @@ import React from "react";
 import type { CircuitMapProps } from "./CircuitMapInner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin } from "lucide-react";
+import "./leaflet-styles.css";
 
 // Chargement dynamique dynamique pour contourner le rendu SSR de Leaflet
 const CircuitMapInner = dynamic(() => import("./CircuitMapInner"), {

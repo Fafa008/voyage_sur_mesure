@@ -132,7 +132,6 @@ export async function createReservation(prevState: unknown, formData: FormData) 
     if (err instanceof Error && err.message === "NEXT_REDIRECT") {
       throw err;
     }
-    console.error("createReservation error:", err);
     return { error: "Erreur lors de la création de la réservation" };
   }
 }

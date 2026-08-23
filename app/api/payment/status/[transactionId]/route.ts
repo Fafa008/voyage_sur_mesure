@@ -50,7 +50,6 @@ export async function GET(
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur interne";
-    console.error("Erreur GET /api/payment/status:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

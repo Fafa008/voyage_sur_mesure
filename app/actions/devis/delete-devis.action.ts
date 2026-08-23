@@ -65,7 +65,6 @@ export async function deleteDevisAction(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur inattendue";
-    console.error("Erreur suppression devis:", err);
     return { error: message };
   }
 

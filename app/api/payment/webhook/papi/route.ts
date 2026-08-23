@@ -57,8 +57,7 @@ export async function POST(req: NextRequest) {
         : undefined);
 
     if (!reference) {
-      console.error("Papi webhook: missing order/payment reference in payload");
-      return NextResponse.json(
+        return NextResponse.json(
         { error: "Missing merchantPaymentReference or paymentReference" },
         { status: 400 }
       );
@@ -71,7 +70,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (!transaction) {
-      console.error(`Papi webhook: transaction not found for reference ${reference}`);
       await prisma.paymentWebhook.create({
         data: {
           provider: "PAPI",
@@ -109,9 +107,6 @@ export async function POST(req: NextRequest) {
 
     if (!expectedToken) {
       // Pas de token stocké = impossible de vérifier l'authenticité du webhook
-      console.error(
-        `Papi webhook: no notificationToken stored for transaction ${transaction.id}. Cannot verify webhook authenticity.`
-      );
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -128,9 +123,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (!receivedToken || receivedToken !== expectedToken) {
-      console.error(
-        `Papi webhook: invalid or missing notificationToken for ref ${reference}`
-      );
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -148,7 +140,6 @@ export async function POST(req: NextRequest) {
 
     // 5. Validation du statut Papi
     if (!paymentStatus || typeof paymentStatus !== "string") {
-      console.error("Papi webhook: missing paymentStatus");
       return NextResponse.json(
         { error: "Missing paymentStatus" },
         { status: 400 }
@@ -162,7 +153,6 @@ export async function POST(req: NextRequest) {
 
     const receivedNum = Number(amount);
     if (isNaN(receivedNum) || receivedNum <= 0) {
-      console.error(`Papi webhook: invalid amount received (${amount})`);
       return NextResponse.json({ error: "Invalid amount value" }, { status: 400 });
     }
 
@@ -170,9 +160,6 @@ export async function POST(req: NextRequest) {
     const receivedAmountInt = Math.round(receivedNum);
 
     if (expectedAmountInt !== receivedAmountInt) {
-      console.error(
-        `Papi webhook: amount mismatch for ref ${reference}. Expected ${expectedAmountInt}, received ${receivedAmountInt}`
-      );
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -190,9 +177,6 @@ export async function POST(req: NextRequest) {
 
     // 7. Validation de la devise
     if (typeof currency !== "string" || currency.trim().toUpperCase() !== transaction.currency.toUpperCase()) {
-      console.error(
-        `Papi webhook: currency mismatch for ref ${reference}. Expected ${transaction.currency}, received ${currency}`
-      );
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -316,7 +300,6 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Erreur webhook Papi";
-    console.error("Papi webhook error:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

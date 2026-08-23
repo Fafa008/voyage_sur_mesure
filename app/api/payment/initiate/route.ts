@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur interne";
-    console.error("Erreur POST /api/payment/initiate:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

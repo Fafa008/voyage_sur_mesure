@@ -10,7 +10,7 @@ export default function CTABanner() {
         <div className="relative overflow-hidden rounded-2xl bg-card shadow-lg">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Left - Image */}
-            <div className="relative h-64 lg:h-auto min-h-[320px] overflow-hidden">
+            <div className="relative h-64 lg:h-auto min-h-[320px] overflow-hidden" style={{ position: 'relative' }}>
               <Image
                 src="/cta-landscape.png"
                 alt="Paysage paradisiaque de Madagascar"

@@ -71,7 +71,6 @@ export async function POST(request: Request) {
     const url = `/uploads/circuits/${safeName}`;
     return NextResponse.json({ url });
   } catch (error) {
-    console.error("Erreur lors de l'upload :", error);
     return NextResponse.json(
       { error: "Erreur lors de la sauvegarde du fichier" },
       { status: 500 }

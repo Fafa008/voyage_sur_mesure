@@ -17,9 +17,6 @@ export async function initiatePaymentAction(
 
     const userId = session.user.id;
 
-    console.log(
-      `[initiatePaymentAction] Starting for reservation=${reservationId}, method=${method}`
-    );
 
     const result = await paymentService.initiatePayment(
       reservationId,
@@ -27,14 +24,8 @@ export async function initiatePaymentAction(
       userId
     );
 
-    console.log(
-      `[initiatePaymentAction] Service returned: success=${result.success}, hasCheckoutUrl=${!!result.checkoutUrl}, transactionId=${result.transactionId}`
-    );
 
     if (!result.success) {
-      console.error(
-        `[initiatePaymentAction] Payment failed: ${result.error}`
-      );
 
       return {
         success: false,
@@ -52,9 +43,6 @@ export async function initiatePaymentAction(
       expiresAt: result.expiresAt,
     };
 
-    console.log(
-      `[initiatePaymentAction] Payment created: checkoutUrl=${!!safeResult.checkoutUrl}, transactionId=${safeResult.transactionId}`
-    );
 
     revalidatePath(`/paiement/${reservationId}`);
 
@@ -66,7 +54,6 @@ export async function initiatePaymentAction(
     const message =
       error instanceof Error ? error.message : "Erreur inconnue";
 
-    console.error(`[initiatePaymentAction] ERROR: ${message}`);
 
     return {
       success: false,
@@ -105,7 +92,6 @@ export async function initiatePaymentFromDevisAction(devisId: number, method: Pa
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    console.error("Erreur initiation paiement devis:", error);
     return { success: false, error: message };
   }
 }
@@ -179,7 +165,6 @@ export async function getOrCreateReservationFromDevisAction(devisId: number) {
     return { success: true, reservationId: reservation.id };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
-    console.error("Erreur getOrCreateReservationFromDevisAction:", error);
     return { success: false, error: message };
   }
 }

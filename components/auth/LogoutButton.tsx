@@ -19,7 +19,6 @@ export default function LogoutButton() {
       router.replace("/home");
       router.refresh();
     } catch (error) {
-      console.error("Erreur lors de la déconnexion :", error);
       setIsLoading(false);
     }
   };

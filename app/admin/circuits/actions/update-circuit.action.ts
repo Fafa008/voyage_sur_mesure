@@ -142,7 +142,6 @@ export async function updateCircuit(formData: FormData) {
       try {
         await fs.unlink(filePath);
       } catch (err) {
-        console.error(`Erreur lors de la suppression physique du fichier ${filePath} :`, err);
       }
     }
   }

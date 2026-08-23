@@ -69,7 +69,6 @@ export async function deleteReservationAction(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Erreur inattendue";
-    console.error("Erreur suppression réservation:", err);
     return { error: message };
   }
 

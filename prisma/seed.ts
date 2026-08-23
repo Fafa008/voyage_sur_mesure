@@ -55,7 +55,6 @@ const THEMES_MADAGASCAR = [
 ];
 
 async function main() {
-  console.log("🌱 Début du seed...");
 
   // ==========================
   // 1. RÔLES
@@ -83,7 +82,6 @@ async function main() {
     throw new Error("Impossible de récupérer les rôles.");
   }
 
-  console.log("✅ Rôles créés");
 
   // ==========================
   // 2. UTILISATEURS (User + Account)
@@ -178,7 +176,6 @@ async function main() {
     },
   });
 
-  console.log("✅ Utilisateurs et comptes créés");
 
   // ==========================
   // 3. LES 24 RÉGIONS DE MADAGASCAR
@@ -195,7 +192,6 @@ async function main() {
     where: { nom: "Menabe" },
   });
 
-  console.log(`✅ 24 régions de Madagascar créées (${REGIONS_MADAGASCAR.length} au total)`);
 
   // ==========================
   // 4. THÈMES RÉELS DE VOYAGE À MADAGASCAR
@@ -212,7 +208,6 @@ async function main() {
     where: { nom: "Aventure & Trekking" },
   });
 
-  console.log(`✅ Thèmes de voyage réels créés (${THEMES_MADAGASCAR.length} au total)`);
 
   // ==========================
   // 5. MODES DE PAIEMENT
@@ -226,7 +221,6 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("✅ Modes de paiement créés");
 
   // ==========================
   // 6. CIRCUIT AVEC IMAGE, HÉBERGEMENT, ÉTAPE, ACTIVITÉ
@@ -284,10 +278,8 @@ async function main() {
       },
     });
 
-    console.log("✅ Circuit de démonstration créé");
   }
 
-  console.log("🎉 Seed des régions et thèmes terminé avec succès !");
 }
 
 main()
