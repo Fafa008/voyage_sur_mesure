@@ -1,14 +1,7 @@
 "use client"
 
 import { Users } from "lucide-react"
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import { SearchSelectField } from "./SearchSelectField"
 
 interface TravelersSelectProps {
   value?: number | null
@@ -16,7 +9,7 @@ interface TravelersSelectProps {
   className?: string
 }
 
-const travelerOptions = [
+const TRAVELER_OPTIONS = [
   { value: "1", label: "1 voyageur" },
   { value: "2", label: "2 voyageurs" },
   { value: "3", label: "3 voyageurs" },
@@ -30,29 +23,14 @@ export function TravelersSelect({
   className = "",
 }: TravelersSelectProps) {
   return (
-    <div className={`space-y-1.5 ${className}`}>
-      <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-        Voyageurs
-      </Label>
-      <div className="relative">
-        <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0 z-10" />
-        <Select
-          items={travelerOptions}
-          value={value?.toString() ?? null}
-          onValueChange={(val) => onChange(val ? Number(val) : null)}
-        >
-          <SelectTrigger className="pl-10 h-9 rounded-lg">
-            <SelectValue placeholder="Tous les voyageurs" />
-          </SelectTrigger>
-          <SelectContent>
-            {travelerOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <SearchSelectField
+      label="Voyageurs"
+      icon={<Users className="w-4 h-4" />}
+      options={TRAVELER_OPTIONS}
+      value={value?.toString() ?? null}
+      onChange={(val) => onChange(val ? Number(val) : null)}
+      placeholder="Tous les voyageurs"
+      className={className}
+    />
   )
 }

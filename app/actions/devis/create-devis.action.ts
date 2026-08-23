@@ -96,17 +96,29 @@ export async function createDevis(prevState: unknown, formData: FormData) {
   const circuitId = parseInt(data.circuitId, 10);
   const circuit = await prisma.circuit.findUnique({
     where: { id: circuitId },
-    select: { id: true },
+    select: { id: true, titre: true },
   });
   if (!circuit) {
     return { error: 'Circuit invalide ou introuvable.' };
   }
+
+  // 4b. Sélectionner automatiquement un conseiller disponible (celui avec le moins de devis assignés)
+  const conseiller = await prisma.user.findFirst({
+    where: {
+      role: { nom: 'conseiller' },
+    },
+    orderBy: {
+      devisConseiller: { _count: 'asc' },
+    },
+    select: { id: true, name: true, prenom: true, email: true },
+  });
 
   // 5. Création du devis avec tous les champs
   const devis = await prisma.devis.create({
     data: {
       userId: session.user.id,
       circuitId,
+      conseillerId: conseiller?.id || null,
       prenom: data.prenom,
       nom: data.nom,
       telephone: data.telephone,
@@ -137,16 +149,34 @@ export async function createDevis(prevState: unknown, formData: FormData) {
     },
   });
 
+  const conseillerNom = conseiller ? (conseiller.prenom ? `${conseiller.prenom} ${conseiller.name}` : conseiller.name) : null;
+  const clientMessage = conseillerNom
+    ? `Votre demande de devis #${devis.id} a bien été reçue. Votre conseiller dédié (${conseillerNom}) étudie votre dossier.`
+    : `Votre demande de devis #${devis.id} a bien été reçue. Un conseiller vous répondra sous peu.`;
+
   await prisma.notification.create({
     data: {
       userId: session.user.id,
       titre: "Demande enregistrée",
-      message: `Votre demande de devis #${devis.id} a bien été reçue. Un conseiller vous répondra sous peu.`,
+      message: clientMessage,
     },
   });
 
+  // Notifier le conseiller assigné s'il existe
+  if (conseiller) {
+    await prisma.notification.create({
+      data: {
+        userId: conseiller.id,
+        titre: "Nouveau devis attribué",
+        message: `Le devis #${devis.id} pour ${data.prenom} ${data.nom} (${circuit.titre}) vous a été attribué.`,
+      },
+    });
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/notifications");
+  revalidatePath("/admin/devis");
+  revalidatePath("/conseiller/dashboard");
 
   // 5. Redirection côté client via useRouter (gérée dans le formulaire)
   return { success: true };

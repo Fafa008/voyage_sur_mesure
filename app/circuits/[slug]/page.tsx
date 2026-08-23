@@ -169,7 +169,36 @@ export default async function CircuitDetailPage({
 
       {/* Carte Interactive & Régions de Madagascar */}
       <section className="space-y-4 pt-2">
-        <CircuitMap circuit={circuit} />
+        <CircuitMap
+          circuit={{
+            id: circuit.id,
+            titre: circuit.titre,
+            description: circuit.description,
+            region: circuit.region
+              ? { id: circuit.region.id, nom: circuit.region.nom }
+              : null,
+            etapes: circuit.etapes.map((etape) => ({
+              id: etape.id,
+              ordre: etape.ordre,
+              ville: etape.ville,
+              description: etape.description,
+              hebergement: etape.hebergement
+                ? {
+                    id: etape.hebergement.id,
+                    nom: etape.hebergement.nom,
+                    type: etape.hebergement.type,
+                    etoiles: etape.hebergement.etoiles,
+                    adresse: etape.hebergement.adresse,
+                  }
+                : null,
+              activites: etape.activites.map((act) => ({
+                id: act.id,
+                nom: act.nom,
+                description: act.description,
+              })),
+            })),
+          }}
+        />
       </section>
 
       {/* Programme des étapes */}

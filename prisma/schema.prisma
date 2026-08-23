@@ -32,8 +32,9 @@ model User {
   role   Role? @relation(fields: [roleId], references: [id])
 
   // 🔗 Relations métier
-  devis         Devis[]
-  paiements     Paiement[]
+  devis          Devis[]              @relation("ClientDevis")
+  devisConseiller Devis[]              @relation("ConseillerDevis")
+  paiements      Paiement[]
   avis          Avis[]
   favoris       Favori[]
   notifications Notification[]
@@ -126,10 +127,12 @@ model Activite {
 
 model Devis {
   id        Int      @id @default(autoincrement())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  circuitId Int
-  circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Restrict)
+  userId       String
+  user         User        @relation("ClientDevis", fields: [userId], references: [id])
+  conseillerId String?
+  conseiller   User?       @relation("ConseillerDevis", fields: [conseillerId], references: [id])
+  circuitId    Int
+  circuit      Circuit     @relation(fields: [circuitId], references: [id], onDelete: Restrict)
 
   // Champs existants
   dateDemande           DateTime    @default(now())
@@ -138,6 +141,8 @@ model Devis {
   commentaireClient     String?
   commentaireConseiller String?
   montantTotal          Decimal?    @db.Decimal(10, 2)
+  // Snapshot du chiffrage serveur scellé lors de la validation (breakdown détaillé)
+  detailsCalcul         Json?
 
   // Nouveaux champs pour le formulaire enrichi
   prenom             String?

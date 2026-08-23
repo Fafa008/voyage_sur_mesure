@@ -25,6 +25,10 @@ export async function updateDevisStatus(formData: FormData) {
   const devisId = parseInt(formData.get("devisId") as string, 10);
   const statut = formData.get("statut") as StatutDevis;
 
+  if (!Object.values(StatutDevis).includes(statut)) {
+    throw new Error("Statut invalide");
+  }
+
   const existingDevis = await prisma.devis.findUnique({
     where: { id: devisId },
     include: { reservation: true },
@@ -32,6 +36,24 @@ export async function updateDevisStatus(formData: FormData) {
 
   if (!existingDevis) {
     throw new Error("Devis introuvable");
+  }
+
+  // Le passage à « validé » est réservé au flux de chiffrage
+  // (validateDevisWithPricing) qui recalcule le montant côté serveur.
+  if (statut === StatutDevis.valide) {
+    throw new Error(
+      "Un devis ne peut pas être marqué validé manuellement : utilisez le calculateur de budget pour chiffrer puis confirmer le devis."
+    );
+  }
+
+  // Devis déjà accepté ou réservé par le client : plus aucune modification possible.
+  if (
+    existingDevis.statut === StatutDevis.accepte ||
+    existingDevis.statut === StatutDevis.reserve
+  ) {
+    throw new Error(
+      "Ce devis a été accepté par le client et ne peut plus être modifié."
+    );
   }
 
   if (existingDevis.reservation && statut !== StatutDevis.reserve) {

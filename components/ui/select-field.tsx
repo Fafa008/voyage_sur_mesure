@@ -14,6 +14,7 @@ import {
 interface SelectFieldProps {
   label: string
   id: string
+  name?: string
   options: { value: string; label: string }[]
   error?: string
   icon?: React.ReactNode
@@ -28,6 +29,7 @@ interface SelectFieldProps {
 function SelectField({
   label,
   id,
+  name,
   options,
   error,
   icon,
@@ -38,7 +40,7 @@ function SelectField({
   className,
   placeholder = "Sélectionner...",
 }: SelectFieldProps) {
-  const filteredOptions = options.filter((opt) => opt.value !== "")
+  const isControlled = value !== undefined
 
   return (
     <div className="space-y-1.5">
@@ -56,12 +58,14 @@ function SelectField({
           </div>
         )}
         <Select
-          items={filteredOptions}
-          defaultValue={defaultValue || null}
-          value={value || null}
+          items={options}
+          name={name || id}
+          {...(isControlled
+            ? { value: value ?? null }
+            : { defaultValue: defaultValue ?? null })}
           onValueChange={(val) => {
-            if (val !== null && onValueChange) {
-              onValueChange(val)
+            if (onValueChange) {
+              onValueChange(val ?? "")
             }
           }}
         >
@@ -78,7 +82,7 @@ function SelectField({
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
-            {filteredOptions.map((opt) => (
+            {options.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>

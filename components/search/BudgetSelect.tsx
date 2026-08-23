@@ -2,14 +2,7 @@
 
 import { DollarSign } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import { SearchSelectField } from "./SearchSelectField"
 
 interface BudgetSelectProps {
   value?: number | null
@@ -17,7 +10,7 @@ interface BudgetSelectProps {
   className?: string
 }
 
-const budgetOptions = [
+const BUDGET_OPTIONS = [
   { value: "500000", label: `Jusqu'à ${formatCurrency(500000)}` },
   { value: "1000000", label: `Jusqu'à ${formatCurrency(1000000)}` },
   { value: "1500000", label: `Jusqu'à ${formatCurrency(1500000)}` },
@@ -31,29 +24,14 @@ export function BudgetSelect({
   className = "",
 }: BudgetSelectProps) {
   return (
-    <div className={`space-y-1.5 ${className}`}>
-      <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-        Budget Max
-      </Label>
-      <div className="relative">
-        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none shrink-0 z-10" />
-        <Select
-          items={budgetOptions}
-          value={value?.toString() ?? null}
-          onValueChange={(val) => onChange(val ? Number(val) : null)}
-        >
-          <SelectTrigger className="pl-10 h-9 rounded-lg">
-            <SelectValue placeholder="Tous les budgets" />
-          </SelectTrigger>
-          <SelectContent>
-            {budgetOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <SearchSelectField
+      label="Budget Max"
+      icon={<DollarSign className="w-4 h-4" />}
+      options={BUDGET_OPTIONS}
+      value={value?.toString() ?? null}
+      onChange={(val) => onChange(val ? Number(val) : null)}
+      placeholder="Tous les budgets"
+      className={className}
+    />
   )
 }

@@ -15,16 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatutDevis } from "@prisma/client";
-import { PricingBreakdown } from "@/lib/services/devis-calculator.service";
+import { PricingBreakdown, DevisDetailsCalcul } from "@/lib/services/devis-calculator.service";
 import { formatCurrency } from "@/lib/format";
 import {
   Calculator,
   AlertTriangle,
   CheckCircle2,
   HelpCircle,
-  TrendingDown,
-  Sparkles,
   Info,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,11 +34,7 @@ interface DevisCalculatorProps {
   initialTransportType?: string | null;
   initialRemise?: number;
   initialCommentaire?: string | null;
-  initialMontantTotal?: number | null;
-  initialDateDebutConfirmee?: string | null;
-  initialDateFinConfirmee?: string | null;
-  budgetMin?: number | null;
-  budgetMax?: number | null;
+  initialSnapshot?: DevisDetailsCalcul | null;
 }
 
 export function DevisCalculator({
@@ -49,11 +44,7 @@ export function DevisCalculator({
   initialTransportType = "aucun",
   initialRemise = 0,
   initialCommentaire = "",
-  initialMontantTotal = null,
-  initialDateDebutConfirmee = "",
-  initialDateFinConfirmee = "",
-  budgetMin = null,
-  budgetMax = null,
+  initialSnapshot = null,
 }: DevisCalculatorProps) {
   const router = useRouter();
   const [typeHebergement, setTypeHebergement] = useState(initialTypeHebergement || "hotel");
@@ -61,8 +52,8 @@ export function DevisCalculator({
   const [includeGuide, setIncludeGuide] = useState(false);
   const [remise, setRemise] = useState(initialRemise);
   const [commentaire, setCommentaire] = useState(initialCommentaire || "");
-  const [dateDebutConfirmee, setDateDebutConfirmee] = useState(initialDateDebutConfirmee || "");
-  const [dateFinConfirmee, setDateFinConfirmee] = useState(initialDateFinConfirmee || "");
+  const [dateDebutConfirmee, setDateDebutConfirmee] = useState("");
+  const [dateFinConfirmee, setDateFinConfirmee] = useState("");
 
   const [breakdown, setBreakdown] = useState<PricingBreakdown | null>(null);
   const [isCalculating, startCalculating] = useTransition();
@@ -72,23 +63,18 @@ export function DevisCalculator({
     null
   );
 
+  // Snapshot scellé lors de la validation serveur (source de vérité en lecture seule)
+  const snapshot = initialSnapshot;
+
+  // Le devis est-il déjà finalisé ?
+  const isFinalized =
+    statut !== StatutDevis.en_cours && statut !== StatutDevis.en_modification;
+
   useEffect(() => {
     if (validationState?.success) {
       router.refresh();
     }
   }, [validationState, router]);
-
-  // Is the devis already finalized?
-  const isFinalized =
-    statut !== StatutDevis.en_cours && statut !== StatutDevis.en_modification;
-
-  // Run initial budget simulation on mount for view-only or pre-calculation
-  useEffect(() => {
-    if (isFinalized && initialMontantTotal !== null) {
-      // Simulate/Trigger calculation to display breakdown for finalized devis
-      handleCalculate(true);
-    }
-  }, [isFinalized]);
 
   const handleCalculate = (silent = false) => {
     startCalculating(async () => {
@@ -107,6 +93,15 @@ export function DevisCalculator({
     });
   };
 
+  // Devis finalisé sans snapshot (validé avant l'ajout de la fonctionnalité) :
+  // on recalcule silencieusement pour afficher un rapport approximatif.
+  useEffect(() => {
+    if (isFinalized && !snapshot) {
+      handleCalculate(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFinalized, snapshot]);
+
   return (
     <div className="space-y-6">
       <Card className="border border-border/60">
@@ -124,6 +119,7 @@ export function DevisCalculator({
           </div>
           {isFinalized && (
             <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+              <Lock className="w-3 h-3 mr-1" />
               Chiffrage Finalisé
             </Badge>
           )}
@@ -262,6 +258,26 @@ export function DevisCalculator({
 
                 {breakdown ? (
                   <div className="space-y-3 text-xs">
+                    {/* Avertissements données sources */}
+                    {breakdown.avertissements.length > 0 && (
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-1.5">
+                        <p className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-400">
+                          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                          Données incomplètes
+                        </p>
+                        <ul className="list-disc list-inside text-[11px] text-amber-700/90 dark:text-amber-400/90 space-y-0.5">
+                          {breakdown.avertissements.map((a, i) => (
+                            <li key={i}>{a}</li>
+                          ))}
+                        </ul>
+                        {!breakdown.estValide && (
+                          <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-400">
+                            La confirmation est bloquée tant que ces données ne sont pas corrigées.
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Circuit de base ({breakdown.nombreVoyageurs} pers)</span>
                       <span className="font-medium">{formatCurrency(breakdown.prixBaseCircuit)}</span>
@@ -308,7 +324,7 @@ export function DevisCalculator({
                           ) : (
                             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           )}
-                          Budget client : {budgetMax ? formatCurrency(budgetMax) : "Non défini"}
+                          Budget client : {breakdown.budgetMax ? formatCurrency(breakdown.budgetMax) : "Non défini"}
                         </span>
                         <Badge className={cn(
                           "text-[10px] uppercase font-bold",
@@ -337,50 +353,38 @@ export function DevisCalculator({
                 )}
               </div>
             </div>
+          ) : snapshot ? (
+            // ── Vue lecture seule fidèle au chiffrage scellé en base ──
+            <ReadOnlyReport snapshot={snapshot} />
           ) : (
-            // Read-Only view of calculation details if devis is validated/finalized
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted/40 p-4 border border-border/50 rounded-xl">
-                <div>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Hébergement</span>
-                  <span className="font-semibold text-xs capitalize">{typeHebergement}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Transport</span>
-                  <span className="font-semibold text-xs capitalize">{transportType}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Remise appliquée</span>
-                  <span className="font-semibold text-xs text-rose-500">-{formatCurrency(remise)}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Montant final</span>
-                  <span className="font-bold text-xs text-primary">{initialMontantTotal ? formatCurrency(initialMontantTotal) : "—"}</span>
-                </div>
+            // Devis finalisé sans snapshot (legacy) : rapport recalculé à titre indicatif
+            breakdown ? (
+              <ReadOnlyReport
+                snapshot={{
+                  calculeLe: "",
+                  prixBaseCircuit: breakdown.prixBaseCircuit,
+                  dureeJours: breakdown.dureeJours,
+                  nombreVoyageurs: breakdown.nombreVoyageurs,
+                  hebergementSuppl: breakdown.hebergementSuppl,
+                  transportSuppl: breakdown.transportSuppl,
+                  activitesSuppl: breakdown.activitesSuppl,
+                  prestationsExtra: breakdown.prestationsExtra,
+                  remise: breakdown.remise,
+                  montantTotal: breakdown.montantTotal,
+                  budgetMin: breakdown.budgetMin,
+                  budgetMax: breakdown.budgetMax,
+                  budgetStatut: breakdown.budgetStatut,
+                  budgetDifference: breakdown.budgetDifference,
+                  options: breakdown.options,
+                }}
+                legacy
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground space-y-2">
+                <HelpCircle className="w-8 h-8 text-muted-foreground/30" />
+                <p className="text-xs">Aucun détail de calcul enregistré pour ce devis.</p>
               </div>
-
-              {breakdown && (
-                <div className="border border-border/60 rounded-xl p-4 bg-muted/20 space-y-2 max-w-md">
-                  <h4 className="font-semibold text-[11px] uppercase tracking-wider text-muted-foreground border-b pb-1.5">
-                    Rapport de validation du budget
-                  </h4>
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Sous-total prestations</span>
-                      <span>{formatCurrency(breakdown.prixBaseCircuit + breakdown.hebergementSuppl + breakdown.transportSuppl + breakdown.activitesSuppl + breakdown.prestationsExtra)}</span>
-                    </div>
-                    <div className="flex justify-between text-rose-500">
-                      <span>Remise accordée</span>
-                      <span>-{formatCurrency(remise)}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-primary border-t pt-1.5 mt-1.5">
-                      <span>Montant facturé</span>
-                      <span>{formatCurrency(breakdown.montantTotal)}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            )
           )}
 
           {/* Submission and Confirmation Form */}
@@ -391,9 +395,36 @@ export function DevisCalculator({
               <input type="hidden" name="transportType" value={transportType} />
               <input type="hidden" name="includeGuide" value={includeGuide ? "true" : "false"} />
               <input type="hidden" name="remise" value={remise} />
-              <input type="hidden" name="montantTotal" value={breakdown?.montantTotal ?? ""} />
               <input type="hidden" name="dateDebutConfirmee" value={dateDebutConfirmee} />
               <input type="hidden" name="dateFinConfirmee" value={dateFinConfirmee} />
+
+              {/* Dates confirmées (scellées lors de la validation) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="dateDebutConfirmee" className="text-xs">
+                    Date de début confirmée
+                  </Label>
+                  <Input
+                    type="date"
+                    id="dateDebutConfirmee"
+                    value={dateDebutConfirmee}
+                    onChange={(e) => setDateDebutConfirmee(e.target.value)}
+                    className="h-10 text-xs"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="dateFinConfirmee" className="text-xs">
+                    Date de fin confirmée
+                  </Label>
+                  <Input
+                    type="date"
+                    id="dateFinConfirmee"
+                    value={dateFinConfirmee}
+                    onChange={(e) => setDateFinConfirmee(e.target.value)}
+                    className="h-10 text-xs"
+                  />
+                </div>
+              </div>
 
               {/* Message to Traveler Client */}
               <div className="space-y-1.5">
@@ -420,10 +451,10 @@ export function DevisCalculator({
               )}
 
               {/* Actions Footer */}
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
                 <Button
                   type="submit"
-                  disabled={pendingConfirm || !breakdown}
+                  disabled={pendingConfirm || !breakdown || !breakdown.estValide}
                   className="w-full sm:w-auto font-bold bg-primary hover:bg-primary-hover shadow-md transition-all h-10 px-6 shrink-0"
                 >
                   {pendingConfirm ? "Validation en cours..." : "Confirmer le devis et envoyer"}
@@ -434,11 +465,146 @@ export function DevisCalculator({
                     Le calcul de budget doit être exécuté avant de confirmer le devis.
                   </span>
                 )}
+                {breakdown && !breakdown.estValide && (
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    Données du circuit incomplètes : confirmation impossible.
+                  </span>
+                )}
               </div>
             </form>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/**
+ * Rapport de chiffrage lecture seule construit depuis le snapshot persisté côté serveur.
+ */
+function ReadOnlyReport({
+  snapshot,
+  legacy = false,
+}: {
+  snapshot: DevisDetailsCalcul;
+  legacy?: boolean;
+}) {
+  const sousTotal =
+    snapshot.prixBaseCircuit +
+    snapshot.hebergementSuppl +
+    snapshot.transportSuppl +
+    snapshot.activitesSuppl +
+    snapshot.prestationsExtra;
+
+  return (
+    <div className="space-y-4">
+      {legacy && (
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[11px] text-amber-700 dark:text-amber-400 flex items-start gap-2">
+          <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          Ce devis a été validé avant l&apos;archivage automatique du détail de calcul :
+          le rapport ci-dessous est une estimation recalculée.
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted/40 p-4 border border-border/50 rounded-xl">
+        <div>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Hébergement</span>
+          <span className="font-semibold text-xs capitalize">{snapshot.options.typeHebergement}</span>
+        </div>
+        <div>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Transport</span>
+          <span className="font-semibold text-xs capitalize">{snapshot.options.transportType}</span>
+        </div>
+        <div>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Remise appliquée</span>
+          <span className="font-semibold text-xs text-rose-500">
+            -{formatCurrency(snapshot.remise)}
+          </span>
+        </div>
+        <div>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Montant final</span>
+          <span className="font-bold text-xs text-primary">{formatCurrency(snapshot.montantTotal)}</span>
+        </div>
+      </div>
+
+      <div className="border border-border/60 rounded-xl p-4 bg-muted/20 space-y-2 max-w-md">
+        <h4 className="font-semibold text-[11px] uppercase tracking-wider text-muted-foreground border-b pb-1.5 flex items-center justify-between">
+          <span>Rapport de validation du budget</span>
+          {snapshot.calculeLe && (
+            <span className="text-[9px] normal-case font-normal text-muted-foreground/70">
+              {new Date(snapshot.calculeLe).toLocaleString("fr-FR", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          )}
+        </h4>
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Circuit de base ({snapshot.nombreVoyageurs} pers)</span>
+            <span>{formatCurrency(snapshot.prixBaseCircuit)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Supplément hébergement</span>
+            <span>{formatCurrency(snapshot.hebergementSuppl)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Supplément transport</span>
+            <span>{formatCurrency(snapshot.transportSuppl)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Activités incluses</span>
+            <span>{formatCurrency(snapshot.activitesSuppl)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Taxes & prestations extra</span>
+            <span>{formatCurrency(snapshot.prestationsExtra)}</span>
+          </div>
+          <div className="flex justify-between border-t border-border/40 pt-1.5">
+            <span className="text-muted-foreground">Sous-total prestations</span>
+            <span>{formatCurrency(sousTotal)}</span>
+          </div>
+          <div className="flex justify-between text-rose-500">
+            <span>Remise accordée</span>
+            <span>-{formatCurrency(snapshot.remise)}</span>
+          </div>
+          <div className="flex justify-between font-bold text-primary border-t pt-1.5 mt-1.5">
+            <span>Montant facturé</span>
+            <span>{formatCurrency(snapshot.montantTotal)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Comparaison budget client figée au moment de la validation */}
+      {snapshot.budgetMax !== null && (
+        <div className={cn(
+          "max-w-md p-3 rounded-xl border space-y-1.5",
+          snapshot.budgetStatut === "depasse"
+            ? "bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400"
+            : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+        )}>
+          <div className="flex items-center justify-between font-bold text-xs">
+            <span>Budget client : {formatCurrency(snapshot.budgetMax)}</span>
+            <Badge className={cn(
+              "text-[10px] uppercase font-bold",
+              snapshot.budgetStatut === "depasse"
+                ? "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                : "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+            )}>
+              {snapshot.budgetStatut === "depasse" ? "Budget Dépassé" : "Budget Respecté"}
+            </Badge>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {snapshot.budgetStatut === "depasse"
+              ? `Au moment de la validation, le montant dépassait le budget maximal de ${formatCurrency(snapshot.budgetDifference)}.`
+              : `Marge restante par rapport au budget maximal : ${formatCurrency(snapshot.budgetDifference)}.`}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

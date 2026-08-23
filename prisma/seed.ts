@@ -2,7 +2,9 @@
 import { PrismaClient, RoleNom } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -113,7 +115,7 @@ async function main() {
     },
   });
 
-  // Conseiller
+  // Conseiller 1
   await prisma.user.upsert({
     where: { email: "conseiller@voyage.com" },
     update: {},
@@ -128,6 +130,27 @@ async function main() {
         create: {
           providerId: "credential",
           accountId: "conseiller@voyage.com",
+          password: await hashPassword("conseiller123"),
+        },
+      },
+    },
+  });
+
+  // Conseiller 2
+  await prisma.user.upsert({
+    where: { email: "conseiller2@voyage.com" },
+    update: {},
+    create: {
+      email: "conseiller2@voyage.com",
+      name: "Ravelo",
+      emailVerified: true,
+      prenom: "David",
+      telephone: "0342222222",
+      roleId: conseillerRole.id,
+      accounts: {
+        create: {
+          providerId: "credential",
+          accountId: "conseiller2@voyage.com",
           password: await hashPassword("conseiller123"),
         },
       },

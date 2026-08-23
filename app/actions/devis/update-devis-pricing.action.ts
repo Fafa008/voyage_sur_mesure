@@ -53,8 +53,8 @@ export async function calculateDevisPricingAction(
     await requireStaff();
     const breakdown = await calculateDevisBudget(devisId, params);
     return { success: true, breakdown };
-  } catch (error: any) {
-    return { error: error.message ?? "Erreur lors du calcul" };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : "Erreur lors du calcul" };
   }
 }
 
@@ -111,8 +111,34 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
       remise,
     });
 
+    // Données sources insuffisantes : la confirmation est interdite
+    if (!breakdown.estValide) {
+      return {
+        error: `Chiffrage impossible : ${breakdown.avertissements.join(" ")}`,
+      };
+    }
+
     const parsedDateDebut = dateDebutConfirmee ? new Date(dateDebutConfirmee) : null;
     const parsedDateFin = dateFinConfirmee ? new Date(dateFinConfirmee) : null;
+
+    // Snapshot du chiffrage scellé avec le devis (audit + affichage finalisé fidèle)
+    const detailsCalcul = {
+      calculeLe: new Date().toISOString(),
+      prixBaseCircuit: breakdown.prixBaseCircuit,
+      dureeJours: breakdown.dureeJours,
+      nombreVoyageurs: breakdown.nombreVoyageurs,
+      hebergementSuppl: breakdown.hebergementSuppl,
+      transportSuppl: breakdown.transportSuppl,
+      activitesSuppl: breakdown.activitesSuppl,
+      prestationsExtra: breakdown.prestationsExtra,
+      remise: breakdown.remise,
+      montantTotal: breakdown.montantTotal,
+      budgetMin: breakdown.budgetMin,
+      budgetMax: breakdown.budgetMax,
+      budgetStatut: breakdown.budgetStatut,
+      budgetDifference: breakdown.budgetDifference,
+      options: breakdown.options,
+    };
 
     // Sauvegarde en BDD et notification client
     await prisma.$transaction([
@@ -126,6 +152,7 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
           transport: transportType ? [transportType] : [],
           dateDebutConfirmee: parsedDateDebut ?? undefined,
           dateFinConfirmee: parsedDateFin ?? undefined,
+          detailsCalcul,
         },
       }),
       prisma.notification.create({
@@ -144,7 +171,12 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
     revalidatePath("/notifications");
 
     return { success: true };
-  } catch (error: any) {
-    return { error: error.message ?? "Une erreur est survenue lors de la validation" };
+  } catch (error: unknown) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de la validation",
+    };
   }
 }

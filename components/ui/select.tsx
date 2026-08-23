@@ -5,7 +5,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 
 import { cn } from "@/lib/utils"
 
-function Select({ ...props }: SelectPrimitive.Root.Props<string | null>) {
+function Select<Value = string | null>({ ...props }: SelectPrimitive.Root.Props<Value>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
@@ -59,12 +59,20 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "z-50 max-h-96 min-w-[8rem] overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
+            // bg-popover garantit un fond opaque (blanc en light, #20232a en dark)
+            // overflow-hidden sur le Popup, le scroll est géré par SelectList
+            "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-md",
             className
           )}
           {...props}
         >
-          {children}
+          {/* SelectList est le composant Base UI qui gère le scroll interne.
+              Sans lui, overflow-auto sur Popup peut être ignoré par le moteur. */}
+          <SelectPrimitive.List
+            className="max-h-96 overflow-y-auto p-1"
+          >
+            {children}
+          </SelectPrimitive.List>
         </SelectPrimitive.Popup>
       </SelectPrimitive.Positioner>
     </SelectPrimitive.Portal>
@@ -80,7 +88,13 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default select-none items-center gap-2 rounded-md py-2 pl-8 pr-3 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        // hover: ET focus: explicites pour garantir le fond en mode clair ET sombre
+        "relative flex w-full cursor-default select-none items-center gap-2 rounded-md py-2 pl-8 pr-3 text-sm outline-hidden",
+        "hover:bg-accent hover:text-accent-foreground",
+        "focus:bg-accent focus:text-accent-foreground",
+        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "data-disabled:pointer-events-none data-disabled:opacity-50",
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}

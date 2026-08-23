@@ -41,6 +41,16 @@ export default async function DevisDetailPage({
       include: {
         circuit: true,
         user: { select: { id: true, name: true, email: true } },
+        conseiller: {
+          select: {
+            id: true,
+            name: true,
+            prenom: true,
+            email: true,
+            telephone: true,
+            image: true,
+          },
+        },
         reservation: {
           include: {
             paiement: { include: { mode: true } },

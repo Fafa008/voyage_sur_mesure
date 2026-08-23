@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { DevisCalculator } from "@/components/devis/DevisCalculator";
 import { formatCurrency } from "@/lib/format";
+import { parseDetailsCalcul } from "@/lib/services/devis-calculator.service";
 import {
   ArrowLeft,
   CalendarCheck,
@@ -23,7 +24,6 @@ import {
   Utensils,
   Car,
   Activity,
-  FileText,
   Mail,
   Phone,
   Users,
@@ -117,9 +117,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
 
   if (!devis) notFound();
 
-  const isFinalized =
-    devis.statut !== StatutDevis.en_cours &&
-    devis.statut !== StatutDevis.en_modification;
+  const detailsCalcul = parseDetailsCalcul(devis.detailsCalcul);
 
   const clientName = `${devis.prenom || devis.user.prenom || ""} ${devis.nom || devis.user.name}`.trim();
   const initials = getInitials(devis.prenom || devis.user.prenom, devis.nom || devis.user.name);
@@ -341,7 +339,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
               </div>
 
               {/* Preferences Tags */}
-              {(devis.typeHebergement || devis.regime || (devis.transport && devis.transport.length > 0) || (devis.activites && devis.activites.length > 0)) && (
+              {(devis.typeHebergement || devis.regime || (devis.typeVoyage && devis.typeVoyage.length > 0) || (devis.transport && devis.transport.length > 0) || (devis.activites && devis.activites.length > 0)) && (
                 <div className="pt-4 border-t border-border/30 space-y-3">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
                     Préférences du voyageur
@@ -360,6 +358,12 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                         {devis.regimePrecision && ` (${devis.regimePrecision})`}
                       </span>
                     )}
+                    {devis.typeVoyage && devis.typeVoyage.map((t, i) => (
+                      <span key={i} className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-violet-500/5 border border-violet-500/15 rounded-lg px-2.5 py-1.5 text-violet-600 dark:text-violet-400">
+                        <Compass className="w-3 h-3" />
+                        {t}
+                      </span>
+                    ))}
                     {devis.transport && devis.transport.length > 0 && devis.transport.map((t, i) => (
                       <span key={i} className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-muted/60 border border-border/40 rounded-lg px-2.5 py-1.5">
                         <Car className="w-3 h-3 text-muted-foreground" />
@@ -554,13 +558,15 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
             <DevisCalculator
               devisId={devis.id}
               statut={devis.statut}
-              initialTypeHebergement={devis.typeHebergement}
-              initialTransportType={devis.transport?.[0]}
-              initialRemise={devis.montantTotal ? 0 : 0}
+              initialTypeHebergement={
+                detailsCalcul?.options.typeHebergement ?? devis.typeHebergement
+              }
+              initialTransportType={
+                detailsCalcul?.options.transportType ?? devis.transport?.[0]
+              }
+              initialRemise={detailsCalcul?.remise ?? 0}
               initialCommentaire={devis.commentaireConseiller}
-              initialMontantTotal={devis.montantTotal ? Number(devis.montantTotal) : null}
-              budgetMin={devis.budgetMin ? Number(devis.budgetMin) : null}
-              budgetMax={devis.budgetMax ? Number(devis.budgetMax) : null}
+              initialSnapshot={detailsCalcul}
             />
           </div>
         </div>
