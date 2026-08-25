@@ -1,11 +1,12 @@
 import { StatutDevis } from "@prisma/client";
-import { Check, Clock, FileText, CreditCard, Sparkles, AlertCircle } from "lucide-react";
+import { Check, Clock, FileText, CreditCard, Sparkles, AlertCircle, FilePenLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DevisTimelineProps {
   statut: StatutDevis;
   hasReservation?: boolean;
   isReservationPaid?: boolean;
+  commentaireConseiller?: string | null;
 }
 
 interface StepItem {
@@ -19,6 +20,7 @@ export function DevisTimeline({
   statut,
   hasReservation = false,
   isReservationPaid = false,
+  commentaireConseiller = null,
 }: DevisTimelineProps) {
   // Define full lifecycle steps
   const steps: StepItem[] = [
@@ -74,6 +76,30 @@ export function DevisTimeline({
           <p className="font-semibold text-sm">Devis décliné</p>
           <p className="text-xs text-muted-foreground">
             Ce dossier a été annulé ou décliné. Vous pouvez créer une nouvelle demande à tout moment.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (statut === StatutDevis.en_modification) {
+    return (
+      <div
+        className={cn(
+          "flex items-start gap-3 p-4 rounded-xl bg-orange-500/10 border border-orange-500/25",
+          "text-orange-700 dark:text-orange-300"
+        )}
+      >
+        <FilePenLine className="w-5 h-5 shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-sm">Modification demandée par votre conseiller</p>
+          {commentaireConseiller && (
+            <p className="text-xs leading-relaxed italic">
+              &ldquo;{commentaireConseiller}&rdquo;
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Merci de modifier les informations concernées depuis le détail de votre devis, puis de renvoyer votre dossier pour nouvelle analyse.
           </p>
         </div>
       </div>

@@ -92,17 +92,32 @@ export async function createDevis(prevState: unknown, formData: FormData) {
 
   const data = parsed.data;
 
-  // 4. Le circuit référencé doit exister (un devis ne peut pas exister sans circuit)
+  // 4. Vérification dateFin >= dateDebut
+  const dateDebut = new Date(data.dateDebut);
+  const dateFin = new Date(data.dateFin);
+  if (dateFin < dateDebut) {
+    return {
+      error: 'La date de retour doit être postérieure à la date de départ.',
+    };
+  }
+
+  // 5. Le circuit référencé doit exister (un devis ne peut pas exister sans circuit)
   const circuitId = parseInt(data.circuitId, 10);
   const circuit = await prisma.circuit.findUnique({
     where: { id: circuitId },
-    select: { id: true, titre: true },
+    select: { id: true, titre: true, regionId: true },
   });
   if (!circuit) {
     return { error: 'Circuit invalide ou introuvable.' };
   }
 
-  // 4b. Sélectionner automatiquement un conseiller disponible (celui avec le moins de devis assignés)
+  // 5b. Garantir que la région du circuit est incluse dans regionIds
+  let regionIds = data.regionIds?.map(id => parseInt(id)) || [];
+  if (circuit.regionId && !regionIds.includes(circuit.regionId)) {
+    regionIds = [circuit.regionId, ...regionIds];
+  }
+
+  // 6. Sélectionner automatiquement un conseiller disponible (celui avec le moins de devis assignés)
   const conseiller = await prisma.user.findFirst({
     where: {
       role: { nom: 'conseiller' },
@@ -113,7 +128,7 @@ export async function createDevis(prevState: unknown, formData: FormData) {
     select: { id: true, name: true, prenom: true, email: true },
   });
 
-  // 5. Création du devis avec tous les champs
+  // 7. Création du devis avec tous les champs
   const devis = await prisma.devis.create({
     data: {
       userId: session.user.id,
@@ -138,7 +153,7 @@ export async function createDevis(prevState: unknown, formData: FormData) {
       newsletter: data.newsletter === 'true',
       // Tableaux (PostgreSQL)
       themeIds: data.themeIds?.map(id => parseInt(id)) || [],
-      regionIds: data.regionIds?.map(id => parseInt(id)) || [],
+      regionIds,
       typeVoyage: data.typeVoyage || [],
       activites: data.activites || [],
       transport: data.transport || [],

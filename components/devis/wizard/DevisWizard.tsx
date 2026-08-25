@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { createDevis } from "@/app/actions/devis/create-devis.action";
-import type { DevisFormData, DevisOption } from "@/types/devis";
+import { updateDevisByClient } from "@/app/actions/devis/update-devis-by-client.action";
+import type { DevisFormData, DevisOption, CircuitPreview } from "@/types/devis";
 
 import { ProgressBar } from "./ProgressBar";
 import { NavigationButtons } from "./NavigationButtons";
@@ -92,6 +93,7 @@ const contentSteps = [
 
 interface DevisWizardProps {
   user: {
+    id?: string;
     email: string;
     prenom?: string | null;
     name?: string | null;
@@ -101,6 +103,12 @@ interface DevisWizardProps {
   themes: DevisOption[];
   regions: DevisOption[];
   preselectedCircuitId?: string;
+  /** Données enrichies du circuit pré-sélectionné (region, dates, lieux) */
+  preselectedCircuit?: CircuitPreview | null;
+  /** Mode édition : données existantes du devis à corriger */
+  initialData?: Partial<DevisFormData>;
+  /** Mode édition : identifiant du devis modifié (la modification est faite par le client) */
+  devisId?: number;
 }
 
 export function DevisWizard({
@@ -109,17 +117,62 @@ export function DevisWizard({
   themes,
   regions,
   preselectedCircuitId,
+  preselectedCircuit,
+  initialData,
+  devisId,
 }: DevisWizardProps) {
   const router = useRouter();
+  const isEditMode = typeof devisId === "number";
 
   const [currentStep, setCurrentStep] = useState(0);
+  // Calcul des valeurs initiales injectées depuis le circuit pré-sélectionné
+  const circuitRegionId = preselectedCircuit?.region?.id;
+  const circuitRegionIds: string[] =
+    circuitRegionId && !isEditMode
+      ? Array.from(
+          new Set([
+            String(circuitRegionId),
+            ...(initialData?.regionIds ?? []),
+          ])
+        )
+      : (initialData?.regionIds ?? []);
+
+  const circuitDateDebut =
+    !isEditMode && preselectedCircuit?.dateDebut
+      ? new Date(preselectedCircuit.dateDebut).toISOString().slice(0, 10)
+      : "";
+  const circuitDateFin =
+    !isEditMode && preselectedCircuit?.dateFin
+      ? new Date(preselectedCircuit.dateFin).toISOString().slice(0, 10)
+      : "";
+
   const [formData, setFormData] = useState<DevisFormData>(() => ({
     ...initialData,
-    email: user?.email ?? "",
-    prenom: user?.prenom ?? "",
-    nom: user?.name ?? "",
-    telephone: user?.telephone ?? "",
-    circuitId: preselectedCircuitId || "",
+    prenom: initialData?.prenom ?? user?.prenom ?? "",
+    nom: initialData?.nom ?? user?.name ?? "",
+    email: initialData?.email ?? user?.email ?? "",
+    telephone: initialData?.telephone ?? user?.telephone ?? "",
+    circuitId: initialData?.circuitId || preselectedCircuitId || "",
+    typeVoyage: initialData?.typeVoyage ?? [],
+    themeIds: initialData?.themeIds ?? [],
+    regionIds: circuitRegionIds,
+    dateDebut: initialData?.dateDebut ?? circuitDateDebut,
+    dateFin: initialData?.dateFin ?? circuitDateFin,
+    dureeFlexible: initialData?.dureeFlexible ?? false,
+    adultes: initialData?.adultes ?? 2,
+    enfants: initialData?.enfants ?? 0,
+    ados: initialData?.ados ?? 0,
+    enfantsAge: initialData?.enfantsAge ?? "",
+    typeHebergement: initialData?.typeHebergement ?? "",
+    regime: initialData?.regime ?? "",
+    regimePrecision: initialData?.regimePrecision ?? "",
+    activites: initialData?.activites ?? [],
+    transport: initialData?.transport ?? [],
+    budgetMin: initialData?.budgetMin ?? 0,
+    budgetMax: initialData?.budgetMax ?? 0,
+    commentaire: initialData?.commentaire ?? "",
+    source: initialData?.source ?? "",
+    newsletter: initialData?.newsletter ?? false,
   }));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,8 +181,12 @@ export function DevisWizard({
   const totalSteps = contentSteps.length + 1;
   const isAuthStep = currentStep === contentSteps.length;
 
-  // Restaure le brouillon et l'étape courante
+  // Restaure le brouillon et l'étape courante (création uniquement)
   useEffect(() => {
+    if (isEditMode) {
+      setHydrated(true);
+      return;
+    }
     try {
       const savedDraft = sessionStorage.getItem(DRAFT_KEY);
       const savedStep = sessionStorage.getItem(STEP_KEY);
@@ -159,17 +216,17 @@ export function DevisWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sauvegarde du brouillon
+  // Sauvegarde du brouillon (création uniquement)
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isEditMode) return;
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
-  }, [formData, hydrated]);
+  }, [formData, hydrated, isEditMode]);
 
-  // Sauvegarde de l'étape courante
+  // Sauvegarde de l'étape courante (création uniquement)
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isEditMode) return;
     sessionStorage.setItem(STEP_KEY, String(currentStep));
-  }, [currentStep, hydrated]);
+  }, [currentStep, hydrated, isEditMode]);
 
   const updateFormData = (newData: Partial<DevisFormData>) => {
     setFormData((prev) => ({ ...prev, ...newData }));
@@ -233,6 +290,25 @@ export function DevisWizard({
       }
     });
 
+    if (isEditMode && devisId) {
+      form.append("devisId", String(devisId));
+      const result = await updateDevisByClient(null, form);
+
+      if (result?.error) {
+        setError(result.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (result?.success) {
+        router.push(`/devis/${devisId}`);
+        return;
+      }
+
+      setIsSubmitting(false);
+      return;
+    }
+
     const result = await createDevis(null, form);
 
     if (result?.error) {
@@ -264,10 +340,12 @@ export function DevisWizard({
           Conception Sur Mesure
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          Demande de Devis Personnalisé
+          {isEditMode ? "Modifier ma Demande de Devis" : "Demande de Devis Personnalisé"}
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
-          {isAuthStep
+          {isEditMode
+            ? "Corrigez les informations demandées par votre conseiller, puis renvoyez votre dossier pour nouvelle analyse."
+            : isAuthStep
             ? "Vérifiez le récapitulatif de votre dossier avant de nous le transmettre."
             : "Complétez les détails de votre séjour pour recevoir une proposition adaptée sous 24h."}
         </p>
@@ -297,6 +375,7 @@ export function DevisWizard({
             circuits={circuits}
             themes={themes}
             regions={regions}
+            preselectedCircuit={preselectedCircuit}
           />
         )}
 
@@ -343,6 +422,8 @@ export function DevisWizard({
               <Send className="w-4 h-4" />
               {isSubmitting
                 ? "Transmission en cours..."
+                : isEditMode
+                ? "Renvoyer mon devis modifié"
                 : "Confirmer et Envoyer ma Demande"}
             </button>
           ) : (

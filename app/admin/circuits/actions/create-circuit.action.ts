@@ -18,9 +18,21 @@ const createCircuitSchema = z.object({
   prixEstime: z.number().min(0, 'Prix invalide'),
   nbPlacesDisponibles: z.number().int().min(0).default(0),
   dateDebut: z.string().optional(),
+  dateFin: z.string().optional(),
   estGroupe: z.boolean().default(false),
   themeId: z.number().optional(),
   regionId: z.number().optional(),
+
+  // Lieu de départ
+  lieuDepartNom: z.string().optional(),
+  lieuDepartLat: z.number().min(-90).max(90).optional(),
+  lieuDepartLng: z.number().min(-180).max(180).optional(),
+
+  // Lieu d'arrivée
+  lieuArriveeNom: z.string().optional(),
+  lieuArriveeLat: z.number().min(-90).max(90).optional(),
+  lieuArriveeLng: z.number().min(-180).max(180).optional(),
+
   // Relations
   etapes: z.array(
     z.object({
@@ -50,7 +62,39 @@ const createCircuitSchema = z.object({
       ordre: z.number().int().min(0).default(0),
     })
   ),
-});
+}).refine(
+  (data) => {
+    // Validation: dateFin >= dateDebut
+    if (data.dateDebut && data.dateFin) {
+      return new Date(data.dateFin) >= new Date(data.dateDebut);
+    }
+    return true;
+  },
+  { message: 'La date de retour doit être postérieure ou égale à la date de départ', path: ['dateFin'] }
+).refine(
+  (data) => {
+    // Si lat fourni, lng doit l'être aussi (et vice-versa)
+    const hasLat = data.lieuDepartLat !== undefined;
+    const hasLng = data.lieuDepartLng !== undefined;
+    return hasLat === hasLng;
+  },
+  { message: 'Latitude et longitude du départ doivent être fournies ensemble', path: ['lieuDepartLat'] }
+).refine(
+  (data) => {
+    const hasLat = data.lieuArriveeLat !== undefined;
+    const hasLng = data.lieuArriveeLng !== undefined;
+    return hasLat === hasLng;
+  },
+  { message: 'Latitude et longitude de l\'arrivée doivent être fournies ensemble', path: ['lieuArriveeLat'] }
+);
+
+/** Parse une valeur numérique optionnelle depuis FormData */
+function parseOptionalFloat(formData: FormData, key: string): number | undefined {
+  const raw = formData.get(key)?.toString()?.trim();
+  if (!raw || raw === '') return undefined;
+  const val = parseFloat(raw);
+  return isNaN(val) ? undefined : val;
+}
 
 export async function createCircuit(formData: FormData) {
   // 1. Vérifier l'authentification et le rôle admin
@@ -77,9 +121,19 @@ export async function createCircuit(formData: FormData) {
     prixEstime: parseFloat(formData.get('prixEstime')?.toString() || '0'),
     nbPlacesDisponibles: parseInt(formData.get('nbPlacesDisponibles')?.toString() || '0'),
     dateDebut: formData.get('dateDebut')?.toString() || undefined,
+    dateFin: formData.get('dateFin')?.toString() || undefined,
     estGroupe: formData.get('estGroupe') === 'true',
     themeId: formData.get('themeId') ? parseInt(formData.get('themeId') as string) : undefined,
     regionId: formData.get('regionId') ? parseInt(formData.get('regionId') as string) : undefined,
+
+    // Lieux géographiques
+    lieuDepartNom: formData.get('lieuDepartNom')?.toString()?.trim() || undefined,
+    lieuDepartLat: parseOptionalFloat(formData, 'lieuDepartLat'),
+    lieuDepartLng: parseOptionalFloat(formData, 'lieuDepartLng'),
+    lieuArriveeNom: formData.get('lieuArriveeNom')?.toString()?.trim() || undefined,
+    lieuArriveeLat: parseOptionalFloat(formData, 'lieuArriveeLat'),
+    lieuArriveeLng: parseOptionalFloat(formData, 'lieuArriveeLng'),
+
     etapes: (() => {
       try {
         const raw = formData.get('etapes') as string;
@@ -116,9 +170,19 @@ export async function createCircuit(formData: FormData) {
         prixEstime: data.prixEstime,
         nbPlacesDisponibles: data.nbPlacesDisponibles,
         dateDebut: data.dateDebut && data.dateDebut.trim() !== "" ? new Date(data.dateDebut) : null,
+        dateFin: data.dateFin && data.dateFin.trim() !== "" ? new Date(data.dateFin) : null,
         estGroupe: data.estGroupe,
         themeId: data.themeId ?? null,
         regionId: data.regionId ?? null,
+
+        // Lieux géographiques
+        lieuDepartNom: data.lieuDepartNom || null,
+        lieuDepartLat: data.lieuDepartLat ?? null,
+        lieuDepartLng: data.lieuDepartLng ?? null,
+        lieuArriveeNom: data.lieuArriveeNom || null,
+        lieuArriveeLat: data.lieuArriveeLat ?? null,
+        lieuArriveeLng: data.lieuArriveeLng ?? null,
+
         images: {
           create: data.images.map((img, index) => ({
             url: img.url,

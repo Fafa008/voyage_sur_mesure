@@ -1,9 +1,9 @@
-// app/devis/historique/page.tsx
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
+import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
 
 export default async function HistoriqueDevisPage() {
   const session = await auth.api.getSession({
@@ -15,7 +15,7 @@ export default async function HistoriqueDevisPage() {
   }
 
   const devisList = await prisma.devis.findMany({
-    where: { userId: session.user.id },
+    where: { deletedAt: null, userId: session.user.id },
     include: {
       circuit: { select: { titre: true } },
       reservation: { select: { id: true } },
@@ -52,8 +52,12 @@ export default async function HistoriqueDevisPage() {
                 {new Date(devis.dateDemande).toLocaleDateString("fr-FR")} •{" "}
                 {devis.nombrePersonnes} pers.
               </p>
-              <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">
-                {devis.statut}
+              <span
+                className={`text-xs px-2 py-1 rounded border ${
+                  statutDevisColors[devis.statut] || ""
+                }`}
+              >
+                {statutDevisLabels[devis.statut] || devis.statut}
               </span>
             </div>
             <div className="flex items-center gap-3">

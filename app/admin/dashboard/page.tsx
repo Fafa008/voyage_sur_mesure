@@ -35,16 +35,18 @@ export default async function AdminDashboardPage() {
     reservationsParStatut,
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.circuit.count(),
-    prisma.devis.count(),
-    prisma.reservation.count(),
+    prisma.circuit.count({ where: { deletedAt: null } }),
+    prisma.devis.count({ where: { deletedAt: null } }),
+    prisma.reservation.count({ where: { deletedAt: null } }),
     prisma.avis.count(),
     prisma.avis.count({ where: { estModere: false } }),
     prisma.devis.groupBy({
       by: ["statut"],
+      where: { deletedAt: null },
       _count: true,
     }),
     prisma.reservation.groupBy({
+      where: { deletedAt: null },
       by: ["statut"],
       _count: true,
     }),

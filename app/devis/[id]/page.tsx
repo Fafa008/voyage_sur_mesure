@@ -18,7 +18,7 @@ import { PaymentForm } from "@/components/reservation/PaymentForm";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import { DevisTimeline } from "@/components/devis/DevisTimeline";
 import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
-import { CreditCard, CheckCircle2, CalendarCheck } from "lucide-react";
+import { CreditCard, CheckCircle2, CalendarCheck, PenLine } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
 interface DevisDetailPageProps {
@@ -76,6 +76,8 @@ export default async function DevisDetailPage({
   if (!isOwner && !isStaff) redirect("/dashboard");
 
   const showClientActions = isOwner && devis.statut === StatutDevis.valide;
+  const showModificationRequest =
+    isOwner && devis.statut === StatutDevis.en_modification;
   const showPayment =
     isOwner &&
     (devis.statut === StatutDevis.accepte ||
@@ -124,7 +126,39 @@ export default async function DevisDetailPage({
         statut={devis.statut}
         hasReservation={hasReservation}
         isReservationPaid={isReservationPaid}
+        commentaireConseiller={devis.commentaireConseiller}
       />
+
+      {/* Demande de modification du conseiller : le client corrige lui-même */}
+      {showModificationRequest && (
+        <Card className="border-orange-300 bg-orange-50/60 dark:bg-orange-950/20 dark:border-orange-900">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2 text-orange-700 dark:text-orange-300">
+              <PenLine className="w-5 h-5" />
+              Votre conseiller demande une modification
+            </CardTitle>
+            <CardDescription className="text-orange-800/80 dark:text-orange-200/70">
+              {devis.commentaireConseiller ??
+                "Merci de vérifier les informations de votre devis."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`/devis/${devis.id}/modifier`}
+              className={
+                buttonVariants({ variant: "default", size: "lg" }) +
+                " font-bold shadow-sm"
+              }
+            >
+              <PenLine className="w-4 h-4 mr-2" />
+              Modifier mon devis et renvoyer
+            </Link>
+            <p className="text-xs text-muted-foreground mt-3">
+              Vous seul pouvez corriger les informations de votre demande. Une fois renvoyé, votre conseiller l&apos;analysera à nouveau.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions client : accepter / refuser */}
       {showClientActions && (

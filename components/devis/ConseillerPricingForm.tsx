@@ -32,8 +32,7 @@ export function ConseillerPricingForm({
     if (state?.success) router.refresh();
   }, [state?.success, router]);
 
-  const canValidate =
-    statut === StatutDevis.en_cours || statut === StatutDevis.en_modification;
+  const canValidate = statut === StatutDevis.en_cours;
 
   if (!canValidate) return null;
 

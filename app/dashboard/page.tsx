@@ -56,7 +56,7 @@ export default async function DashboardPage() {
 
   // Récupérer les devis du client
   const devisList = await prisma.devis.findMany({
-    where: { userId },
+    where: { deletedAt: null, userId },
     include: {
       circuit: {
         select: { titre: true, slug: true },
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
 
   // Récupérer les réservations récentes
   const reservations = await prisma.reservation.findMany({
-    where: { devis: { userId } },
+    where: { deletedAt: null, devis: { userId } },
     include: {
       devis: {
         include: {
@@ -107,15 +107,15 @@ export default async function DashboardPage() {
     take: 3,
   });
   // Statistiques
-  const totalDevis = await prisma.devis.count({ where: { userId } });
+  const totalDevis = await prisma.devis.count({ where: { deletedAt: null, userId } });
   const devisEnAttente = await prisma.devis.count({
-    where: { userId, statut: StatutDevis.en_cours },
+    where: { deletedAt: null, userId, statut: StatutDevis.en_cours },
   });
   const totalReservations = await prisma.reservation.count({
-    where: { devis: { userId } },
+    where: { deletedAt: null, devis: { userId } },
   });
   const devisAPayer = await prisma.devis.count({
-    where: { userId, statut: StatutDevis.accepte },
+    where: { deletedAt: null, userId, statut: StatutDevis.accepte },
   });
   const totalFavoris = await prisma.favori.count({ where: { userId } });
   const notificationsNonLues = await prisma.notification.count({

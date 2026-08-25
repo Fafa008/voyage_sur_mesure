@@ -17,6 +17,7 @@ export default async function CircuitsPreview() {
   const favoriteIds = await getUserFavoriteCircuitIds(session?.user.id);
 
   const circuits = await prisma.circuit.findMany({
+    where: { deletedAt: null },
     take: 4,
     select: {
       id: true,
@@ -83,7 +84,7 @@ export default async function CircuitsPreview() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {circuits.map((circuit) => (
+            {circuits.map((circuit, index) => (
               <Card
                 key={circuit.id}
                 className={`
@@ -117,6 +118,7 @@ export default async function CircuitsPreview() {
                         src={circuit.images[0].url}
                         alt={circuit.titre}
                         fill
+                        priority={index === 0}
                         className="
                           object-cover
                           transition-transform

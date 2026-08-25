@@ -50,7 +50,7 @@ export function SearchSelectField({
 }: SearchSelectFieldProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+      <Label className="text-xs font-medium text-foreground/80">
         {label}
       </Label>
       <div className="relative">
@@ -64,7 +64,7 @@ export function SearchSelectField({
           value={value}
           onValueChange={(val) => onChange(val)}
         >
-          <SelectTrigger className="pl-10 h-9 rounded-lg">
+          <SelectTrigger className="pl-10 h-10 rounded-xl bg-background text-foreground border-input shadow-2xs hover:border-primary/50 focus:border-ring">
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>

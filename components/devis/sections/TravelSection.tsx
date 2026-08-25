@@ -5,8 +5,16 @@ import { InputField } from "@/components/ui/input-field";
 import { SelectField } from "@/components/ui/select-field";
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import { CounterInput } from "@/components/ui/counter-input";
-import type { DevisFormData, DevisOption } from "@/types/devis";
-import { Compass, Calendar, Users, Sparkles, MapPin, Tag } from "lucide-react";
+import type { DevisFormData, DevisOption, CircuitPreview } from "@/types/devis";
+import {
+  Compass,
+  Calendar,
+  Users,
+  Sparkles,
+  MapPin,
+  Lock,
+  Info,
+} from "lucide-react";
 
 interface TravelSectionProps {
   data: DevisFormData;
@@ -14,6 +22,8 @@ interface TravelSectionProps {
   circuits: DevisOption[];
   themes: DevisOption[];
   regions: DevisOption[];
+  /** Données enrichies du circuit pré-sélectionné (injectées côté serveur) */
+  preselectedCircuit?: CircuitPreview | null;
 }
 
 export function TravelSection({
@@ -22,6 +32,7 @@ export function TravelSection({
   circuits,
   themes,
   regions,
+  preselectedCircuit,
 }: TravelSectionProps) {
   type TravelArrayField = keyof Pick<
     TravelSectionProps["data"],
@@ -61,6 +72,32 @@ export function TravelSection({
     label: r.nom ?? "Région",
   }));
 
+  // Région définie par le circuit (verrouillée, non désélectionnable)
+  const circuitRegion = preselectedCircuit?.region ?? null;
+  const circuitRegionIdStr = circuitRegion ? String(circuitRegion.id) : null;
+
+  // Dates du circuit (indicatives, pré-remplies)
+  const hasCircuitDates =
+    preselectedCircuit?.dateDebut || preselectedCircuit?.dateFin;
+  const circuitDateDebutDisplay = preselectedCircuit?.dateDebut
+    ? new Date(preselectedCircuit.dateDebut).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+  const circuitDateFinDisplay = preselectedCircuit?.dateFin
+    ? new Date(preselectedCircuit.dateFin).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  // Lieux de départ / arrivée du circuit
+  const lieuDepart = preselectedCircuit?.lieuDepartNom ?? null;
+  const lieuArrivee = preselectedCircuit?.lieuArriveeNom ?? null;
+
   return (
     <div className="space-y-8">
       {/* En-tête */}
@@ -79,30 +116,74 @@ export function TravelSection({
         </div>
       </div>
 
-      {/* 1. Circuit d'inspiration */}
+      {/* ── BLOC A : Informations du Circuit (lecture seule si circuit pré-sélectionné) ── */}
       <div className="p-6 rounded-xl bg-card space-y-4">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-            Point de départ
+            Circuit sélectionné
           </h3>
         </div>
 
         <SelectField
-          label="Circuit d'inspiration *"
+          label="Circuit de référence *"
           id="circuitId"
           icon={<Compass className="w-4 h-4" />}
           options={[
             { value: "", label: "Sélectionnez un circuit…" },
             ...circuits.map((c) => ({
               value: String(c.id),
-              label: `Inspiration : ${c.titre}`,
+              label: c.titre ?? "Circuit",
             })),
           ]}
-          value={data.circuitId}
+          value={data.circuitId ?? ""}
           onValueChange={(val) => updateData({ circuitId: val })}
           sublabel="Le devis doit être rattaché à un circuit existant"
         />
+
+        {/* Informations fixes du circuit sélectionné */}
+        {preselectedCircuit && (
+          <div className="mt-2 space-y-3">
+            {/* Région du circuit — information verrouillée */}
+            {circuitRegion && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/15">
+                <Lock className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                <div className="text-xs">
+                  <span className="font-semibold text-primary uppercase tracking-wider text-[10px]">
+                    Région définie par le circuit
+                  </span>
+                  <p className="text-foreground font-medium mt-0.5">
+                    {circuitRegion.nom}
+                  </p>
+                  <p className="text-muted-foreground text-[11px] mt-0.5">
+                    Cette région est automatiquement associée au circuit choisi.
+                    Vous pouvez ajouter des régions complémentaires ci-dessous si votre voyage en couvre plusieurs.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Lieux de départ / arrivée */}
+            {(lieuDepart || lieuArrivee) && (
+              <div className="flex flex-wrap gap-3">
+                {lieuDepart && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-xs">
+                    <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground">Départ :</span>
+                    <span className="font-medium text-foreground">{lieuDepart}</span>
+                  </div>
+                )}
+                {lieuArrivee && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-xs">
+                    <MapPin className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span className="text-muted-foreground">Arrivée :</span>
+                    <span className="font-medium text-foreground">{lieuArrivee}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 2. Type de voyage & Thèmes */}
@@ -139,16 +220,39 @@ export function TravelSection({
         )}
 
         {regionOptions.length > 0 && (
-          <CheckboxGroup
-            label="Régions d'intérêt"
-            sublabel="Invisages privilégiés"
-            name="regionIds"
-            options={regionOptions}
-            values={data.regionIds}
-            onChange={(value, checked) =>
-              handleArrayChange("regionIds", value, checked)
-            }
-          />
+          <div className="space-y-2">
+            <CheckboxGroup
+              label={
+                circuitRegion
+                  ? "Régions complémentaires"
+                  : "Régions d'intérêt"
+              }
+              sublabel={
+                circuitRegion
+                  ? `La région "${circuitRegion.nom}" est déjà incluse via le circuit. Cochez ici des régions supplémentaires si votre voyage en couvre d'autres.`
+                  : "Régions que vous souhaitez explorer"
+              }
+              name="regionIds"
+              options={regionOptions.map((opt) => ({
+                ...opt,
+                // La région du circuit est verrouillée (toujours cochée)
+                disabled: opt.value === circuitRegionIdStr,
+              }))}
+              values={data.regionIds}
+              onChange={(value, checked) => {
+                // Empêcher la désélection de la région du circuit
+                if (value === circuitRegionIdStr && !checked) return;
+                handleArrayChange("regionIds", value, checked);
+              }}
+            />
+            {circuitRegion && (
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 pl-1">
+                <Lock className="w-3 h-3 text-primary shrink-0" />
+                La région {circuitRegion.nom} est verrouillée car elle est
+                définie par le circuit.
+              </p>
+            )}
+          </div>
         )}
       </div>
 
@@ -160,6 +264,29 @@ export function TravelSection({
             Période & Durée
           </h3>
         </div>
+
+        {/* Bandeau informatif si le circuit a des dates */}
+        {hasCircuitDates && (
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/8 border border-amber-500/20 text-amber-800 dark:text-amber-200">
+            <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500" />
+            <div className="text-xs space-y-0.5">
+              <span className="font-semibold uppercase tracking-wider text-[10px]">
+                Dates du circuit
+              </span>
+              <p>
+                Ce circuit se déroule du{" "}
+                <strong>{circuitDateDebutDisplay ?? "—"}</strong>
+                {circuitDateFinDisplay && (
+                  <>
+                    {" "}au <strong>{circuitDateFinDisplay}</strong>
+                  </>
+                )}
+                . Ces dates ont été pré-remplies. Vous pouvez les ajuster si
+                nécessaire.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <InputField

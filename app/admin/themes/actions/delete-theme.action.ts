@@ -18,7 +18,7 @@ export async function deleteTheme(formData: FormData) {
   }
 
   const circuitCount = await prisma.circuit.count({
-    where: { themeId: parsed.data.themeId },
+    where: { deletedAt: null, themeId: parsed.data.themeId },
   });
 
   if (circuitCount > 0) {

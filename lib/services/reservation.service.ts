@@ -35,7 +35,7 @@ export class ReservationService {
 
   async getByUserId(userId: string) {
     return prisma.reservation.findMany({
-      where: { userId },
+      where: { deletedAt: null, userId },
       include: { circuit: true },
       orderBy: { createdAt: 'desc' }
     });

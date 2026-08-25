@@ -19,9 +19,21 @@ const updateCircuitSchema = z.object({
   prixEstime: z.number().min(0),
   nbPlacesDisponibles: z.number().int().min(0).default(0),
   dateDebut: z.string().optional(),
+  dateFin: z.string().optional(),
   estGroupe: z.boolean().default(false),
   themeId: z.number().optional(),
   regionId: z.number().optional(),
+
+  // Lieu de départ
+  lieuDepartNom: z.string().optional(),
+  lieuDepartLat: z.number().min(-90).max(90).optional(),
+  lieuDepartLng: z.number().min(-180).max(180).optional(),
+
+  // Lieu d'arrivée
+  lieuArriveeNom: z.string().optional(),
+  lieuArriveeLat: z.number().min(-90).max(90).optional(),
+  lieuArriveeLng: z.number().min(-180).max(180).optional(),
+
   images: z.array(
     z.object({
       url: z.string().min(1, 'URL requise'),
@@ -29,7 +41,38 @@ const updateCircuitSchema = z.object({
       ordre: z.number().int().min(0).default(0),
     })
   ),
-});
+}).refine(
+  (data) => {
+    // Validation: dateFin >= dateDebut
+    if (data.dateDebut && data.dateFin) {
+      return new Date(data.dateFin) >= new Date(data.dateDebut);
+    }
+    return true;
+  },
+  { message: 'La date de retour doit être postérieure ou égale à la date de départ', path: ['dateFin'] }
+).refine(
+  (data) => {
+    const hasLat = data.lieuDepartLat !== undefined;
+    const hasLng = data.lieuDepartLng !== undefined;
+    return hasLat === hasLng;
+  },
+  { message: 'Latitude et longitude du départ doivent être fournies ensemble', path: ['lieuDepartLat'] }
+).refine(
+  (data) => {
+    const hasLat = data.lieuArriveeLat !== undefined;
+    const hasLng = data.lieuArriveeLng !== undefined;
+    return hasLat === hasLng;
+  },
+  { message: 'Latitude et longitude de l\'arrivée doivent être fournies ensemble', path: ['lieuArriveeLat'] }
+);
+
+/** Parse une valeur numérique optionnelle depuis FormData */
+function parseOptionalFloat(formData: FormData, key: string): number | undefined {
+  const raw = formData.get(key)?.toString()?.trim();
+  if (!raw || raw === '') return undefined;
+  const val = parseFloat(raw);
+  return isNaN(val) ? undefined : val;
+}
 
 export async function updateCircuit(formData: FormData) {
   // 1. Vérifier l'authentification et le rôle admin
@@ -60,9 +103,22 @@ export async function updateCircuit(formData: FormData) {
       const raw = formData.get('dateDebut')?.toString()?.trim();
       return raw && raw !== "" ? raw : undefined;
     })(),
+    dateFin: (() => {
+      const raw = formData.get('dateFin')?.toString()?.trim();
+      return raw && raw !== "" ? raw : undefined;
+    })(),
     estGroupe: formData.get('estGroupe') === 'true',
     themeId: formData.get('themeId') ? parseInt(formData.get('themeId') as string) : undefined,
     regionId: formData.get('regionId') ? parseInt(formData.get('regionId') as string) : undefined,
+
+    // Lieux géographiques
+    lieuDepartNom: formData.get('lieuDepartNom')?.toString()?.trim() || undefined,
+    lieuDepartLat: parseOptionalFloat(formData, 'lieuDepartLat'),
+    lieuDepartLng: parseOptionalFloat(formData, 'lieuDepartLng'),
+    lieuArriveeNom: formData.get('lieuArriveeNom')?.toString()?.trim() || undefined,
+    lieuArriveeLat: parseOptionalFloat(formData, 'lieuArriveeLat'),
+    lieuArriveeLng: parseOptionalFloat(formData, 'lieuArriveeLng'),
+
     // Les images passent en JSON dans un champ hidden
     images: (() => {
       try {
@@ -111,9 +167,22 @@ export async function updateCircuit(formData: FormData) {
           const d = new Date(data.dateDebut);
           return isNaN(d.getTime()) ? null : d;
         })(),
+        dateFin: (() => {
+          if (!data.dateFin) return null;
+          const d = new Date(data.dateFin);
+          return isNaN(d.getTime()) ? null : d;
+        })(),
         estGroupe: data.estGroupe,
         themeId: data.themeId ?? null,
         regionId: data.regionId ?? null,
+
+        // Lieux géographiques
+        lieuDepartNom: data.lieuDepartNom || null,
+        lieuDepartLat: data.lieuDepartLat ?? null,
+        lieuDepartLng: data.lieuDepartLng ?? null,
+        lieuArriveeNom: data.lieuArriveeNom || null,
+        lieuArriveeLat: data.lieuArriveeLat ?? null,
+        lieuArriveeLng: data.lieuArriveeLng ?? null,
       },
     });
 

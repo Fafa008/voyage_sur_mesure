@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis, Prisma } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -80,22 +83,36 @@ export default async function ConseillerDashboardPage({
 }: ConseillerDashboardProps) {
   const { page, search, statut } = await searchParams;
 
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { role: true },
+  });
+
+  const isConseillerOnly = user?.role?.nom === "conseiller";
+  const conseillerFilter: Prisma.DevisWhereInput = isConseillerOnly ? { conseillerId: session.user.id } : {};
+
   const currentPage = Math.max(1, parseInt(page ?? "1", 10));
   const skip = (currentPage - 1) * DEVIS_PER_PAGE;
 
   // Global counts for KPI cards
   const [countEnCours, countEnModification, countValide, countAccepte, countReserve, countRefuse, countTotal] = await Promise.all([
-    prisma.devis.count({ where: { statut: StatutDevis.en_cours } }),
-    prisma.devis.count({ where: { statut: StatutDevis.en_modification } }),
-    prisma.devis.count({ where: { statut: StatutDevis.valide } }),
-    prisma.devis.count({ where: { statut: StatutDevis.accepte } }),
-    prisma.devis.count({ where: { statut: StatutDevis.reserve } }),
-    prisma.devis.count({ where: { statut: StatutDevis.refuse } }),
-    prisma.devis.count(),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.en_cours } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.en_modification } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.valide } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.accepte } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.reserve } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter, statut: StatutDevis.refuse } }),
+    prisma.devis.count({ where: { deletedAt: null, ...conseillerFilter } }),
   ]);
 
   // Where query for current filtered table
-  const where: Prisma.DevisWhereInput = {};
+  const where: Prisma.DevisWhereInput = {
+    deletedAt: null,
+    ...conseillerFilter,
+  };
 
   if (statut && Object.values(StatutDevis).includes(statut as StatutDevis)) {
     where.statut = statut as StatutDevis;
@@ -145,7 +162,7 @@ export default async function ConseillerDashboardPage({
   const statusTabs = [
     { label: "Tous", value: "", count: countTotal },
     { label: "À traiter", value: "en_cours", count: countEnCours, dotColor: "bg-amber-500" },
-    { label: "Modifications", value: "en_modification", count: countEnModification, dotColor: "bg-orange-500" },
+    { label: "Modif. demandées", value: "en_modification", count: countEnModification, dotColor: "bg-orange-500" },
     { label: "Validés", value: "valide", count: countValide, dotColor: "bg-blue-500" },
     { label: "Acceptés", value: "accepte", count: countAccepte, dotColor: "bg-emerald-500" },
     { label: "Réservés", value: "reserve", count: countReserve, dotColor: "bg-purple-500" },

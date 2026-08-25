@@ -17,7 +17,17 @@ export default async function NouveauDevisPage({ searchParams }: Props) {
 
   const [circuits, themes, regions] = await Promise.all([
     prisma.circuit.findMany({
-      select: { id: true, titre: true },
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        titre: true,
+        regionId: true,
+        region: { select: { id: true, nom: true } },
+        dateDebut: true,
+        dateFin: true,
+        lieuDepartNom: true,
+        lieuArriveeNom: true,
+      },
       orderBy: { titre: "asc" },
     }),
     prisma.theme.findMany({
@@ -29,6 +39,15 @@ export default async function NouveauDevisPage({ searchParams }: Props) {
       orderBy: { nom: "asc" },
     }),
   ]);
+
+  // Résoudre le circuit pré-sélectionné depuis la liste déjà chargée
+  const preselectedCircuitIdNum = preselectedCircuitId
+    ? parseInt(preselectedCircuitId, 10)
+    : NaN;
+  const preselectedCircuit =
+    !isNaN(preselectedCircuitIdNum)
+      ? (circuits.find((c) => c.id === preselectedCircuitIdNum) ?? null)
+      : null;
 
   const user = session
     ? {
@@ -47,6 +66,7 @@ export default async function NouveauDevisPage({ searchParams }: Props) {
           themes={themes}
           regions={regions}
           preselectedCircuitId={preselectedCircuitId}
+          preselectedCircuit={preselectedCircuit}
         />
       </div>
     </main>

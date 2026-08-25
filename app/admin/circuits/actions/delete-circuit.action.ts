@@ -6,8 +6,6 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import fs from 'fs/promises';
-import path from 'path';
 
 export async function deleteCircuit(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -24,18 +22,12 @@ export async function deleteCircuit(formData: FormData) {
 
   const circuitId = parseInt(formData.get('circuitId') as string);
 
-  // 1. Récupérer les images associées avant de supprimer le circuit de la base de données
-  const circuitImages = await prisma.imageCircuit.findMany({
-    where: { circuitId },
-    select: { url: true },
-  });
-
-  // 2. Suppression sécurisée en transaction.
-  //    Un circuit peut être lié à des Devis (ON DELETE CASCADE) et donc à des
-  //    Réservations. Les dépendances de paiement (transactions, logs, webhooks,
-  //    factures, paiements) n'ont pas de cascade : on les nettoie d'abord pour
-  //    ne jamais laisser de données orphelines.
+  // 1. Soft delete en transaction.
+  //    Le circuit, ses devis et réservations reçoivent un deletedAt.
+  //    Les données financières (PaymentTransaction, Invoice, PaymentLog,
+  //    PaymentWebhook, Paiement) ne sont JAMAIS supprimées.
   await prisma.$transaction(async (tx) => {
+    // Soft delete des réservations liées (via devis ou directement)
     const devisList = await tx.devis.findMany({
       where: { circuitId },
       select: { id: true },
@@ -43,48 +35,52 @@ export async function deleteCircuit(formData: FormData) {
     const devisIds = devisList.map((d) => d.id);
 
     const reservations = await tx.reservation.findMany({
-      where: devisIds.length
-        ? { OR: [{ devisId: { in: devisIds } }, { circuitId }] }
-        : { circuitId },
+      where: {
+        deletedAt: null,
+        ...(devisIds.length
+          ? { OR: [{ devisId: { in: devisIds } }, { circuitId }] }
+          : { circuitId }),
+      },
       select: { id: true },
     });
-    const reservationIds = reservations.map((r) => r.id);
 
-    if (reservationIds.length) {
-      await tx.paymentWebhook.deleteMany({
-        where: { transaction: { reservationId: { in: reservationIds } } },
-      });
-      await tx.paymentLog.deleteMany({
-        where: { transaction: { reservationId: { in: reservationIds } } },
-      });
-      await tx.paymentTransaction.deleteMany({
-        where: { reservationId: { in: reservationIds } },
-      });
-      await tx.invoice.deleteMany({
-        where: { reservationId: { in: reservationIds } },
-      });
-      await tx.paiement.deleteMany({
-        where: { reservationId: { in: reservationIds } },
-      });
-      await tx.reservation.deleteMany({
-        where: { id: { in: reservationIds } },
+    if (reservations.length) {
+      await tx.reservation.updateMany({
+        where: { id: { in: reservations.map((r) => r.id) } },
+        data: { deletedAt: new Date() },
       });
     }
 
+    // Soft delete des devis liés
     if (devisIds.length) {
-      await tx.devis.deleteMany({ where: { id: { in: devisIds } } });
+      await tx.devis.updateMany({
+        where: { id: { in: devisIds } },
+        data: { deletedAt: new Date() },
+      });
     }
 
-    await tx.circuit.delete({ where: { id: circuitId } });
+    // Soft delete du circuit
+    await tx.circuit.update({
+      where: { id: circuitId },
+      data: { deletedAt: new Date() },
+    });
   });
 
-  // 3. Supprimer physiquement les images associées du disque
+  // 2. Supprimer les images du disque (données non financières)
+  const circuitImages = await prisma.imageCircuit.findMany({
+    where: { circuitId },
+    select: { url: true },
+  });
+
+  const fs = await import('fs/promises');
+  const path = await import('path');
+
   for (const img of circuitImages) {
     if (img.url.startsWith('/uploads/circuits/')) {
       const filePath = path.join(process.cwd(), 'public', img.url);
       try {
         await fs.unlink(filePath);
-      } catch (err) {
+      } catch {
       }
     }
   }

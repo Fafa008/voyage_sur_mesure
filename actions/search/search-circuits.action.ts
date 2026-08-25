@@ -28,7 +28,9 @@ export async function searchCircuitsAction(
       limit = 12,
     } = validatedFilters;
 
-    const where: Prisma.CircuitWhereInput = {};
+    const where: Prisma.CircuitWhereInput = {
+      deletedAt: null,
+    };
 
     // 1. Text Search (Destination / Keywords)
     if (destination && destination.trim() !== "") {

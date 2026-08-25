@@ -98,9 +98,17 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
 
     if (!devis) return { error: "Devis introuvable" };
 
-    // Seul un devis en_cours ou en_modification peut être chiffré/validé
-    if (devis.statut !== StatutDevis.en_cours && devis.statut !== StatutDevis.en_modification) {
-      return { error: "Ce devis est déjà validé ou finalisé. Pour le modifier, passez-le d'abord en révision." };
+    // Seul un devis en_cours peut être chiffré/validé.
+    // Un devis en_modification est en attente des corrections du client :
+    // le conseiller ne peut pas le valider tant que le client ne l'a pas renvoyé.
+    if (devis.statut !== StatutDevis.en_cours) {
+      if (devis.statut === StatutDevis.en_modification) {
+        return {
+          error:
+            "Ce devis est en attente de modification par le client. Vous pourrez le valider une fois qu'il l'aura renvoyé.",
+        };
+      }
+      return { error: "Ce devis est déjà validé, accepté ou clôturé." };
     }
 
     // Recalculer le montant exact côté serveur pour la sécurité
@@ -140,7 +148,11 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
       options: breakdown.options,
     };
 
-    // Sauvegarde en BDD et notification client
+    // Sauvegarde en BDD et notification client.
+    // RÈGLE MÉTIER : le conseiller ne modifie AUCUNE donnée saisie par le client.
+    // typeHebergement/transport choisis ici sont des options de chiffrage :
+    // elles sont scellées uniquement dans le snapshot detailsCalcul, jamais
+    // écrites dans les champs du devis appartenant au client.
     await prisma.$transaction([
       prisma.devis.update({
         where: { id: devisId },
@@ -148,8 +160,6 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
           montantTotal: breakdown.montantTotal,
           commentaireConseiller,
           statut: StatutDevis.valide,
-          typeHebergement: typeHebergement ?? undefined,
-          transport: transportType ? [transportType] : [],
           dateDebutConfirmee: parsedDateDebut ?? undefined,
           dateFinConfirmee: parsedDateFin ?? undefined,
           detailsCalcul,
@@ -163,6 +173,10 @@ export async function validateDevisWithPricing(_prevState: unknown, formData: Fo
         },
       }),
     ]);
+
+    console.log(
+      `[DEVIS-WORKFLOW] Conseiller valide devis #${devisId} → valide. Montant: ${formatCurrency(breakdown.montantTotal)}`
+    );
 
     revalidatePath("/conseiller/dashboard");
     revalidatePath(`/conseiller/devis/${devisId}`);

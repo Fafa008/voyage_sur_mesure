@@ -137,13 +137,13 @@ export default async function AdminUtilisateursPage() {
                             <select
                               name="roleId"
                               defaultValue={user.roleId ?? undefined}
-                              className="h-8 rounded-lg border border-input bg-background text-foreground px-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer dark:bg-muted"
+                              className="h-8 rounded-lg border border-border bg-card text-foreground px-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-ring/30 cursor-pointer shadow-2xs"
                             >
                               {roles.map((role) => (
                                 <option
                                   key={role.id}
                                   value={role.id}
-                                  className="bg-popover text-popover-foreground"
+                                  className="bg-popover text-popover-foreground py-1"
                                 >
                                   {roleLabels[role.nom]}
                                 </option>

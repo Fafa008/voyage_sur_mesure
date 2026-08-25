@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
-
+import { Check, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function Select<Value = string | null>({ ...props }: SelectPrimitive.Root.Props<Value>) {
@@ -20,26 +20,19 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20",
+        "group flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-2xs transition-colors",
+        "placeholder:text-muted-foreground",
+        "hover:border-primary/50",
+        "focus:border-ring focus:outline-hidden focus:ring-2 focus:ring-ring/30",
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20",
         className
       )}
       {...props}
     >
-      <SelectPrimitive.Value placeholder={placeholder} />
-      <SelectPrimitive.Icon className="shrink-0 opacity-50">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+      <SelectPrimitive.Value placeholder={placeholder} className="truncate text-foreground" />
+      <SelectPrimitive.Icon className="shrink-0 text-muted-foreground transition-transform duration-200 group-hover:text-foreground">
+        <ChevronDown className="size-4" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -55,22 +48,19 @@ function SelectContent({
 }) {
   return (
     <SelectPrimitive.Portal>
-      <SelectPrimitive.Positioner sideOffset={4} alignItemWithTrigger={alignItemWithTrigger}>
+      <SelectPrimitive.Positioner sideOffset={4} alignItemWithTrigger={alignItemWithTrigger} className="z-50">
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            // bg-popover garantit un fond opaque (blanc en light, #20232a en dark)
-            // overflow-hidden sur le Popup, le scroll est géré par SelectList
-            "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-md",
+            // Fond 100% opaque avec bordure et ombre nette en Light et Dark Mode
+            "z-50 min-w-[8rem] overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-xl outline-hidden",
+            "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+            "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
         >
-          {/* SelectList est le composant Base UI qui gère le scroll interne.
-              Sans lui, overflow-auto sur Popup peut être ignoré par le moteur. */}
-          <SelectPrimitive.List
-            className="max-h-96 overflow-y-auto p-1"
-          >
+          <SelectPrimitive.List className="max-h-80 overflow-y-auto p-1.5 space-y-0.5">
             {children}
           </SelectPrimitive.List>
         </SelectPrimitive.Popup>
@@ -88,36 +78,25 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        // hover: ET focus: explicites pour garantir le fond en mode clair ET sombre
-        "relative flex w-full cursor-default select-none items-center gap-2 rounded-md py-2 pl-8 pr-3 text-sm outline-hidden",
+        "relative flex w-full cursor-pointer select-none items-center gap-2 rounded-lg py-2 pl-8 pr-3 text-sm text-popover-foreground outline-hidden transition-colors",
+        // Hover et focus clairs
         "hover:bg-accent hover:text-accent-foreground",
         "focus:bg-accent focus:text-accent-foreground",
         "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        // État sélectionné clairement visible
+        "data-selected:bg-primary/10 data-selected:text-primary data-selected:font-semibold",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}
     >
-      <span className="absolute left-2 flex size-4 items-center justify-center">
+      <span className="absolute left-2.5 flex size-4 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-4"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+          <Check className="size-4 text-primary stroke-[2.5]" />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText className="truncate">{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
 }

@@ -21,14 +21,19 @@ import {
   Clock,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
 import { CircuitMap } from "@/components/map/CircuitMap";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import type { Metadata } from "next";
 
-// Composants shadcn/ui supplémentaires
 import {
   Accordion,
   AccordionContent,
@@ -66,6 +71,7 @@ const getSimilarCircuits = cache(
     return prisma.circuit.findMany({
       where: {
         AND: [
+          { deletedAt: null },
           { id: { not: excludeId } },
           {
             OR: [
@@ -94,7 +100,10 @@ export const revalidate = 3600;
 
 // ---------- Génération statique ----------
 export async function generateStaticParams() {
-  const circuits = await prisma.circuit.findMany({ select: { slug: true } });
+  const circuits = await prisma.circuit.findMany({
+    where: { deletedAt: null },
+    select: { slug: true },
+  });
   return circuits.map((circuit) => ({ slug: circuit.slug }));
 }
 
@@ -247,41 +256,50 @@ export default async function CircuitDetailPage({
                 circuitId={circuit.id}
                 initialIsFavori={isFavori}
               />
-              {/* Menu de partage */}
-              <div className="relative group">
-                <button className="p-2 rounded-full hover:bg-muted transition-colors">
-                  <Share2 className="w-5 h-5 text-muted-foreground" />
-                </button>
-                <div className="absolute right-0 top-full mt-2 p-2 bg-card border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto flex gap-1">
-                  {/* Twitter/X */}
-                  <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 hover:bg-muted rounded-full"
-                  >
-                    <X className="w-4 h-4" />
-                  </a>
-                  {/* Facebook (avec Share2) */}
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 hover:bg-muted rounded-full"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </a>
-                  {/* WhatsApp */}
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1.5 hover:bg-muted rounded-full"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
+              {/* Menu de partage standard */}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-hidden focus:ring-2 focus:ring-ring/30"
+                  aria-label="Partager ce circuit"
+                >
+                  <Share2 className="w-5 h-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem>
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 w-full text-foreground hover:text-primary"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>X / Twitter</span>
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 w-full text-foreground hover:text-primary"
+                    >
+                      <Share2 className="w-4 h-4 text-blue-500" />
+                      <span>Facebook</span>
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 w-full text-foreground hover:text-primary"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-500" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

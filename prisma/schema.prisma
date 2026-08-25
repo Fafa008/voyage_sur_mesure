@@ -70,7 +70,18 @@ model Circuit {
   prixEstime          Decimal?       @db.Decimal(10, 2)
   nbPlacesDisponibles Int            @default(0)
   dateDebut           DateTime?
+  dateFin             DateTime?
   estGroupe           Boolean        @default(false)
+
+  // Lieu de départ (nom + coordonnées GPS)
+  lieuDepartNom       String?
+  lieuDepartLat       Decimal?       @db.Decimal(10, 7)
+  lieuDepartLng       Decimal?       @db.Decimal(10, 7)
+
+  // Lieu d'arrivée (nom + coordonnées GPS)
+  lieuArriveeNom      String?
+  lieuArriveeLat      Decimal?       @db.Decimal(10, 7)
+  lieuArriveeLng      Decimal?       @db.Decimal(10, 7)
   themeId             Int?
   regionId            Int?
   avis                Avis[]
@@ -81,6 +92,8 @@ model Circuit {
   favoris             Favori[]
   images              ImageCircuit[]
   reservations        Reservation[]
+
+  deletedAt           DateTime?
 }
 
 model ImageCircuit {
@@ -174,6 +187,7 @@ model Devis {
   transport  String[] @default([]) // ["4x4", "Avion"]
 
   reservation Reservation?
+  deletedAt   DateTime?
 }
 
 model Reservation {
@@ -187,7 +201,7 @@ model Reservation {
 
   // Devis optionnel
   devisId Int?   @unique
-  devis   Devis? @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  devis   Devis? @relation(fields: [devisId], references: [id], onDelete: Restrict)
 
   // Nouveaux champs
   circuitId   Int?
@@ -201,6 +215,8 @@ model Reservation {
   paiement  Paiement?
   paiements PaymentTransaction[]
   factures  Invoice[]
+
+  deletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -455,7 +471,7 @@ model Coupon {
 model PaymentLog {
   id            String             @id @default(cuid())
   transactionId String
-  transaction   PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transaction   PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
   action        String
   data          Json?
   createdAt     DateTime           @default(now())

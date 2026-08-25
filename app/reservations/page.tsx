@@ -36,7 +36,7 @@ export default async function ReservationsPage() {
   if (!session) redirect("/login");
 
   const reservations = await prisma.reservation.findMany({
-    where: { devis: { userId: session.user.id } },
+    where: { deletedAt: null, devis: { userId: session.user.id } },
     include: {
       devis: {
         include: {

@@ -1,3 +1,5 @@
+// types/devis.ts
+
 export interface DevisFormData {
   prenom: string;
   nom: string;
@@ -30,4 +32,16 @@ export interface DevisOption {
   id: number;
   titre?: string;
   nom?: string;
+}
+
+/** Données enrichies d'un circuit pré-sélectionné pour pré-remplir le formulaire */
+export interface CircuitPreview {
+  id: number;
+  titre: string;
+  regionId: number | null;
+  region: { id: number; nom: string } | null;
+  dateDebut: Date | null;
+  dateFin: Date | null;
+  lieuDepartNom: string | null;
+  lieuArriveeNom: string | null;
 }

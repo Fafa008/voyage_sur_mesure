@@ -11,11 +11,11 @@ import { Suspense } from "react";
 
 async function SidebarNavWithCounts() {
   const [total, enCours, enModification, valide, refuse] = await Promise.all([
-    prisma.devis.count(),
-    prisma.devis.count({ where: { statut: StatutDevis.en_cours } }),
-    prisma.devis.count({ where: { statut: StatutDevis.en_modification } }),
-    prisma.devis.count({ where: { statut: StatutDevis.valide } }),
-    prisma.devis.count({ where: { statut: StatutDevis.refuse } }),
+    prisma.devis.count({ where: { deletedAt: null } }),
+    prisma.devis.count({ where: { deletedAt: null, statut: StatutDevis.en_cours } }),
+    prisma.devis.count({ where: { deletedAt: null, statut: StatutDevis.en_modification } }),
+    prisma.devis.count({ where: { deletedAt: null, statut: StatutDevis.valide } }),
+    prisma.devis.count({ where: { deletedAt: null, statut: StatutDevis.refuse } }),
   ]);
 
   return (

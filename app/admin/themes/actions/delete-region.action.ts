@@ -18,7 +18,7 @@ export async function deleteRegion(formData: FormData) {
   }
 
   const circuitCount = await prisma.circuit.count({
-    where: { regionId: parsed.data.regionId },
+    where: { deletedAt: null, regionId: parsed.data.regionId },
   });
 
   if (circuitCount > 0) {

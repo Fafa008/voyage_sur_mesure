@@ -44,7 +44,7 @@ export default async function AdminDevisPage({
   const skip = (currentPage - 1) * DEVIS_PER_PAGE;
 
   // Build Prisma filter
-  const where: Prisma.DevisWhereInput = {};
+  const where: Prisma.DevisWhereInput = { deletedAt: null };
 
   if (statut && Object.values(StatutDevis).includes(statut as StatutDevis)) {
     where.statut = statut as StatutDevis;
@@ -80,9 +80,9 @@ export default async function AdminDevisPage({
         orderBy: { dateDemande: "desc" },
       }),
       prisma.devis.count({ where }),
-      prisma.devis.count(),
-      prisma.devis.count({ where: { statut: StatutDevis.en_cours } }),
-      prisma.devis.count({ where: { reservation: { isNot: null } } }),
+      prisma.devis.count({ where: { deletedAt: null } }),
+      prisma.devis.count({ where: { deletedAt: null, statut: StatutDevis.en_cours } }),
+      prisma.devis.count({ where: { deletedAt: null, reservation: { isNot: null } } }),
     ]);
 
   const totalPages = Math.ceil(totalFiltered / DEVIS_PER_PAGE);

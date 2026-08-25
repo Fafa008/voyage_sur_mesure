@@ -4,15 +4,15 @@ import { prisma } from "@/lib/prisma";
 type Tx = Prisma.TransactionClient;
 
 /**
- * Suppression sécurisée des Devis et Réservations.
+ * Suppression sécurisée (soft delete) des Devis et Réservations.
  *
- * Les dépendances "lourdes" (PaymentTransaction, PaymentLog, PaymentWebhook,
- * Invoice, Paiement) ne possèdent pas de cascade au niveau de la base de données.
- * On nettoie donc toutes ces entités à l'intérieur d'une transaction afin de
- * ne jamais laisser de données orphelines.
+ * Les données financières (PaymentTransaction, PaymentLog, PaymentWebhook,
+ * Invoice, Paiement) ne sont JAMAIS supprimées. Seuls les enregistrements
+ * métier (Circuit, Devis, Re√°servation) reçoivent un `deletedAt` pour les
+ * masquer des listes actives tout en conservant l'intégrité des archives.
  */
 export class DeletionService {
-  private async deleteReservationTx(
+  private async softDeleteReservationTx(
     tx: Tx,
     reservationId: number,
     restorePlaces: boolean,
@@ -26,18 +26,11 @@ export class DeletionService {
 
     if (!reservation) return;
 
-    // Nettoyage des dépendances de paiement / facturation
-    await tx.paymentWebhook.deleteMany({
-      where: { transaction: { reservationId } },
+    // Soft delete de la réservation — les données financières restent liées
+    await tx.reservation.update({
+      where: { id: reservationId },
+      data: { deletedAt: new Date() },
     });
-    await tx.paymentLog.deleteMany({
-      where: { transaction: { reservationId } },
-    });
-    await tx.paymentTransaction.deleteMany({ where: { reservationId } });
-    await tx.invoice.deleteMany({ where: { reservationId } });
-    await tx.paiement.deleteMany({ where: { reservationId } });
-
-    await tx.reservation.delete({ where: { id: reservationId } });
 
     // Restauration des places éventuellement réservées sur le circuit
     if (restorePlaces) {
@@ -65,7 +58,7 @@ export class DeletionService {
 
   async deleteReservation(reservationId: number, restorePlaces = true) {
     await prisma.$transaction(async (tx) => {
-      await this.deleteReservationTx(tx, reservationId, restorePlaces);
+      await this.softDeleteReservationTx(tx, reservationId, restorePlaces);
     });
   }
 
@@ -79,10 +72,13 @@ export class DeletionService {
       if (!devis) return;
 
       if (devis.reservation) {
-        await this.deleteReservationTx(tx, devis.reservation.id, restorePlaces);
+        await this.softDeleteReservationTx(tx, devis.reservation.id, restorePlaces);
       }
 
-      await tx.devis.delete({ where: { id: devisId } });
+      await tx.devis.update({
+        where: { id: devisId },
+        data: { deletedAt: new Date() },
+      });
     });
   }
 }

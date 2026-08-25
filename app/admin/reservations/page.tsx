@@ -56,6 +56,7 @@ const statusLabels: Record<ReservationStatus, string> = {
 
 export default async function AdminReservationsPage() {
   const reservations = await prisma.reservation.findMany({
+    where: { deletedAt: null },
     include: {
       devis: {
         include: {

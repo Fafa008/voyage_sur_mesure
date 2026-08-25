@@ -40,6 +40,7 @@ export default async function CircuitsPage({
   // Toutes les requêtes indépendantes en parallèle
   const [circuits, total, session] = await Promise.all([
     prisma.circuit.findMany({
+      where: { deletedAt: null },
       take: CIRCUITS_PER_PAGE,
       skip,
 
@@ -82,7 +83,7 @@ export default async function CircuitsPage({
       },
     }),
 
-    prisma.circuit.count(),
+    prisma.circuit.count({ where: { deletedAt: null } }),
 
     auth.api.getSession({
       headers: await headers(),

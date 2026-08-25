@@ -1,6 +1,26 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, ReservationStatus } from "@prisma/client";
+
+/**
+ * Comparaison de chaînes à temps constant pour éviter les timing attacks.
+ * Empêche l'attente par mesurage du temps de réponse pour deviner le token.
+ */
+function timingSafeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, "utf-8");
+  const bufB = Buffer.from(b, "utf-8");
+  if (bufA.length !== bufB.length) {
+    const maxLen = Math.max(bufA.length, bufB.length);
+    const paddedA = Buffer.alloc(maxLen, 0);
+    const paddedB = Buffer.alloc(maxLen, 0);
+    bufA.copy(paddedA);
+    bufB.copy(paddedB);
+    const result = crypto.timingSafeEqual(paddedA, paddedB);
+    return result && bufA.length === bufB.length;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 /**
  * Webhook sécurisé Papi.mg
@@ -70,6 +90,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!transaction) {
+      console.log("[PAPI WEBHOOK] Transaction inexistante pour ref:", reference);
       await prisma.paymentWebhook.create({
         data: {
           provider: "PAPI",
@@ -83,6 +104,8 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
+
+    console.log("[PAPI WEBHOOK] Transaction trouvée:", transaction.id);
 
     // 4. SÉCURITÉ : Validation du notificationToken
     //
@@ -106,7 +129,7 @@ export async function POST(req: NextRequest) {
     const expectedToken = transaction.notificationToken;
 
     if (!expectedToken) {
-      // Pas de token stocké = impossible de vérifier l'authenticité du webhook
+      console.log("[PAPI WEBHOOK] Notification rejetée: aucun token stocké en base");
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -122,7 +145,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!receivedToken || receivedToken !== expectedToken) {
+    if (!receivedToken || !timingSafeCompare(receivedToken, expectedToken)) {
+      console.log("[PAPI WEBHOOK] Token invalide — webhook rejeté");
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -138,8 +162,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("[PAPI WEBHOOK] Token valide");
+
     // 5. Validation du statut Papi
     if (!paymentStatus || typeof paymentStatus !== "string") {
+      console.log("[PAPI WEBHOOK] Notification rejetée: paymentStatus manquant");
       return NextResponse.json(
         { error: "Missing paymentStatus" },
         { status: 400 }
@@ -148,6 +175,7 @@ export async function POST(req: NextRequest) {
 
     // 6. Validation du montant (numérique, non-NaN, positif, normalisé)
     if (typeof amount === "undefined" || amount === null) {
+      console.log("[PAPI WEBHOOK] Notification rejetée: montant manquant");
       return NextResponse.json({ error: "Missing amount in payload" }, { status: 400 });
     }
 
@@ -160,6 +188,7 @@ export async function POST(req: NextRequest) {
     const receivedAmountInt = Math.round(receivedNum);
 
     if (expectedAmountInt !== receivedAmountInt) {
+      console.log("[PAPI WEBHOOK] Montant invalide: attendu", expectedAmountInt, "reçu", receivedAmountInt);
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -177,6 +206,7 @@ export async function POST(req: NextRequest) {
 
     // 7. Validation de la devise
     if (typeof currency !== "string" || currency.trim().toUpperCase() !== transaction.currency.toUpperCase()) {
+      console.log("[PAPI WEBHOOK] Devise invalide: attendue", transaction.currency, "reçue", currency);
       await prisma.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -211,40 +241,32 @@ export async function POST(req: NextRequest) {
         newStatus = PaymentStatus.PENDING;
     }
 
-    // 9. IDEMPOTENCE : si la transaction est déjà dans le statut cible ou déjà PAID
-    if (transaction.status === newStatus || transaction.status === PaymentStatus.PAID) {
-      await prisma.paymentWebhook.create({
-        data: {
-          transactionId: transaction.id,
-          provider: "PAPI",
-          payload: payload,
-          isProcessed: true,
-          error: transaction.status === PaymentStatus.PAID ? "Transaction already PAID (idempotent)" : "Already in target status",
-        },
-      });
-      return NextResponse.json({
-        success: true,
-        message: "Already processed (idempotent)",
-      });
-    }
-
-    // 10. Transaction Prisma atomique
+    // 9. Transaction Prisma atomique (idempotence vérifiée atomiquement)
     const providerPaymentMethodStr =
       typeof paymentMethod === "string" && paymentMethod.trim() !== ""
         ? paymentMethod.trim().toUpperCase()
         : null;
 
     await prisma.$transaction(async (tx) => {
-      // 10a. Mettre à jour la transaction de paiement
-      await tx.paymentTransaction.update({
-        where: { id: transaction.id },
+      // 9a. Vérification idempotente atomique : updateMany avec condition
+      //     Si la transaction est déjà PAID ou déjà dans le statut cible, count === 0
+      const updated = await tx.paymentTransaction.updateMany({
+        where: {
+          id: transaction.id,
+          status: { notIn: [PaymentStatus.PAID, newStatus] },
+        },
         data: {
           status: newStatus,
           providerPaymentMethod: providerPaymentMethodStr,
         },
       });
 
-      // 10b. Si payé : mettre à jour la réservation + notification
+      if (updated.count === 0) {
+        console.log("[PAPI WEBHOOK] Déjà traité (idempotent) — statut actuel:", transaction.status);
+        return;
+      }
+
+      // 9b. Si payé : mettre à jour la réservation + notification
       if (newStatus === PaymentStatus.PAID) {
         await tx.reservation.update({
           where: { id: transaction.reservationId },
@@ -260,7 +282,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 10c. Si échoué ou expiré : notification client
+      // 9c. Si échoué ou expiré : notification client
       if (
         newStatus === PaymentStatus.FAILED ||
         newStatus === PaymentStatus.EXPIRED
@@ -276,7 +298,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 10d. Log de la transaction
+      // 9d. Log de la transaction
       await tx.paymentLog.create({
         data: {
           transactionId: transaction.id,
@@ -285,7 +307,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 10e. Sauvegarder le webhook traité
+      // 9e. Sauvegarder le webhook traité
       await tx.paymentWebhook.create({
         data: {
           transactionId: transaction.id,
@@ -295,6 +317,8 @@ export async function POST(req: NextRequest) {
         },
       });
     });
+
+    console.log("[PAPI WEBHOOK] Webhook traité avec succès — statut:", newStatus);
 
     return NextResponse.json({ success: true, message: "Webhook processed successfully" });
   } catch (error: unknown) {

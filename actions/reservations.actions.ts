@@ -12,7 +12,12 @@ export async function createReservationAction(data: CreateReservationDTO) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return { success: false, error: "Non authentifié" };
 
-    const reservation = await reservationService.create(data);
+    // Sécurité serveur : l'utilisateur ne peut créer une réservation que pour
+    // lui-même, quel que soit le payload envoyé au client.
+    const reservation = await reservationService.create({
+      ...data,
+      userId: session.user.id,
+    });
     revalidatePath("/reservation/history");
     return { success: true, data: reservation };
   } catch (error: unknown) {

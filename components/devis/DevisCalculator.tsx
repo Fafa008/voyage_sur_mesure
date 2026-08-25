@@ -3,6 +3,10 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { calculateDevisPricingAction, validateDevisWithPricing } from "@/app/actions/devis/update-devis-pricing.action";
+import {
+  requestDevisModificationAction,
+  refuseDevisByStaffAction,
+} from "@/app/actions/devis/review-devis.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +28,9 @@ import {
   HelpCircle,
   Info,
   Lock,
+  FilePenLine,
+  XCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +69,12 @@ export function DevisCalculator({
     validateDevisWithPricing,
     null
   );
+  const [modificationState, modificationAction, pendingModification] =
+    useActionState(requestDevisModificationAction, null);
+  const [refusState, refusAction, pendingRefus] = useActionState(
+    refuseDevisByStaffAction,
+    null
+  );
 
   // Snapshot scellé lors de la validation serveur (source de vérité en lecture seule)
   const snapshot = initialSnapshot;
@@ -70,11 +83,26 @@ export function DevisCalculator({
   const isFinalized =
     statut !== StatutDevis.en_cours && statut !== StatutDevis.en_modification;
 
+  // Le conseiller peut-il encore confirmer le devis (chiffrage + validation) ?
+  // Seul un devis en_cours est traitable : en_modification est en attente du client.
+  const canConfirm = statut === StatutDevis.en_cours;
+
+  // Le conseiller peut-il prendre une autre décision (demander modif / refuser) ?
+  const canDecide =
+    canConfirm ||
+    statut === StatutDevis.valide;
+
   useEffect(() => {
     if (validationState?.success) {
       router.refresh();
     }
   }, [validationState, router]);
+
+  useEffect(() => {
+    if (modificationState?.success || refusState?.success) {
+      router.refresh();
+    }
+  }, [modificationState, refusState, router]);
 
   const handleCalculate = (silent = false) => {
     startCalculating(async () => {
@@ -387,8 +415,8 @@ export function DevisCalculator({
             )
           )}
 
-          {/* Submission and Confirmation Form */}
-          {!isFinalized && (
+          {/* ── DÉCISION 1 : Confirmer le devis ── */}
+          {canConfirm && (
             <form action={formAction} className="space-y-4 border-t border-border/40 pt-4">
               <input type="hidden" name="devisId" value={devisId} />
               <input type="hidden" name="typeHebergement" value={typeHebergement} />
@@ -473,6 +501,82 @@ export function DevisCalculator({
                 )}
               </div>
             </form>
+          )}
+
+          {/* ── DÉCISIONS 2 & 3 : Demander une modification / Refuser ── */}
+          {canDecide && (
+            <div className="border-t border-border/40 pt-4 space-y-4">
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-primary" />
+                Vous ne pouvez pas modifier directement ce devis : demandez au client d&apos;apporter lui-même les corrections nécessaires.
+              </div>
+
+              {/* Décision 2 : Demander une modification (commentaire obligatoire) */}
+              <form action={modificationAction} className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
+                <input type="hidden" name="devisId" value={devisId} />
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                    <FilePenLine className="w-3.5 h-3.5 shrink-0" />
+                    Demander une modification au client
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Le devis sera marqué « Modification demandée » et seul le client pourra corriger ses informations.
+                  </p>
+                </div>
+                <Textarea
+                  name="commentaireConseiller"
+                  rows={3}
+                  required
+                  minLength={10}
+                  placeholder="Ex : Merci de modifier la date de retour souhaitée et de préciser le nombre d'enfants."
+                  className="min-h-[70px] text-xs resize-y"
+                />
+                {modificationState?.error && (
+                  <p className="text-destructive text-[11px] font-medium">{modificationState.error}</p>
+                )}
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={pendingModification || pendingRefus || pendingConfirm}
+                  className="w-full sm:w-auto h-9 border-amber-500/40 bg-transparent text-amber-700 hover:bg-amber-500/15 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-500/10 font-semibold text-xs"
+                >
+                  {pendingModification ? "Envoi..." : "Demander une modification"}
+                  <FilePenLine className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </form>
+
+              {/* Décision 3 : Refuser le devis (motif optionnel) */}
+              <form action={refusAction} className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 space-y-3">
+                <input type="hidden" name="devisId" value={devisId} />
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    Refuser le devis
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Le dossier sera clôturé : il ne pourra plus être transformé en réservation. Un motif peut être indiqué au client.
+                  </p>
+                </div>
+                <Textarea
+                  name="commentaireConseiller"
+                  rows={2}
+                  placeholder="Motif du refus (optionnel) — visible par le client."
+                  className="min-h-[50px] text-xs resize-y"
+                />
+                {refusState?.error && (
+                  <p className="text-destructive text-[11px] font-medium">{refusState.error}</p>
+                )}
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={pendingRefus || pendingModification || pendingConfirm}
+                  className="w-full sm:w-auto h-9 border-rose-500/40 bg-transparent text-rose-700 hover:bg-rose-500/15 hover:text-rose-800 dark:text-rose-400 dark:hover:bg-rose-500/10 font-semibold text-xs"
+                >
+                  {pendingRefus ? "Refus en cours..." : "Refuser le devis"}
+                  <XCircle className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </form>
+            </div>
           )}
         </CardContent>
       </Card>

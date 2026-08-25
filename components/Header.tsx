@@ -35,7 +35,7 @@ export default async function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/70 backdrop-blur-xl shadow-sm transition-all dark:bg-background/70">
+    <header className="sticky top-0 z-70 w-full border-b border-border/30 bg-background/70 backdrop-blur-xl shadow-sm transition-all dark:bg-background/70">
       {/* Dégradé subtil en fond */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
 

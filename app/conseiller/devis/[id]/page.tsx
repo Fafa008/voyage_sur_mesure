@@ -233,6 +233,24 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
         </Card>
       )}
 
+      {/* ───── Bandeau : modification demandée au client ───── */}
+      {devis.statut === StatutDevis.en_modification && (
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-500/10 border border-orange-500/25 text-orange-700 dark:text-orange-300">
+          <MessageSquare className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-semibold text-sm">
+              Modification demandée — en attente du client
+            </p>
+            <p className="text-xs leading-relaxed italic">
+              &ldquo;{devis.commentaireConseiller}&rdquo;
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Le client est seul habilité à corriger son devis. Vous recevrez une notification dès qu&apos;il l&apos;aura renvoyé pour nouvelle analyse.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ───── Main Grid View ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* ═══ Left Column (3/5) - Client & Circuit Details ═══ */}
@@ -429,6 +447,17 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                   <p className="text-sm font-bold text-foreground">
                     {devis.circuit.dureeJours ? `${devis.circuit.dureeJours} jours` : "Flexible"}
                   </p>
+                  {(devis.circuit.dateDebut || devis.circuit.dateFin) && (
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {devis.circuit.dateDebut
+                        ? new Date(devis.circuit.dateDebut).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                        : "—"}{" "}
+                      →{" "}
+                      {devis.circuit.dateFin
+                        ? new Date(devis.circuit.dateFin).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                        : "—"}
+                    </p>
+                  )}
                 </div>
                 <div className="text-center p-3 rounded-xl bg-muted/30 border border-border/30">
                   <MapPin className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
@@ -445,6 +474,26 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                   </p>
                 </div>
               </div>
+
+              {/* Lieux de départ / arrivée */}
+              {(devis.circuit.lieuDepartNom || devis.circuit.lieuArriveeNom) && (
+                <div className="flex flex-wrap gap-3">
+                  {devis.circuit.lieuDepartNom && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-xs">
+                      <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">Départ :</span>
+                      <span className="font-medium text-foreground">{devis.circuit.lieuDepartNom}</span>
+                    </div>
+                  )}
+                  {devis.circuit.lieuArriveeNom && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-xs">
+                      <MapPin className="w-3 h-3 text-emerald-500 shrink-0" />
+                      <span className="text-muted-foreground">Arrivée :</span>
+                      <span className="font-medium text-foreground">{devis.circuit.lieuArriveeNom}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Description */}
               {devis.circuit.description && (

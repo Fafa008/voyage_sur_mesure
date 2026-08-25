@@ -18,6 +18,7 @@ import DeleteCircuitForm from "@/components/admin/circuits/DeleteCircuitForm";
 
 export default async function AdminCircuitsPage() {
   const circuits = await prisma.circuit.findMany({
+    where: { deletedAt: null },
     include: {
       theme: true,
       region: true,

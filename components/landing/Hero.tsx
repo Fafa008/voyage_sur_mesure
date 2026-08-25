@@ -63,6 +63,7 @@ export default function Hero() {
               <Button
                 size="lg"
                 className="group px-8 py-6 text-base font-semibold rounded-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                nativeButton={false}
                 render={<Link href="/devis/nouveau" />}
               >
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -74,6 +75,7 @@ export default function Hero() {
                 variant="outline"
                 size="lg"
                 className="px-8 py-6 text-base font-semibold rounded-full border-2 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                nativeButton={false}
                 render={<Link href="/circuits" />}
               >
                 Explorer les circuits

@@ -6,6 +6,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
+import { LocationPickerWrapper } from "@/components/admin/circuits/LocationPickerWrapper";
 import { createCircuit } from "@/app/admin/circuits/actions/create-circuit.action";
 
 function formatDateInput(value: Date | null | undefined) {
@@ -60,7 +61,13 @@ export default async function NewCircuitPage() {
           />
           <InputField
             id="dateDebut"
-            label="Date de début"
+            label="Date de départ estimée"
+            type="date"
+            defaultValue={formatDateInput(undefined)}
+          />
+          <InputField
+            id="dateFin"
+            label="Date de retour estimée"
             type="date"
             defaultValue={formatDateInput(undefined)}
           />
@@ -110,6 +117,29 @@ export default async function NewCircuitPage() {
             rows={5}
             placeholder="Décrivez l'itinéraire, les points forts et le programme du circuit..."
           />
+        </div>
+
+        {/* Section : Lieux de départ et d'arrivée */}
+        <div className="p-5 rounded-xl bg-card border space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              📍 Lieux de départ et d&apos;arrivée
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sélectionnez les lieux exacts sur la carte ou recherchez par nom.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <LocationPickerWrapper
+              prefix="lieuDepart"
+              label="Lieu de départ"
+            />
+            <LocationPickerWrapper
+              prefix="lieuArrivee"
+              label="Lieu d'arrivée"
+            />
+          </div>
         </div>
 
         <div className="p-5 rounded-xl bg-card">

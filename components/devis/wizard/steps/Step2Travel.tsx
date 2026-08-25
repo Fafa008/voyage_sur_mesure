@@ -2,7 +2,7 @@
 "use client";
 
 import { TravelSection } from "@/components/devis/sections/TravelSection";
-import type { DevisFormData, DevisOption } from "@/types/devis";
+import type { DevisFormData, DevisOption, CircuitPreview } from "@/types/devis";
 
 interface Step2Props {
   data: DevisFormData;
@@ -10,6 +10,7 @@ interface Step2Props {
   circuits: DevisOption[];
   themes: DevisOption[];
   regions: DevisOption[];
+  preselectedCircuit?: CircuitPreview | null;
 }
 
 export function Step2Travel({
@@ -18,21 +19,8 @@ export function Step2Travel({
   circuits,
   themes,
   regions,
+  preselectedCircuit,
 }: Step2Props) {
-  // Fonctions pour gérer les tableaux (checkbox)
-  const handleArrayChange = (
-    field: keyof DevisFormData,
-    value: string,
-    checked: boolean,
-  ) => {
-    const current = (data[field] as string[]) ?? [];
-    if (checked) {
-      updateData({ [field]: [...current, value] });
-    } else {
-      updateData({ [field]: current.filter((v) => v !== value) });
-    }
-  };
-
   return (
     <TravelSection
       data={data}
@@ -40,6 +28,7 @@ export function Step2Travel({
       circuits={circuits}
       themes={themes}
       regions={regions}
+      preselectedCircuit={preselectedCircuit}
     />
   );
 }

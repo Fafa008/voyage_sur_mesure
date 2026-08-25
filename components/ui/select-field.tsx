@@ -45,7 +45,9 @@ function SelectField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <Label htmlFor={id}>{label}</Label>
+        <Label htmlFor={id} className="text-sm font-medium text-foreground">
+          {label}
+        </Label>
         {sublabel && (
           <span className="text-xs text-muted-foreground">{sublabel}</span>
         )}
@@ -73,7 +75,7 @@ function SelectField({
             id={id}
             data-slot="select-field"
             className={cn(
-              "h-9 rounded-lg",
+              "h-10 rounded-xl bg-background text-foreground border-input shadow-2xs hover:border-primary/50 focus:border-ring",
               icon && "pl-10",
               error && "border-destructive focus:ring-destructive/30",
               className
