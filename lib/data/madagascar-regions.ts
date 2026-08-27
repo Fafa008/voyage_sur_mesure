@@ -229,41 +229,84 @@ export const MADAGASCAR_REGIONS: RegionData[] = [
 ];
 
 /**
- * Génère un GeoJSON léger pour l'affichage interactif des 24 régions de Madagascar.
+ * Correspondance entre les noms de régions Prisma (seed) et les slugs GeoJSON.
+ * Gère les variantes d'apostrophe et de casse.
  */
-export function getMadagascarGeoJSON(): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: MADAGASCAR_REGIONS.map((reg) => {
-      // Générer une boîte bounding polygon autour du centre de chaque région
-      const [lat, lng] = reg.center;
-      const dLat = 0.65;
-      const dLng = 0.65;
+export const REGION_NAME_TO_SLUG: Record<string, string> = {
+  "diana": "diana",
+  "sava": "sava",
+  "itasy": "itasy",
+  "analamanga": "analamanga",
+  "vakinankaratra": "vakinankaratra",
+  "bongolava": "bongolava",
+  "sofia": "sofia",
+  "boeny": "boeny",
+  "betsiboka": "betsiboka",
+  "melaky": "melaky",
+  "alaotra-mangoro": "alaotra-mangoro",
+  "atsinanana": "atsinanana",
+  "analanjirofo": "analanjirofo",
+  "amoron'i mania": "amoron-i-mania",
+  "haute matsiatra": "haute-matsiatra",
+  "vatovavy": "vatovavy-fitovinany",
+  "fitovinany": "vatovavy-fitovinany",
+  "ihorombe": "ihorombe",
+  "atsimo-atsinanana": "atsimo-atsinanana",
+  "atsimo-andrefana": "atsimo-andrefana",
+  "androy": "androy",
+  "anosy": "anosy",
+  "menabe": "menabe",
+  "ambatosoa": "ambatosoa",
+};
 
-      return {
-        type: "Feature",
-        id: reg.id,
-        properties: {
-          id: reg.id,
-          name: reg.name,
-          capital: reg.capital,
-          color: reg.color,
-          description: reg.description,
-          attractions: reg.attractions,
-        },
-        geometry: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [lng - dLng, lat - dLat],
-              [lng + dLng, lat - dLat],
-              [lng + dLng, lat + dLat],
-              [lng - dLng, lat + dLat],
-              [lng - dLng, lat - dLat],
-            ],
-          ],
-        },
-      };
-    }),
-  };
+/**
+ * Trouve le slug GeoJSON correspondant à un nom de région Prisma.
+ */
+export function getRegionSlug(regionName: string): string | undefined {
+  const normalized = regionName.trim().toLowerCase();
+
+  // Correspondance directe
+  if (REGION_NAME_TO_SLUG[normalized]) {
+    return REGION_NAME_TO_SLUG[normalized];
+  }
+
+  // Recherche partielle (gère les variantes d'apostrophe : ' vs ')
+  for (const [key, slug] of Object.entries(REGION_NAME_TO_SLUG)) {
+    if (
+      normalized.includes(key) ||
+      key.includes(normalized) ||
+      normalized.replace(/['']/g, "'") === key.replace(/['']/g, "'")
+    ) {
+      return slug;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Charge les véritables frontières GeoJSON des régions de Madagascar
+ * depuis le fichier statique public/data/madagascar-regions.geojson.
+ *
+ * Ce fichier contient les vrais polygones administratifs (source : geoBoundaries / OSM).
+ * Le chargement est asynchrone (fetch côté client uniquement).
+ */
+let _cachedGeoJSON: GeoJSON.FeatureCollection | null = null;
+
+export async function loadMadagascarGeoJSON(): Promise<GeoJSON.FeatureCollection> {
+  if (_cachedGeoJSON) return _cachedGeoJSON;
+
+  try {
+    const response = await fetch("/data/madagascar-regions.geojson");
+    if (!response.ok) {
+      throw new Error(`Failed to load GeoJSON: ${response.status}`);
+    }
+    const data = (await response.json()) as GeoJSON.FeatureCollection;
+    _cachedGeoJSON = data;
+    return data;
+  } catch (error) {
+    console.error("[CartographieMadagascar] Impossible de charger les frontières réelles:", error);
+    // Retourne une collection vide plutôt que de planter
+    return { type: "FeatureCollection", features: [] };
+  }
 }

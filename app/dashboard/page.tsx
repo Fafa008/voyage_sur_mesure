@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutDevis, RoleNom } from "@prisma/client";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -140,7 +141,7 @@ export default async function DashboardPage() {
             {showConseillerLink && (
               <Link
                 href="/conseiller/dashboard"
-                className={buttonVariants({ variant: "outline", size: "sm" }) + " gap-1.5"}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
               >
                 Espace Conseiller
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -149,7 +150,7 @@ export default async function DashboardPage() {
             {showAdminLink && (
               <Link
                 href="/admin/dashboard"
-                className={buttonVariants({ variant: "default", size: "sm" }) + " gap-1.5"}
+                className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-1.5")}
               >
                 Espace Admin
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -175,10 +176,10 @@ export default async function DashboardPage() {
 
         <Link
           href="/devis/nouveau"
-          className={
-            buttonVariants({ variant: "default", size: "lg" }) +
-            " shrink-0 shadow-sm"
-          }
+          className={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "shrink-0 shadow-sm"
+          )}
         >
           <PlusCircle className="w-4 h-4 mr-2" />
           Nouvelle Demande de Devis

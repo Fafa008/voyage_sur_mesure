@@ -41,7 +41,10 @@ export class DeletionService {
         reservation.nbVoyageurs ??
         1;
 
-      if (circuitId) {
+      // Ne JAMAIS restaurer si les places ont déjà été libérées par
+      // l'ExpirationService (placesReleasedAt posé) — évite la double
+      // restitution qui rendrait nbPlacesDisponibles incohérent.
+      if (circuitId && !reservation.placesReleasedAt) {
         const circuit = await tx.circuit.findUnique({
           where: { id: circuitId },
           select: { id: true },

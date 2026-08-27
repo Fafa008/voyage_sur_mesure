@@ -274,6 +274,7 @@ export async function runPapiWebhookTests() {
   } finally {
     // Cleanup test data
     if (testReservation) {
+      await prisma.invoice.deleteMany({ where: { reservationId: testReservation.id } });
       await prisma.paymentWebhook.deleteMany({ where: { transaction: { reservationId: testReservation.id } } });
       await prisma.paymentLog.deleteMany({ where: { transaction: { reservationId: testReservation.id } } });
       await prisma.paymentTransaction.deleteMany({ where: { reservationId: testReservation.id } });

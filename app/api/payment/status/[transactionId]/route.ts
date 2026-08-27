@@ -24,15 +24,14 @@ export async function GET(
       return NextResponse.json({ error: "Transaction non trouvée" }, { status: 404 });
     }
 
-    if (transaction.userId !== session.user.id) {
-      // Vérifier si admin/conseiller
-      const dbUser = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        include: { role: true },
-      });
-      if (dbUser?.role?.nom !== "admin" && dbUser?.role?.nom !== "conseiller") {
-        return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-      }
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { role: true },
+    });
+    const isStaff = dbUser?.role?.nom === "admin" || dbUser?.role?.nom === "conseiller";
+
+    if (transaction.userId !== session.user.id && !isStaff) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -44,7 +43,7 @@ export async function GET(
         currency: transaction.currency,
         method: transaction.method,
         reservationId: transaction.reservationId,
-        providerRef: transaction.providerRef,
+        ...(isStaff ? { providerRef: transaction.providerRef } : {}),
         createdAt: transaction.createdAt,
       },
     });

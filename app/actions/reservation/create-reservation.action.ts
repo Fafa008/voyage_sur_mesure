@@ -98,14 +98,20 @@ export async function createReservation(prevState: unknown, formData: FormData) 
       });
 
       if (devis.circuitId && devis.circuit) {
-        await tx.circuit.update({
-          where: { id: devis.circuitId },
+        const updated = await tx.circuit.updateMany({
+          where: {
+            id: devis.circuitId,
+            nbPlacesDisponibles: { gte: devis.nombrePersonnes },
+          },
           data: {
             nbPlacesDisponibles: {
               decrement: devis.nombrePersonnes,
             },
           },
         });
+        if (updated.count === 0) {
+          throw new Error("Plus assez de places disponibles pour ce circuit");
+        }
       }
 
       await tx.notification.create({

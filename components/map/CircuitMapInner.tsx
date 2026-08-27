@@ -14,7 +14,8 @@ import {
 import L from "leaflet";
 import {
   MADAGASCAR_REGIONS,
-  getMadagascarGeoJSON,
+  loadMadagascarGeoJSON,
+  getRegionSlug,
 } from "@/lib/data/madagascar-regions";
 import {
   NATIONAL_PARKS,
@@ -126,20 +127,47 @@ export default function CircuitMapInner({
   const [showItinerary, setShowItinerary] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fitTrigger, setFitTrigger] = useState(0);
+  const [geoJsonData, setGeoJsonData] = useState<GeoJSON.FeatureCollection>({
+    type: "FeatureCollection",
+    features: [],
+  });
 
-  // GeoJSON des 24 régions
-  const geoJsonData = useMemo(() => getMadagascarGeoJSON(), []);
+  // Chargement asynchrone du GeoJSON réel depuis /data/
+  useEffect(() => {
+    loadMadagascarGeoJSON().then(setGeoJsonData);
+  }, []);
 
   // Déterminer la région du circuit
-  const currentRegionName = circuit.region?.nom?.toLowerCase() || "";
+  const currentRegionName = circuit.region?.nom || "";
+  const circuitRegionSlug = useMemo(
+    () => getRegionSlug(currentRegionName),
+    [currentRegionName],
+  );
   const circuitRegion = useMemo(() => {
     return MADAGASCAR_REGIONS.find(
       (r) =>
-        r.name.toLowerCase().includes(currentRegionName) ||
-        currentRegionName.includes(r.name.toLowerCase()) ||
-        r.id === currentRegionName,
+        r.name.toLowerCase().includes(currentRegionName.toLowerCase()) ||
+        currentRegionName.toLowerCase().includes(r.name.toLowerCase()) ||
+        r.id === currentRegionName.toLowerCase(),
     );
   }, [currentRegionName]);
+
+  // Filtrer les features GeoJSON : uniquement la région du circuit
+  const filteredRegionFeatures = useMemo(() => {
+    if (!circuitRegionSlug) return [];
+    return geoJsonData.features.filter(
+      (f) => f.properties?.id === circuitRegionSlug,
+    );
+  }, [geoJsonData, circuitRegionSlug]);
+
+  // FeatureCollection filtrée pour l'affichage
+  const filteredGeoJson = useMemo<GeoJSON.FeatureCollection>(
+    () => ({
+      type: "FeatureCollection",
+      features: filteredRegionFeatures,
+    }),
+    [filteredRegionFeatures],
+  );
 
   // Calcul des coordonnées pour chaque étape du circuit
   const etapePoints = useMemo(() => {
@@ -166,19 +194,29 @@ export default function CircuitMapInner({
     if (itineraryPath.length > 0) {
       return L.latLngBounds(itineraryPath);
     }
-    if (circuitRegion) {
-      const [lat, lng] = circuitRegion.center;
-      return L.latLngBounds([
-        [lat - 1.2, lng - 1.2],
-        [lat + 1.2, lng + 1.2],
-      ]);
+    if (filteredRegionFeatures.length > 0) {
+      // Calculer les bounds à partir des vrais polygones GeoJSON
+      const bounds = L.latLngBounds([]);
+      filteredRegionFeatures.forEach((feature) => {
+        const geom = feature.geometry;
+        if (geom.type === "Polygon") {
+          geom.coordinates[0].forEach(([lng, lat]) =>
+            bounds.extend([lat, lng]),
+          );
+        } else if (geom.type === "MultiPolygon") {
+          geom.coordinates.forEach((polygon) =>
+            polygon[0].forEach(([lng, lat]) => bounds.extend([lat, lng])),
+          );
+        }
+      });
+      return bounds;
     }
     // Vue globale de Madagascar par défaut
     return L.latLngBounds([
       [-25.6, 43.0],
       [-11.8, 50.8],
     ]);
-  }, [itineraryPath, circuitRegion]);
+  }, [itineraryPath, filteredRegionFeatures]);
 
   // Réinitialiser la vue
   const handleRecenter = () => {
@@ -195,37 +233,32 @@ export default function CircuitMapInner({
     return NATIONAL_PARKS;
   }, []);
 
-  // Style personnalisé pour les 24 régions dans la couche GeoJSON
+  // Style pour la région du circuit (polygon réel)
   const getRegionStyle = (feature: any) => {
-    const isSelected =
-      circuitRegion && feature.properties.id === circuitRegion.id;
     return {
-      fillColor: feature.properties.color || "#3b82f6",
-      weight: isSelected ? 3 : 1,
+      fillColor: circuitRegion?.color || "#3b82f6",
+      weight: 3,
       opacity: 0.8,
-      color: isSelected ? "#e11d48" : "#94a3b8",
-      dashArray: isSelected ? "" : "3",
-      fillOpacity: isSelected ? 0.35 : 0.12,
+      color: circuitRegion?.color || "#3b82f6",
+      fillOpacity: 0.15,
     };
   };
 
-  // Interactions sur les régions (survol / clic)
+  // Interactions sur la région (survol / clic)
   const onEachRegion = (feature: any, layer: L.Layer) => {
     layer.on({
       mouseover: (e) => {
         const target = e.target;
         target.setStyle({
-          fillOpacity: 0.45,
-          weight: 2,
+          fillOpacity: 0.3,
+          weight: 4,
         });
       },
       mouseout: (e) => {
         const target = e.target;
-        const isSelected =
-          circuitRegion && feature.properties.id === circuitRegion.id;
         target.setStyle({
-          fillOpacity: isSelected ? 0.35 : 0.12,
-          weight: isSelected ? 3 : 1,
+          fillOpacity: 0.15,
+          weight: 3,
         });
       },
     });
@@ -242,7 +275,7 @@ export default function CircuitMapInner({
         <div className="flex items-center gap-2">
           <Navigation className="w-5 h-5 text-primary animate-pulse" />
           <h3 className="font-bold text-base md:text-lg flex items-center gap-2">
-            Carte Interactive — Madagascar &amp; 24 Régions
+            Carte Interactive — Madagascar
           </h3>
           {circuit.region && (
             <Badge
@@ -264,7 +297,7 @@ export default function CircuitMapInner({
             className="h-8 gap-1.5 text-xs"
           >
             <MapPin className="w-3.5 h-3.5" />
-            24 Régions
+            Région
           </Button>
 
           {/* Toggle Itinéraire */}
@@ -348,10 +381,10 @@ export default function CircuitMapInner({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Couche 1 : Les 24 Régions de Madagascar (GeoJSON) */}
-          {showRegions && (
+          {/* Couche 1 : Région du circuit (polygone réel GeoJSON) */}
+          {showRegions && filteredGeoJson.features.length > 0 && (
             <GeoJSON
-              data={geoJsonData}
+              data={filteredGeoJson}
               style={getRegionStyle}
               onEachFeature={(feature, layer) => {
                 onEachRegion(feature, layer);
@@ -520,7 +553,7 @@ export default function CircuitMapInner({
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-sm bg-sky-400/50 border border-sky-500 inline-block"></span>
-          <span>24 Régions de Madagascar</span>
+          <span>Région du Circuit</span>
         </div>
       </div>
     </div>

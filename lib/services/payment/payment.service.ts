@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentStatus, ReservationStatus, StatutDevis, StatutReservation, type Prisma } from "@prisma/client";
+import { PaymentMethod, PaymentStatus, ReservationStatus, StatutDevis, StatutReservation, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PaymentFactory } from "./payment.factory";
 import { PaymentResult, WebhookResult } from "@/types/payment.types";
@@ -15,6 +15,14 @@ export class PaymentService {
 
     if (!reservation) throw new Error("Reservation not found");
     if (!reservation.montantFinal) throw new Error("Amount is not defined");
+
+    // P1.1 — Rejeter l'initiation de paiement si la réservation est déjà PAYEE ou ANNULEE
+    if (reservation.status === ReservationStatus.PAYEE) {
+      throw new Error("Cette réservation a déjà été réglée");
+    }
+    if (reservation.status === ReservationStatus.ANNULEE) {
+      throw new Error("Cette réservation a été annulée et ne peut plus être payée");
+    }
 
     // Vérifier la propriété de la réservation
     const isOwner =
@@ -122,49 +130,73 @@ export class PaymentService {
     if (devis.statut !== StatutDevis.accepte && devis.statut !== StatutDevis.reserve) {
       throw new Error("Le devis doit être accepté avant le paiement");
     }
-    if (devis.reservation && devis.reservation.status === "PAYEE") {
+    if (devis.reservation && devis.reservation.status === ReservationStatus.PAYEE) {
       throw new Error("Cette réservation a déjà été réglée");
+    }
+    if (devis.reservation && devis.reservation.status === ReservationStatus.ANNULEE) {
+      throw new Error("Cette réservation a été annulée");
     }
     if (!devis.montantTotal) throw new Error("Montant du devis non défini");
 
-    // Si réservation existe déjà (brouillon), on l'utilise. Sinon on crée.
+    // Si réservation existe déjà, on l'utilise. Sinon on crée de façon atomique.
     let reservationId: number;
 
     if (devis.reservation) {
       reservationId = devis.reservation.id;
     } else {
-      const reservation = await prisma.$transaction(async (tx) => {
-        if (devis.circuit && devis.circuitId) {
-          const circuit = await tx.circuit.findUnique({ where: { id: devis.circuitId }, select: { nbPlacesDisponibles: true } });
-          if (circuit && circuit.nbPlacesDisponibles < devis.nombrePersonnes) {
-            throw new Error("Plus assez de places disponibles pour ce circuit");
+      try {
+        const reservation = await prisma.$transaction(async (tx) => {
+          if (devis.circuit && devis.circuitId) {
+            // P1.1 — Décrémentation atomique avec vérification SQL gte pour empêcher les valeurs négatives en cas de requêtes simultanées
+            const updatedCircuit = await tx.circuit.updateMany({
+              where: {
+                id: devis.circuitId,
+                nbPlacesDisponibles: { gte: devis.nombrePersonnes }
+              },
+              data: {
+                nbPlacesDisponibles: { decrement: devis.nombrePersonnes }
+              }
+            });
+
+            if (updatedCircuit.count === 0) {
+              throw new Error("Plus assez de places disponibles pour ce circuit");
+            }
           }
 
-          await tx.circuit.update({
-            where: { id: devis.circuitId },
-            data: { nbPlacesDisponibles: { decrement: devis.nombrePersonnes } }
+          const newRes = await tx.reservation.create({
+            data: {
+              devisId,
+              circuitId: devis.circuitId,
+              nbVoyageurs: devis.nombrePersonnes,
+              montantFinal: devis.montantTotal!,
+              status: ReservationStatus.EN_ATTENTE,
+              statut: StatutReservation.confirmee,
+              userId,
+            }
           });
-        }
 
-        const newRes = await tx.reservation.create({
-          data: {
-            devisId,
-            montantFinal: devis.montantTotal!,
-            status: ReservationStatus.EN_ATTENTE,
-            statut: StatutReservation.confirmee,
-            userId,
+          await tx.devis.update({
+            where: { id: devisId },
+            data: { statut: StatutDevis.reserve }
+          });
+
+          return newRes;
+        });
+
+        reservationId = reservation.id;
+      } catch (err) {
+        // En cas de conflit unique P2002 sur devisId (requêtes simultanées), récupérer la réservation créée par l'autre requête
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+          const existingRes = await prisma.reservation.findUnique({ where: { devisId } });
+          if (existingRes) {
+            reservationId = existingRes.id;
+          } else {
+            throw err;
           }
-        });
-
-        await tx.devis.update({
-          where: { id: devisId },
-          data: { statut: StatutDevis.reserve }
-        });
-
-        return newRes;
-      });
-
-      reservationId = reservation.id;
+        } else {
+          throw err;
+        }
+      }
     }
 
     // Initier le paiement
@@ -218,18 +250,37 @@ export class PaymentService {
   }
 
   private async _markReservationPaid(reservationId: number, userId: string): Promise<void> {
-    await prisma.reservation.update({
-      where: { id: reservationId },
-      data: { status: ReservationStatus.PAYEE }
-    });
+    await prisma.$transaction(async (tx) => {
+      const reservation = await tx.reservation.update({
+        where: { id: reservationId },
+        data: { status: ReservationStatus.PAYEE }
+      });
 
-    // Notification client
-    await prisma.notification.create({
-      data: {
-        userId,
-        titre: "Paiement confirmé 🎉",
-        message: `Votre paiement pour la réservation #${reservationId} a été confirmé avec succès. Bon voyage !`,
+      const existingInvoice = await tx.invoice.findFirst({
+        where: { reservationId }
+      });
+
+      if (!existingInvoice && reservation.montantFinal) {
+        const numFacture = `FAC-${reservationId}-${Date.now()}`;
+        await tx.invoice.create({
+          data: {
+            numeroFacture: numFacture,
+            status: "PAID",
+            amount: reservation.montantFinal,
+            totalAmount: reservation.montantFinal,
+            reservationId,
+            userId,
+          }
+        });
       }
+
+      await tx.notification.create({
+        data: {
+          userId,
+          titre: "Paiement confirmé",
+          message: `Votre paiement pour la réservation #${reservationId} a été confirmé avec succès. Bon voyage !`,
+        }
+      });
     });
   }
 

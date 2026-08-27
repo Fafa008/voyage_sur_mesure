@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, ReservationStatus } from "@prisma/client";
+import { expirationService } from "@/lib/services/payment/expiration.service";
 
 /**
  * Comparaison de chaînes à temps constant pour éviter les timing attacks.
@@ -266,29 +267,77 @@ export async function POST(req: NextRequest) {
         return;
       }
 
-      // 9b. Si payé : mettre à jour la réservation + notification
+      // 9b. Si payé : vérifier si l'expiration a déjà libéré les places (paiement tardif)
       if (newStatus === PaymentStatus.PAID) {
-        await tx.reservation.update({
-          where: { id: transaction.reservationId },
-          data: { status: ReservationStatus.PAYEE },
+        const currentRes = await tx.reservation.findUnique({
+          where: { id: transaction.reservationId }
         });
 
-        await tx.notification.create({
-          data: {
-            userId: transaction.userId,
-            titre: "Paiement confirmé",
-            message: `Votre paiement pour la réservation #${transaction.reservationId} (${providerPaymentMethodStr || "Papi"}) a été confirmé avec succès. Bon voyage !`,
-          },
+        if (currentRes?.placesReleasedAt) {
+          // P1.1 — Paiement tardif reçu alors que les places ont été libérées et la réservation expirée.
+          // La transaction passe à PAID pour la traçabilité comptable, mais la réservation reste marquée
+          // et une alerte est créée pour traitement administratif sans forcer un état incohérent.
+          console.warn(`[PAPI WEBHOOK] Webhook PAID tardif reçu pour réservation #${transaction.reservationId} (places déjà libérées)`);
+          await tx.notification.create({
+            data: {
+              userId: transaction.userId,
+              titre: "Paiement reçu — Traitement en cours",
+              message: `Votre paiement pour la réservation #${transaction.reservationId} a été reçu après l'expiration. Notre équipe prend contact avec vous.`,
+            },
+          });
+        } else {
+          await tx.reservation.update({
+            where: { id: transaction.reservationId },
+            data: { status: ReservationStatus.PAYEE },
+          });
+
+          await tx.notification.create({
+            data: {
+              userId: transaction.userId,
+              titre: "Paiement confirmé",
+              message: `Votre paiement pour la réservation #${transaction.reservationId} (${providerPaymentMethodStr || "Papi"}) a été confirmé avec succès. Bon voyage !`,
+            },
+          });
+        }
+
+        // P1.1 — Création automatique de la facture (Invoice) si absente
+        const existingInvoice = await tx.invoice.findFirst({
+          where: { reservationId: transaction.reservationId }
         });
+
+        if (!existingInvoice && transaction.amount) {
+          await tx.invoice.create({
+            data: {
+              numeroFacture: `FAC-${transaction.reservationId}-${Date.now()}`,
+              status: "PAID",
+              amount: transaction.amount,
+              totalAmount: transaction.amount,
+              reservationId: transaction.reservationId,
+              userId: transaction.userId,
+            }
+          });
+        }
       }
 
-      // 9c. Si échoué ou expiré : notification client
+      // 9c. Si échoué, expiré ou annulé : libérer les places + notification client
       if (
         newStatus === PaymentStatus.FAILED ||
-        newStatus === PaymentStatus.EXPIRED
+        newStatus === PaymentStatus.EXPIRED ||
+        newStatus === PaymentStatus.CANCELLED
       ) {
-        const statusLabel =
-          newStatus === PaymentStatus.FAILED ? "échoué" : "expiré";
+        // P0.3 / P1.1 — Libération atomique des places du circuit.
+        // expirationService.expireReservation() gère l'idempotence via
+        // Reservation.placesReleasedAt et protège les réservations PAYEE.
+        await expirationService.expireReservation(
+          transaction.reservationId,
+          transaction.id,
+          tx,
+        );
+
+        let statusLabel = "expiré";
+        if (newStatus === PaymentStatus.FAILED) statusLabel = "échoué";
+        if (newStatus === PaymentStatus.CANCELLED) statusLabel = "annulé";
+
         await tx.notification.create({
           data: {
             userId: transaction.userId,

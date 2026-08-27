@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -70,10 +71,10 @@ export default async function AdminDashboardPage() {
         </div>
         <Link
           href="/admin/circuits/nouveau"
-          className={
-            buttonVariants({ variant: "default", size: "lg" }) +
-            " shrink-0 shadow-md"
-          }
+          className={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "shrink-0 shadow-md"
+          )}
         >
           <PlusCircle className="w-4 h-4 mr-2" />
           Ajouter un circuit

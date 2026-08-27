@@ -1,8 +1,8 @@
-// app/devis/merci/page.tsx
 import Link from "next/link";
 import { CheckCircle2, LayoutDashboard, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function MerciPage() {
   return (
@@ -28,10 +28,10 @@ export default function MerciPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Link
               href="/dashboard"
-              className={
-                buttonVariants({ variant: "default", size: "lg" }) +
-                " font-semibold"
-              }
+              className={cn(
+                buttonVariants({ variant: "default", size: "lg" }),
+                "font-semibold"
+              )}
             >
               <LayoutDashboard className="w-4 h-4 mr-2" />
               Voir mes devis

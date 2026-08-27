@@ -216,7 +216,11 @@ model Reservation {
   paiements PaymentTransaction[]
   factures  Invoice[]
 
-  deletedAt DateTime?
+  deletedAt        DateTime?
+  // Verrou idempotent : posé lors de la libération des places.
+  // Si non-null, les places ont déjà été restituées → toute tentative
+  // de double libération est rejetée atomiquement par Prisma.
+  placesReleasedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

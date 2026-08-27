@@ -36,9 +36,10 @@ export default async function NotificationsPage() {
         <div className="space-y-2">
           <Link
             href="/dashboard"
-            className={
-              buttonVariants({ variant: "ghost", size: "sm" }) + " -ml-2"
-            }
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "-ml-2"
+            )}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Retour au tableau de bord

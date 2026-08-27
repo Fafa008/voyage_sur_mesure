@@ -19,7 +19,7 @@ const CircuitMapInner = dynamic(() => import("./CircuitMapInner"), {
       <div className="space-y-2">
         <h4 className="font-semibold text-lg">Chargement de la Carte Interactive...</h4>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Préparation du tracé du circuit et du découpage des 24 régions de Madagascar.
+          Préparation du tracé du circuit et du découpage régional de Madagascar.
         </p>
       </div>
       <Skeleton className="w-48 h-4 rounded-full" />

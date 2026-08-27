@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { StatutDevis } from "@prisma/client";
+import { StatutDevis, RoleNom } from "@prisma/client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -83,6 +85,16 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
   const devisId = parseInt(id);
   if (isNaN(devisId)) notFound();
 
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { role: true },
+  });
+
+  const isAdmin = currentUser?.role?.nom === RoleNom.admin;
+
   const devis = await prisma.devis.findUnique({
     where: { id: devisId },
     include: {
@@ -116,6 +128,10 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
   });
 
   if (!devis) notFound();
+
+  if (!isAdmin && devis.conseillerId !== session.user.id) {
+    redirect("/conseiller/dashboard");
+  }
 
   const detailsCalcul = parseDetailsCalcul(devis.detailsCalcul);
 

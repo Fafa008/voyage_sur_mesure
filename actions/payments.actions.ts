@@ -126,18 +126,19 @@ export async function getOrCreateReservationFromDevisAction(devisId: number) {
 
     const reservation = await prisma.$transaction(async (tx) => {
       if (devis.circuit && devis.circuitId) {
-        const circuit = await tx.circuit.findUnique({
-          where: { id: devis.circuitId },
-          select: { nbPlacesDisponibles: true },
+        const updatedCircuit = await tx.circuit.updateMany({
+          where: {
+            id: devis.circuitId,
+            nbPlacesDisponibles: { gte: devis.nombrePersonnes },
+          },
+          data: {
+            nbPlacesDisponibles: { decrement: devis.nombrePersonnes },
+          },
         });
-        if (circuit && circuit.nbPlacesDisponibles < devis.nombrePersonnes) {
+
+        if (updatedCircuit.count === 0) {
           throw new Error("Plus assez de places disponibles pour ce circuit");
         }
-
-        await tx.circuit.update({
-          where: { id: devis.circuitId },
-          data: { nbPlacesDisponibles: { decrement: devis.nombrePersonnes } },
-        });
       }
 
       const newRes = await tx.reservation.create({

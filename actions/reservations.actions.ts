@@ -28,7 +28,16 @@ export async function createReservationAction(data: CreateReservationDTO) {
 
 export async function getReservationAction(id: number) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) return { success: false, error: "Non authentifié" };
+
     const reservation = await reservationService.getById(id);
+    if (!reservation) return { success: false, error: "Réservation introuvable" };
+
+    if (reservation.userId !== session.user.id) {
+      return { success: false, error: "Accès refusé" };
+    }
+
     return { success: true, data: reservation };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
