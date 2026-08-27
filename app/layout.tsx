@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
 import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
@@ -41,10 +42,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <SmoothScrollProvider>
-            <Header />
-            <div className="flex-1">{children}</div>
-          </SmoothScrollProvider>
+          <CurrencyProvider>
+            <SmoothScrollProvider>
+              <Header />
+              <div className="flex-1">{children}</div>
+            </SmoothScrollProvider>
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

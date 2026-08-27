@@ -7,7 +7,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
-import { LocationPickerWrapper } from "@/components/admin/circuits/LocationPickerWrapper";
+import { CircuitRouteMapPickerWrapper } from "@/components/admin/circuits/CircuitRouteMapPickerWrapper";
 import { updateCircuit } from "@/app/admin/circuits/actions/update-circuit.action";
 
 interface EditCircuitPageProps {
@@ -158,37 +158,29 @@ export default async function EditCircuitPage({
           />
         </div>
 
-        {/* Section : Lieux de départ et d'arrivée */}
-        <div className="p-5 rounded-xl bg-card border space-y-6">
+        {/* Section : Lieux de départ et d'arrivée (Carte Interactive Unique) */}
+        <div className="p-5 rounded-xl bg-card border space-y-5">
           <div>
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              📍 Lieux de départ et d&apos;arrivée
+              🗺️ Itinéraire &amp; Lieux géographiques
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Sélectionnez les lieux exacts sur la carte ou recherchez par nom.
+              Positionnez le point de départ (🟢) et le point d&apos;arrivée (🔴) directement sur la carte interactive ou via la barre de recherche.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <LocationPickerWrapper
-              prefix="lieuDepart"
-              label="Lieu de départ"
-              initialValue={{
-                nom: circuit.lieuDepartNom ?? "",
-                lat: circuit.lieuDepartLat ? Number(circuit.lieuDepartLat) : null,
-                lng: circuit.lieuDepartLng ? Number(circuit.lieuDepartLng) : null,
-              }}
-            />
-            <LocationPickerWrapper
-              prefix="lieuArrivee"
-              label="Lieu d'arrivée"
-              initialValue={{
-                nom: circuit.lieuArriveeNom ?? "",
-                lat: circuit.lieuArriveeLat ? Number(circuit.lieuArriveeLat) : null,
-                lng: circuit.lieuArriveeLng ? Number(circuit.lieuArriveeLng) : null,
-              }}
-            />
-          </div>
+          <CircuitRouteMapPickerWrapper
+            initialDepart={{
+              nom: circuit.lieuDepartNom ?? "",
+              lat: circuit.lieuDepartLat ? Number(circuit.lieuDepartLat) : null,
+              lng: circuit.lieuDepartLng ? Number(circuit.lieuDepartLng) : null,
+            }}
+            initialArrivee={{
+              nom: circuit.lieuArriveeNom ?? "",
+              lat: circuit.lieuArriveeLat ? Number(circuit.lieuArriveeLat) : null,
+              lng: circuit.lieuArriveeLng ? Number(circuit.lieuArriveeLng) : null,
+            }}
+          />
         </div>
 
         <div className="p-5 rounded-xl bg-card">

@@ -38,6 +38,7 @@ async function main() {
     ...process.env,
     APP_URL: tunnel.url,
     NEXT_PUBLIC_APP_URL: tunnel.url,
+    PAPI_WEBHOOK_URL: `${tunnel.url}/api/payment/webhook/papi`,
   };
 
   const nextDev = spawn("npx", ["next", "dev", "--port", String(PORT)], {

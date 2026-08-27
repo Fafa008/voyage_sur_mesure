@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
 interface MobileNavProps {
   user?: {
@@ -184,8 +185,13 @@ export function MobileNav({
           )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer Actions & Currency */}
         <div className="pt-4 border-t border-border/60 space-y-3">
+          <div className="flex items-center justify-between px-1 py-1">
+            <span className="text-xs font-medium text-muted-foreground">Devise :</span>
+            <CurrencySelector />
+          </div>
+
           {user ? (
             <div onClick={() => setOpen(false)}>
               <LogoutButton />

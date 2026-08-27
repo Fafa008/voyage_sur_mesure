@@ -23,8 +23,25 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const router = useRouter();
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/dashboard",
+      });
+    } catch (err: any) {
+      setError(
+        err?.message || "Une erreur est survenue lors de la connexion avec Google."
+      );
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +202,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nom@exemple.com"
                 autoComplete="email"
-                disabled={loading}
+                disabled={loading || googleLoading}
                 required
                 className="
                   h-11.5
@@ -256,7 +273,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
                 autoComplete="current-password"
-                disabled={loading}
+                disabled={loading || googleLoading}
                 required
                 className="
                   h-11.5
@@ -284,7 +301,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
+                disabled={loading || googleLoading}
                 aria-label={
                   showPassword
                     ? "Masquer le mot de passe"
@@ -322,7 +339,7 @@ export default function LoginPage() {
               ================================================= */}
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
             className="
               group relative
               h-11.5
@@ -387,6 +404,8 @@ export default function LoginPage() {
             ================================================= */}
         <button
           type="button"
+          onClick={handleGoogleSignIn}
+          disabled={loading || googleLoading}
           className="
             flex
             h-11.5
@@ -410,11 +429,17 @@ export default function LoginPage() {
             hover:text-primary
 
             hover:shadow-sm
+            disabled:opacity-50
+            disabled:cursor-not-allowed
           "
         >
-          <span className="text-base font-bold text-primary">G</span>
+          {googleLoading ? (
+            <Loader2 className="h-4.5 w-4.5 animate-spin text-primary" />
+          ) : (
+            <span className="text-base font-bold text-primary">G</span>
+          )}
 
-          Continuer avec Google
+          {googleLoading ? "Redirection..." : "Continuer avec Google"}
         </button>
       </div>
 

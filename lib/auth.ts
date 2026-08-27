@@ -13,6 +13,12 @@ export const auth = betterAuth({
       verify: async ({ hash, password }) => bcrypt.compare(password, hash),
     },
   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    },
+  },
   secret: process.env.BETTER_AUTH_SECRET!,
   trustedOrigins: [
     process.env.BETTER_AUTH_URL!

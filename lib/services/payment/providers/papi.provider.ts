@@ -69,6 +69,7 @@ export class PapiProvider implements IPaymentProvider {
       `${appUrl}/paiement/${options.reservationId}`;
 
     const notificationUrl =
+      process.env.PAPI_WEBHOOK_URL ||
       `${appUrl}/api/payment/webhook/papi`;
 
     const validDuration =

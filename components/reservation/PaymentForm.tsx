@@ -5,6 +5,7 @@ import { getOrCreateReservationFromDevisAction } from "@/actions/payments.action
 import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2, ShieldCheck, ArrowRight, Smartphone, Coins, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 interface PaymentFormProps {
   devisId: number;
@@ -14,8 +15,11 @@ interface PaymentFormProps {
 
 export function PaymentForm({ devisId, montant }: PaymentFormProps) {
   const router = useRouter();
+  const { currency, formatPrice } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const numericAmount = parseFloat(montant.replace(/\s+/g, "").replace(",", "."));
 
   const handleProceed = async () => {
     setLoading(true);
@@ -48,6 +52,11 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
           <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
             {montant} MGA
           </p>
+          {currency !== "MGA" && !isNaN(numericAmount) && (
+            <p className="text-xs font-medium text-emerald-600/90 dark:text-emerald-300/90 mt-0.5">
+              Soit environ <strong>{formatPrice(numericAmount)}</strong> (taux indicatif)
+            </p>
+          )}
         </div>
         <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
           <CreditCard className="w-6 h-6" />
