@@ -6,7 +6,7 @@ import { RoleNom, StatutDevis } from "@prisma/client";
 import { ConseillerSidebarNav } from "@/components/conseiller/ConseillerSidebarNav";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, UserCheck, Inbox } from "lucide-react";
+import { Menu, Inbox } from "lucide-react";
 import { Suspense } from "react";
 
 async function SidebarNavWithCounts() {

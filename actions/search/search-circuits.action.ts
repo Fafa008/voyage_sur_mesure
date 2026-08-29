@@ -154,7 +154,7 @@ export async function searchCircuitsAction(
         limit,
       },
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: "Une erreur est survenue lors de la recherche des circuits.",
@@ -189,7 +189,7 @@ export async function getSearchOptionsAction(): Promise<{
         regions,
       },
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: "Impossible de charger les options de filtre.",

@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     // 7. Renvoyer l'URL publique
     const url = `/uploads/circuits/${safeName}`;
     return NextResponse.json({ url });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur lors de la sauvegarde du fichier" },
       { status: 500 }

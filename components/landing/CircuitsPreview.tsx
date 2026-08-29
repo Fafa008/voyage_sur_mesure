@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 import { ArrowRight, Clock3, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -243,21 +243,12 @@ export default async function CircuitsPreview() {
                     </h3>
 
                     <div className="shrink-0 text-right">
-                      <span className="block text-[10px] text-muted-foreground">
-                        À partir de
-                      </span>
-                      <span
-                        className="
-                          whitespace-nowrap
-                          text-lg
-                          font-bold
-                          text-foreground
-                        "
-                      >
-                        {circuit.prixEstime
-                          ? formatCurrency(circuit.prixEstime)
-                          : "Sur devis"}
-                      </span>
+                      <PriceDisplay
+                        amount={circuit.prixEstime?.toString()}
+                        fallback="Sur devis"
+                        label="À partir de"
+                        size="md"
+                      />
                     </div>
                   </div>
 

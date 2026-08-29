@@ -13,12 +13,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : "localhost",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
+        hostname: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : "monvoyage.com",
       },
     ],
   },

@@ -21,7 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import { DevisFilters } from "@/components/devis/DevisFilters";
 import { FileText, Users, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
 import { cn } from "@/lib/utils";
 
@@ -231,9 +231,11 @@ export default async function AdminDevisPage({
                         </Badge>
                       </TableCell>
                       <TableCell className="font-bold text-primary text-sm">
-                        {devis.montantTotal
-                          ? formatCurrency(devis.montantTotal)
-                          : "Sur devis"}
+                        <PriceDisplay
+                          amount={devis.montantTotal?.toString()}
+                          fallback="Sur devis"
+                          size="sm"
+                        />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">

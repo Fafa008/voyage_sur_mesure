@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Building2, Copy, Check, Info } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";

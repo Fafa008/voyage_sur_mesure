@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,9 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, X, Loader2, Filter } from "lucide-react";
-import { StatutDevis } from "@prisma/client";
 import { statutDevisLabels } from "@/lib/statut-config";
-import { Button } from "@/components/ui/button";
 
 interface DevisFiltersProps {
   currentSearch?: string;
@@ -33,9 +31,13 @@ export function DevisFilters({
 
   const [searchTerm, setSearchTerm] = useState(currentSearch);
 
-  useEffect(() => {
+  // Synchronise le champ quand la prop currentSearch change (URL),
+  // en ajustant l'état pendant le rendu plutôt que dans un effet.
+  const [prevCurrentSearch, setPrevCurrentSearch] = useState(currentSearch);
+  if (currentSearch !== prevCurrentSearch) {
+    setPrevCurrentSearch(currentSearch);
     setSearchTerm(currentSearch);
-  }, [currentSearch]);
+  }
 
   const updateFilters = (
     newSearch?: string | null,

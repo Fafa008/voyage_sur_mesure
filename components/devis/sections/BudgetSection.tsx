@@ -3,7 +3,7 @@
 
 import { InputField } from "@/components/ui/input-field";
 import { Coins, Banknote, Check } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 interface BudgetSectionProps {
   data: {
@@ -21,6 +21,8 @@ const budgetPresets = [
 ];
 
 export function BudgetSection({ data, onChange }: BudgetSectionProps) {
+  const { formatPrice } = useCurrency();
+  
   const applyPreset = (min: number, max: number) => {
     onChange("budgetMin", min);
     onChange("budgetMax", max);
@@ -81,7 +83,7 @@ export function BudgetSection({ data, onChange }: BudgetSectionProps) {
                 </div>
 
                 <span className="text-xs font-semibold text-primary">
-                  {formatCurrency(preset.min)} - {formatCurrency(preset.max)}
+                  {formatPrice(preset.min)} - {formatPrice(preset.max)}
                 </span>
                 <span className="text-[10px] text-muted-foreground mt-1">
                   {preset.desc}

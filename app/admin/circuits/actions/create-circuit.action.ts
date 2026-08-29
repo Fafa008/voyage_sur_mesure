@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { CurrencyService, CurrencyCode } from '@/lib/services/currency.service';
 
 // Schéma pour la création
 const createCircuitSchema = z.object({
@@ -119,6 +120,7 @@ export async function createCircuit(formData: FormData) {
     description: formData.get('description')?.toString() || undefined,
     dureeJours: parseInt(formData.get('dureeJours')?.toString() || '0'),
     prixEstime: parseFloat(formData.get('prixEstime')?.toString() || '0'),
+    prixEstimeCurrency: (formData.get('prixEstimeCurrency')?.toString() || 'EUR') as CurrencyCode,
     nbPlacesDisponibles: parseInt(formData.get('nbPlacesDisponibles')?.toString() || '0'),
     dateDebut: formData.get('dateDebut')?.toString() || undefined,
     dateFin: formData.get('dateFin')?.toString() || undefined,
@@ -159,6 +161,16 @@ export async function createCircuit(formData: FormData) {
 
   const data = parsed.data;
 
+  // Convert price from selected currency to MGA for database storage
+  let prixEstimeMGA = data.prixEstime;
+  if (rawData.prixEstimeCurrency && rawData.prixEstimeCurrency !== 'MGA') {
+    // Convert from selected currency to MGA
+    // If user entered 800 EUR, we need to convert to MGA
+    // 1 EUR = 4900 MGA, so 800 EUR = 800 * 4900 = 3,920,000 MGA
+    const rate = CurrencyService.getRate(rawData.prixEstimeCurrency, 'MGA');
+    prixEstimeMGA = data.prixEstime * rate;
+  }
+
   // 3. Création du circuit avec toutes les relations
   try {
     await prisma.circuit.create({
@@ -167,7 +179,7 @@ export async function createCircuit(formData: FormData) {
         slug: data.slug,
         description: data.description || null,
         dureeJours: data.dureeJours,
-        prixEstime: data.prixEstime,
+        prixEstime: prixEstimeMGA,
         nbPlacesDisponibles: data.nbPlacesDisponibles,
         dateDebut: data.dateDebut && data.dateDebut.trim() !== "" ? new Date(data.dateDebut) : null,
         dateFin: data.dateFin && data.dateFin.trim() !== "" ? new Date(data.dateFin) : null,

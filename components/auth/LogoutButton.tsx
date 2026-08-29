@@ -18,7 +18,7 @@ export default function LogoutButton() {
       await authClient.signOut();
       router.replace("/home");
       router.refresh();
-    } catch (error) {
+    } catch {
       setIsLoading(false);
     }
   };

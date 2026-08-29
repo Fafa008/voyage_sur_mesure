@@ -5,7 +5,7 @@
  * Devises d'affichage supportées : MGA, EUR, USD, JPY.
  */
 
-export type CurrencyCode = "MGA" | "EUR" | "USD" | "JPY";
+export type CurrencyCode = "MGA" | "EUR" | "USD" | "GBP" | "JPY";
 
 export interface CurrencyConfig {
   code: CurrencyCode;
@@ -41,6 +41,14 @@ export const SUPPORTED_CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
     decimals: 2,
     symbolPosition: "before",
   },
+  GBP: {
+    code: "GBP",
+    name: "Livre sterling",
+    symbol: "£",
+    flag: "🇬🇧",
+    decimals: 2,
+    symbolPosition: "before",
+  },
   JPY: {
     code: "JPY",
     name: "Yen japonais",
@@ -56,12 +64,14 @@ export const SUPPORTED_CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
  * Taux moyens du marché :
  * 1 EUR ≈ 4 900 MGA -> 1 MGA ≈ 0.0002040816 EUR
  * 1 USD ≈ 4 500 MGA -> 1 MGA ≈ 0.0002222222 USD
+ * 1 GBP ≈ 5 800 MGA -> 1 MGA ≈ 0.0001724138 GBP
  * 1 JPY ≈ 30 MGA    -> 1 MGA ≈ 0.0333333333 JPY
  */
 const DEFAULT_RATES_FROM_MGA: Record<CurrencyCode, number> = {
   MGA: 1.0,
   EUR: 1 / 4900,
   USD: 1 / 4500,
+  GBP: 1 / 5800,
   JPY: 1 / 30,
 };
 
@@ -155,10 +165,12 @@ export class CurrencyService {
       ? this.convert(numMga, currency)
       : numMga;
 
-    const formattedNumber = finalAmount.toLocaleString("fr-FR", {
-      minimumFractionDigits: config.decimals > 0 && finalAmount % 1 !== 0 ? config.decimals : 0,
-      maximumFractionDigits: config.decimals,
-    });
+    const formattedNumber = finalAmount
+      .toLocaleString("fr-FR", {
+        minimumFractionDigits: config.decimals > 0 && finalAmount % 1 !== 0 ? config.decimals : 0,
+        maximumFractionDigits: config.decimals,
+      })
+      .replace(/\u202f|\u00a0/g, " ");
 
     const prefix = showApprox && currency !== "MGA" ? "≈ " : "";
 

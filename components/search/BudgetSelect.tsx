@@ -1,8 +1,8 @@
 "use client"
 
 import { DollarSign } from "lucide-react"
-import { formatCurrency } from "@/lib/format"
 import { SearchSelectField } from "./SearchSelectField"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 interface BudgetSelectProps {
   value?: number | null
@@ -10,19 +10,20 @@ interface BudgetSelectProps {
   className?: string
 }
 
-const BUDGET_OPTIONS = [
-  { value: "500000", label: `Jusqu'à ${formatCurrency(500000)}` },
-  { value: "1000000", label: `Jusqu'à ${formatCurrency(1000000)}` },
-  { value: "1500000", label: `Jusqu'à ${formatCurrency(1500000)}` },
-  { value: "2000000", label: `Jusqu'à ${formatCurrency(2000000)}` },
-  { value: "3000000", label: `Jusqu'à ${formatCurrency(3000000)}` },
-]
+const BUDGET_VALUES = [500000, 1000000, 1500000, 2000000, 3000000]
 
 export function BudgetSelect({
   value,
   onChange,
   className = "",
 }: BudgetSelectProps) {
+  const { formatPrice } = useCurrency()
+  
+  const BUDGET_OPTIONS = BUDGET_VALUES.map(budget => ({
+    value: budget.toString(),
+    label: `Jusqu'à ${formatPrice(budget)}`
+  }))
+
   return (
     <SearchSelectField
       label="Budget Max"

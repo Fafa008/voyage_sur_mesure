@@ -19,7 +19,7 @@ import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import { DevisTimeline } from "@/components/devis/DevisTimeline";
 import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
 import { CreditCard, CheckCircle2, CalendarCheck, PenLine } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 interface DevisDetailPageProps {
   params: Promise<{ id: string }>;
@@ -35,7 +35,7 @@ export default async function DevisDetailPage({
   const devisId = parseInt(id, 10);
   if (isNaN(devisId)) notFound();
 
-  const [devis, modesPaiement] = await Promise.all([
+  const [devis] = await Promise.all([
     prisma.devis.findUnique({
       where: { id: devisId },
       include: {
@@ -218,8 +218,7 @@ export default async function DevisDetailPage({
                 }
               >
                 <CreditCard className="w-4 h-4 mr-2" />
-                Accéder à l'espace de paiement (
-                {formatCurrency(devis.reservation.montantFinal)})
+                Accéder à l'espace de paiement
               </Link>
             </CardContent>
           </Card>
@@ -258,9 +257,11 @@ export default async function DevisDetailPage({
                   <span className="text-muted-foreground block text-xs uppercase tracking-wider">
                     Montant réglé
                   </span>
-                  <p className="font-bold text-primary">
-                    {formatCurrency(devis.reservation.montantFinal)}
-                  </p>
+                  <PriceDisplay
+                    amount={devis.reservation.montantFinal?.toString()}
+                    size="md"
+                    priceClassName="text-primary font-bold"
+                  />
                 </div>
                 {devis.reservation.paiement && (
                   <>
@@ -367,11 +368,14 @@ export default async function DevisDetailPage({
             {(devis.budgetMin || devis.budgetMax) && (
               <div>
                 <span className="font-semibold block">Budget estimé :</span>
-                <p>
-                  {formatCurrency(devis.budgetMin)} -{" "}
-                  {devis.budgetMax
-                    ? formatCurrency(devis.budgetMax)
-                    : "Illimité"}
+                <p className="flex items-center gap-2">
+                  <PriceDisplay amount={devis.budgetMin} size="sm" />
+                  {" - "}
+                  {devis.budgetMax ? (
+                    <PriceDisplay amount={devis.budgetMax} size="sm" />
+                  ) : (
+                    "Illimité"
+                  )}
                 </p>
               </div>
             )}
@@ -388,11 +392,13 @@ export default async function DevisDetailPage({
               <span className="font-semibold block">
                 Montant total proposé :
               </span>
-              <p className="text-2xl font-bold text-primary mt-1">
-                {devis.montantTotal
-                  ? formatCurrency(devis.montantTotal)
-                  : "En cours d'estimation"}
-              </p>
+              <PriceDisplay
+                amount={devis.montantTotal?.toString()}
+                fallback="En cours d'estimation"
+                size="xl"
+                priceClassName="text-primary"
+                className="mt-1"
+              />
             </div>
 
             {devis.commentaireClient && (

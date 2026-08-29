@@ -1,5 +1,6 @@
 "use client";
 
+import type { Feature } from "geojson";
 import React, { useState, useMemo, useEffect } from "react";
 import {
   MapContainer,
@@ -8,7 +9,6 @@ import {
   Popup,
   Polyline,
   GeoJSON,
-  Tooltip,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -21,7 +21,6 @@ import {
   NATIONAL_PARKS,
   FEATURED_HOTELS,
   getCoordinatesForCity,
-  PointOfInterest,
 } from "@/lib/data/madagascar-pois";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,6 @@ import {
   Maximize2,
   Minimize2,
   RotateCcw,
-  Eye,
-  EyeOff,
   Navigation,
 } from "lucide-react";
 
@@ -234,7 +231,7 @@ export default function CircuitMapInner({
   }, []);
 
   // Style pour la région du circuit (polygon réel)
-  const getRegionStyle = (feature: any) => {
+  const getRegionStyle = (_feature?: Feature) => {
     return {
       fillColor: circuitRegion?.color || "#3b82f6",
       weight: 3,
@@ -245,7 +242,7 @@ export default function CircuitMapInner({
   };
 
   // Interactions sur la région (survol / clic)
-  const onEachRegion = (feature: any, layer: L.Layer) => {
+  const onEachRegion = (_feature: Feature, layer: L.Layer) => {
     layer.on({
       mouseover: (e) => {
         const target = e.target;

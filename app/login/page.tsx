@@ -35,9 +35,11 @@ export default function LoginPage() {
         provider: "google",
         callbackURL: "/dashboard",
       });
-    } catch (err: any) {
+    } catch (err) {
       setError(
-        err?.message || "Une erreur est survenue lors de la connexion avec Google."
+        err instanceof Error
+          ? err.message
+          : "Une erreur est survenue lors de la connexion avec Google."
       );
       setGoogleLoading(false);
     }
@@ -149,6 +151,9 @@ export default function LoginPage() {
             {/* Halo autour du logo */}
             <div className="absolute inset-0 scale-150 rounded-full bg-primary/10 blur-xl" />
 
+            {/* Logo — asset SVG statique : next/image exigerait dangerouslyAllowSVG
+                (non activé pour la sécurité), on garde <img> */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/Logo.svg"
               alt="Madaventure"
@@ -347,8 +352,8 @@ export default function LoginPage() {
               overflow-hidden
               rounded-lg
 
-              bg-blue-600
-              text-primary
+              bg-primary
+              text-primary-foreground
 
               text-sm
               font-semibold

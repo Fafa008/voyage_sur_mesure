@@ -42,12 +42,12 @@ export class BinanceProvider implements IPaymentProvider {
 
       const amount = data.totalAmount ? Number(data.totalAmount) : undefined;
       return { status, amount };
-    } catch (error) {
+    } catch {
       return { status: PaymentStatus.PENDING };
     }
   }
 
-  async handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, _headers: Record<string, string>): Promise<WebhookResult> {
     const bizId = typeof payload.bizId === "string" ? payload.bizId : "";
     const bizStatus = typeof payload.bizStatus === "string" ? payload.bizStatus : undefined;
 
@@ -86,7 +86,7 @@ export class BinanceProvider implements IPaymentProvider {
       });
 
       return response.ok;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

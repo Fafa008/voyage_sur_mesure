@@ -3,7 +3,7 @@
 
 import { CheckboxGroup } from "@/components/ui/checkbox-group";
 import type { DevisFormData } from "@/types/devis";
-import { Activity, Car, Compass, Waves, Trees, Bike, Footprints, ShieldCheck } from "lucide-react";
+import { Activity, Car, Compass, Waves, Trees, Bike, Footprints } from "lucide-react";
 
 interface ActivitiesTransportSectionProps {
   data: Pick<DevisFormData, "activites" | "transport">;

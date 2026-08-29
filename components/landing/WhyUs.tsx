@@ -1,14 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import {
-  Compass,
-  ShieldCheck,
   HeartHandshake,
-  Sparkles,
   Search,
-  Users,
   HandCoins,
   Lock,
   ArrowRight,

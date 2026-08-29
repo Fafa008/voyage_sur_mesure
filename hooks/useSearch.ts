@@ -137,7 +137,7 @@ export function useSearch(initialFilters?: Partial<SearchFilters>) {
         } else {
           setError(res.error || "Erreur lors de la recherche");
         }
-      } catch (err) {
+      } catch {
         setError("Erreur de connexion au serveur.");
       } finally {
         setLoading(false);

@@ -20,8 +20,8 @@ async function main() {
       },
     });
     console.log("DEVIS QUERY OK:", JSON.stringify(devis, null, 2));
-  } catch (e: any) {
-    console.error("DEVIS QUERY FAILED:", e.message);
+  } catch (e) {
+    console.error("DEVIS QUERY FAILED:", e instanceof Error ? e.message : e);
   }
 
   const circuit = await p.circuit.findUnique({ where: { id: 6 }, select: { id: true, titre: true } });

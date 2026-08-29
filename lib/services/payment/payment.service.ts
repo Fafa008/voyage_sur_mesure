@@ -66,7 +66,8 @@ export class PaymentService {
     const appUrl =
       process.env.APP_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000";
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      "https://monvoyage.com";
 
     const result = await provider.createCharge(amount, currency, {
       reservationId,

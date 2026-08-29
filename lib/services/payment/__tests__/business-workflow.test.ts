@@ -22,6 +22,7 @@
 // contournant la couche d'auth pour tester la logique métier.
 
 import { POST } from "@/app/api/payment/webhook/papi/route";
+import type { NextRequest } from "next/server";
 import { paymentService } from "@/lib/services/payment/payment.service";
 import { expirationService } from "@/lib/services/payment/expiration.service";
 import { deletionService } from "@/lib/services/deletion.service";
@@ -33,6 +34,7 @@ import {
   PaymentStatus,
   Prisma,
   ReservationStatus,
+  RoleNom,
   StatutDevis,
   StatutReservation,
 } from "@prisma/client";
@@ -64,7 +66,7 @@ async function createTestCircuit(
 
 async function createTestUser(role?: string) {
   const roleId = role
-    ? (await prisma.role.upsert({ where: { nom: role as any }, create: { nom: role as any }, update: {} })).id
+    ? (await prisma.role.upsert({ where: { nom: role as RoleNom }, create: { nom: role as RoleNom }, update: {} })).id
     : null;
   return prisma.user.create({
     data: {
@@ -122,7 +124,7 @@ function createPapiWebhookReq(body: Record<string, unknown>) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  }) as any;
+  }) as unknown as NextRequest;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -249,7 +251,7 @@ export async function runBusinessWorkflowTests() {
           statut: StatutDevis.valide,
           dateDebutConfirmee: new Date("2026-10-01"),
           dateFinConfirmee: new Date("2026-10-05"),
-          detailsCalcul: breakdown as any,
+          detailsCalcul: breakdown as unknown as Prisma.InputJsonValue,
           commentaireConseiller: "Devis chiffré avec hébergement luxe et guide",
         },
       });
@@ -392,8 +394,8 @@ export async function runBusinessWorkflowTests() {
       let rejectError = false;
       try {
         await paymentService.initiateFromDevis(devis.id, PaymentMethod.PAPI, clientUser.id);
-      } catch (e: any) {
-        rejectError = e.message.includes("accepté");
+      } catch (e) {
+        rejectError = e instanceof Error && e.message.includes("accepté");
       }
       assert(rejectError, "Paiement sur devis refusé doit échouer");
 
@@ -820,18 +822,12 @@ export async function runBusinessWorkflowTests() {
       let unauthorized = false;
       try {
         await paymentService.initiateFromDevis(devis.id, PaymentMethod.PAPI, otherUser.id);
-      } catch (e: any) {
-        unauthorized = e.message.includes("Accès refusé");
+      } catch (e) {
+        unauthorized = e instanceof Error && e.message.includes("Accès refusé");
       }
       assert(unauthorized, "Autre utilisateur doit être rejeté");
 
       // L'autre utilisateur ne peut pas récupérer la réservation d'un autre
-      let unauthorizedGet = false;
-      try {
-        await reservationService.getByUserId(otherUser.id);
-      } catch {
-        unauthorizedGet = true;
-      }
       // getByUserId filtre par userId, donc retourne une liste vide — pas d'erreur
       const otherReservations = await reservationService.getByUserId(otherUser.id);
       const hasDevisReservation = otherReservations.some((r) => r.devisId === devis.id);
@@ -1045,8 +1041,9 @@ export async function runBusinessWorkflowTests() {
 
       // Première transaction (expirée)
       const tx1 = await createTestTransaction(reservation.id, clientUser.id, provider!.id, past);
-      // Deuxième transaction (sœur active encore valide)
-      const tx2 = await createTestTransaction(reservation.id, clientUser.id, provider!.id, future);
+      // Deuxième transaction (sœur active encore valide) : on la crée mais on
+      // n'en a pas besoin ensuite, elle maintient la réservation vivante
+      await createTestTransaction(reservation.id, clientUser.id, provider!.id, future);
 
       const result = await expirationService.expireReservation(reservation.id, tx1.id);
 
@@ -1147,8 +1144,8 @@ export async function runBusinessWorkflowTests() {
       let rejected = false;
       try {
         await paymentService.initiatePayment(reservation.id, PaymentMethod.PAPI, clientUser.id);
-      } catch (e: any) {
-        rejected = e.message.includes("réglée");
+      } catch (e) {
+        rejected = e instanceof Error && e.message.includes("réglée");
       }
       assert(rejected, "Paiement sur réservation PAYEE rejeté");
 
@@ -1159,8 +1156,8 @@ export async function runBusinessWorkflowTests() {
       let rejected2 = false;
       try {
         await paymentService.initiatePayment(reservation2.id, PaymentMethod.PAPI, clientUser.id);
-      } catch (e: any) {
-        rejected2 = e.message.includes("annulée");
+      } catch (e) {
+        rejected2 = e instanceof Error && e.message.includes("annulée");
       }
       assert(rejected2, "Paiement sur réservation ANNULEE rejeté");
 
@@ -1187,8 +1184,8 @@ export async function runBusinessWorkflowTests() {
       let rejectedModif = false;
       try {
         await paymentService.initiateFromDevis(devisModif.id, PaymentMethod.PAPI, clientUser.id);
-      } catch (e: any) {
-        rejectedModif = e.message.includes("accepté");
+      } catch (e) {
+        rejectedModif = e instanceof Error && e.message.includes("accepté");
       }
       assert(rejectedModif, "Paiement sur devis en_modification rejeté");
 

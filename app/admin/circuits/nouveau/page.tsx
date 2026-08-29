@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { CircuitRouteMapPickerWrapper } from "@/components/admin/circuits/CircuitRouteMapPickerWrapper";
+import { CurrencyInput } from "@/components/admin/circuits/CurrencyInput";
 import { createCircuit } from "@/app/admin/circuits/actions/create-circuit.action";
 
 function formatDateInput(value: Date | null | undefined) {
@@ -36,40 +37,50 @@ export default async function NewCircuitPage() {
 
       <form action={createCircuit} className="space-y-5">
         <div className="grid gap-6 md:grid-cols-2">
-          <InputField id="titre" label="Titre" required />
-          <InputField id="slug" label="Slug" required />
+          <InputField id="titre" label="Titre du circuit" placeholder="Ex: Circuit Baobabs et Lémuriens" required />
+          <InputField id="slug" label="Slug (URL)" placeholder="Ex: circuit-baobabs-lemuriens" required />
           <InputField
             id="dureeJours"
-            label="Durée (jours)"
+            label="Durée du circuit"
+            placeholder="Ex: 7"
             type="number"
             min={1}
+            sublabel="en jours"
             required
           />
-          <InputField
+          <CurrencyInput
             id="prixEstime"
+            name="prixEstime"
             label="Prix estimé"
+            placeholder="Ex: 1500"
             type="number"
             min={0}
             step="0.01"
+            sublabel="devise de référence"
+            defaultCurrency="EUR"
           />
           <InputField
             id="nbPlacesDisponibles"
-            label="Nombre de places"
+            label="Places disponibles"
+            placeholder="Ex: 12"
             type="number"
             min={0}
             defaultValue="0"
+            sublabel="nombre de participants maximum"
           />
           <InputField
             id="dateDebut"
-            label="Date de départ estimée"
+            label="Date de départ"
             type="date"
             defaultValue={formatDateInput(undefined)}
+            sublabel="date estimée de début du circuit"
           />
           <InputField
             id="dateFin"
-            label="Date de retour estimée"
+            label="Date de retour"
             type="date"
             defaultValue={formatDateInput(undefined)}
+            sublabel="date estimée de fin du circuit"
           />
         </div>
 

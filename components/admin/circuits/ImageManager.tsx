@@ -3,6 +3,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImagePlus, GripVertical, Loader2, X } from "lucide-react";
@@ -123,11 +124,13 @@ export function ImageManager({
               key={img.url}
               className="group overflow-hidden rounded-xl border bg-card transition"
             >
-              <div className="relative">
-                <img
+              <div className="relative h-44">
+                <Image
                   src={img.url}
                   alt={img.legende || ""}
-                  className="h-44 w-full object-cover transition duration-300 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition group-hover:opacity-100" />
                 <button

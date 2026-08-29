@@ -35,13 +35,12 @@ import {
   Inbox,
   Search,
   RotateCcw,
-  Phone,
   MapPin,
   Wallet,
 } from "lucide-react";
 import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 const DEVIS_PER_PAGE = 10;
 
@@ -475,9 +474,9 @@ export default async function ConseillerDashboardPage({
                               <div className="flex items-center gap-1.5 text-[12px]">
                                 <Wallet className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                                 <span className="font-medium text-foreground tabular-nums">
-                                  {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"}
+                                  {devis.budgetMin ? <PriceDisplay amount={devis.budgetMin} size="xs" /> : "—"}
                                   {" – "}
-                                  {devis.budgetMax ? formatCurrency(devis.budgetMax) : "∞"}
+                                  {devis.budgetMax ? <PriceDisplay amount={devis.budgetMax} size="xs" /> : "∞"}
                                 </span>
                               </div>
                             ) : (
@@ -587,7 +586,7 @@ export default async function ConseillerDashboardPage({
                           {(devis.budgetMin || devis.budgetMax) && (
                             <span className="flex items-center gap-1">
                               <Wallet className="w-3 h-3" />
-                              {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"} – {devis.budgetMax ? formatCurrency(devis.budgetMax) : "∞"}
+                              {devis.budgetMin ? <PriceDisplay amount={devis.budgetMin} size="xs" /> : "—"} – {devis.budgetMax ? <PriceDisplay amount={devis.budgetMax} size="xs" /> : "∞"}
                             </span>
                           )}
                           <span className="ml-auto tabular-nums">

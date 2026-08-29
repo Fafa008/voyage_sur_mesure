@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { RemoveFavoriButton } from "@/components/favori/RemoveFavoriButton";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 export default async function FavorisPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -75,10 +76,12 @@ export default async function FavorisPage() {
                 <div>
                   <div className="h-48 bg-muted relative overflow-hidden">
                     {circuit.images[0] ? (
-                      <img
+                      <Image
                         src={circuit.images[0].url}
                         alt={circuit.titre}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -101,11 +104,12 @@ export default async function FavorisPage() {
                   </CardHeader>
                 </div>
                 <div className="p-6 pt-0 flex items-center justify-between mt-4 border-t pt-4 gap-3">
-                  <span className="text-lg font-bold text-primary">
-                    {circuit.prixEstime
-                      ? formatCurrency(circuit.prixEstime)
-                      : "Sur devis"}
-                  </span>
+                  <PriceDisplay
+                    amount={circuit.prixEstime?.toString()}
+                    fallback="Sur devis"
+                    size="lg"
+                    priceClassName="text-primary"
+                  />
                   <div className="flex items-center gap-2">
                     <RemoveFavoriButton circuitId={circuit.id} />
                     <Link

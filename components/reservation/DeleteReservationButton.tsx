@@ -41,9 +41,18 @@ export function DeleteReservationButton({
     null
   );
 
-  useEffect(() => {
+// Ferme le dialogue dès que l'action réussit (ajustement d'état pendant
+// le rendu, comparé à la valeur précédente — pas d'effet nécessaire).
+const [prevState, setPrevState] = useState(state);
+  if (state !== prevState) {
+    setPrevState(state);
     if (state?.success) {
       setOpen(false);
+    }
+  }
+
+  useEffect(() => {
+    if (state?.success) {
       if (redirectTo) {
         router.push(redirectTo);
       } else {

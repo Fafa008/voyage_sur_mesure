@@ -1,4 +1,4 @@
-import { Prisma, ReservationStatus } from "@prisma/client";
+import { ReservationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { CreateReservationDTO } from "@/types/payment.types";
 

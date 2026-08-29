@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { LayoutDashboard, Send, Star, Sparkles } from "lucide-react";
 import ThemeToggle from "@/components/ui/theme-toggle";
-import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { getCachedUserWithRole } from "@/lib/auth-utils";
 import { getUnreadNotificationCount } from "@/lib/notifications-utils";
@@ -75,7 +74,6 @@ export default async function Header() {
 
         {/* Actions et authentification */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <CurrencySelector />
           <ThemeToggle />
           <MobileNav
             user={session?.user}

@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,7 +17,6 @@ import {
   FileText,
   ArrowRight,
   MapPin,
-  Users,
 } from "lucide-react";
 
 interface Props {

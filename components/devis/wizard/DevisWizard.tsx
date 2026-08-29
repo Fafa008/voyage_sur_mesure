@@ -38,7 +38,6 @@ import {
   Compass,
   User,
   Calendar,
-  Users,
   Building,
   Activity,
   Coins,
@@ -53,34 +52,6 @@ import { formatCurrency } from "@/lib/format";
 
 const DRAFT_KEY = "mon-voyage-devis-draft";
 const STEP_KEY = "mon-voyage-devis-step";
-
-const initialData: DevisFormData = {
-  prenom: "",
-  nom: "",
-  email: "",
-  telephone: "",
-  circuitId: "",
-  typeVoyage: [],
-  themeIds: [],
-  regionIds: [],
-  dateDebut: "",
-  dateFin: "",
-  dureeFlexible: false,
-  adultes: 2,
-  enfants: 0,
-  ados: 0,
-  enfantsAge: "",
-  typeHebergement: "",
-  regime: "",
-  regimePrecision: "",
-  activites: [],
-  transport: [],
-  budgetMin: 0,
-  budgetMax: 0,
-  commentaire: "",
-  source: "",
-  newsletter: false,
-};
 
 const contentSteps = [
   { id: 1, label: "Informations", component: Step1PersonalInfo },
@@ -181,7 +152,10 @@ export function DevisWizard({
   const totalSteps = contentSteps.length + 1;
   const isAuthStep = currentStep === contentSteps.length;
 
-  // Restaure le brouillon et l'étape courante (création uniquement)
+  // Restaure le brouillon et l'étape courante (création uniquement).
+// Initialisation unique depuis sessionStorage : pas de snapshot reactive
+// ni d'alternative sans mismatch serveur/client — un effet est requis.
+/* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isEditMode) {
       setHydrated(true);
@@ -215,6 +189,7 @@ export function DevisWizard({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Sauvegarde du brouillon (création uniquement)
   useEffect(() => {
@@ -385,8 +360,6 @@ export function DevisWizard({
             formData={formData}
             circuits={circuits}
             onEditStep={(stepIdx) => setCurrentStep(stepIdx)}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
           />
         )}
       </div>
@@ -456,15 +429,11 @@ function FinalStep({
   formData,
   circuits,
   onEditStep,
-  onSubmit,
-  isSubmitting,
 }: {
   user: DevisWizardProps["user"];
   formData: DevisFormData;
   circuits: DevisOption[];
   onEditStep: (stepIdx: number) => void;
-  onSubmit: () => Promise<void>;
-  isSubmitting: boolean;
 }) {
   const selectedCircuit = circuits.find(
     (c) => String(c.id) === formData.circuitId,

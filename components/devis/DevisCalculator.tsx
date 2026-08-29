@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/select";
 import { StatutDevis } from "@prisma/client";
 import { PricingBreakdown, DevisDetailsCalcul } from "@/lib/services/devis-calculator.service";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
+
 import {
   Calculator,
   AlertTriangle,
@@ -54,6 +56,7 @@ export function DevisCalculator({
   initialSnapshot = null,
 }: DevisCalculatorProps) {
   const router = useRouter();
+  const { formatPrice } = useCurrency();
   const [typeHebergement, setTypeHebergement] = useState(initialTypeHebergement || "hotel");
   const [transportType, setTransportType] = useState(initialTransportType || "aucun");
   const [includeGuide, setIncludeGuide] = useState(false);
@@ -294,7 +297,7 @@ export function DevisCalculator({
                           Données incomplètes
                         </p>
                         <ul className="list-disc list-inside text-[11px] text-amber-700/90 dark:text-amber-400/90 space-y-0.5">
-                          {breakdown.avertissements.map((a, i) => (
+                          {breakdown.avertissements.map((a: string, i: number) => (
                             <li key={i}>{a}</li>
                           ))}
                         </ul>
@@ -308,34 +311,34 @@ export function DevisCalculator({
 
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Circuit de base ({breakdown.nombreVoyageurs} pers)</span>
-                      <span className="font-medium">{formatCurrency(breakdown.prixBaseCircuit)}</span>
+                      <span className="font-medium">{formatPrice(breakdown.prixBaseCircuit)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Supplément Hébergement ({typeHebergement})</span>
-                      <span className="font-medium">{formatCurrency(breakdown.hebergementSuppl)}</span>
+                      <span className="font-medium">{formatPrice(breakdown.hebergementSuppl)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Supplément Transport ({transportType})</span>
-                      <span className="font-medium">{formatCurrency(breakdown.transportSuppl)}</span>
+                      <span className="font-medium">{formatPrice(breakdown.transportSuppl)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Activités incluses</span>
-                      <span className="font-medium">{formatCurrency(breakdown.activitesSuppl)}</span>
+                      <span className="font-medium">{formatPrice(breakdown.activitesSuppl)}</span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-border/30">
                       <span className="text-muted-foreground">Taxes & Prestations Extra</span>
-                      <span className="font-medium">{formatCurrency(breakdown.prestationsExtra)}</span>
+                      <span className="font-medium">{formatPrice(breakdown.prestationsExtra)}</span>
                     </div>
                     {breakdown.remise > 0 && (
                       <div className="flex justify-between py-1 border-b border-border/30 text-rose-500 font-medium">
                         <span>Remise commerciale</span>
-                        <span>-{formatCurrency(breakdown.remise)}</span>
+                        <span>-{formatPrice(breakdown.remise)}</span>
                       </div>
                     )}
 
                     <div className="flex justify-between items-center pt-2 text-sm font-bold text-primary">
                       <span>Total Calculé :</span>
-                      <span>{formatCurrency(breakdown.montantTotal)}</span>
+                      <span>{formatPrice(breakdown.montantTotal)}</span>
                     </div>
 
                     {/* Client Budget Comparison Box */}
@@ -352,7 +355,7 @@ export function DevisCalculator({
                           ) : (
                             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           )}
-                          Budget client : {breakdown.budgetMax ? formatCurrency(breakdown.budgetMax) : "Non défini"}
+                          Budget client : <PriceDisplay amount={breakdown.budgetMax} fallback="Non défini" size="xs" />
                         </span>
                         <Badge className={cn(
                           "text-[10px] uppercase font-bold",
@@ -365,8 +368,8 @@ export function DevisCalculator({
                       </div>
                       <p className="text-[11px] text-muted-foreground leading-normal">
                         {breakdown.budgetStatut === "depasse"
-                          ? `Le montant proposé dépasse le budget maximum du client de ${formatCurrency(breakdown.budgetDifference)}. Veuillez revoir le chiffrage ou la remise.`
-                          : `Le montant proposé respecte le budget du client (Différence positive de ${formatCurrency(breakdown.budgetDifference)}).`}
+                          ? <>Le montant proposé dépasse le budget maximum du client de <PriceDisplay amount={breakdown.budgetDifference} size="xs" />. Veuillez revoir le chiffrage ou la remise.</>
+                          : <>Le montant proposé respecte le budget du client (Différence positive de <PriceDisplay amount={breakdown.budgetDifference} size="xs" />).</>}
                       </p>
                     </div>
                   </div>
@@ -594,6 +597,7 @@ function ReadOnlyReport({
   snapshot: DevisDetailsCalcul;
   legacy?: boolean;
 }) {
+  const { formatPrice } = useCurrency();
   const sousTotal =
     snapshot.prixBaseCircuit +
     snapshot.hebergementSuppl +
@@ -623,12 +627,12 @@ function ReadOnlyReport({
         <div>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Remise appliquée</span>
           <span className="font-semibold text-xs text-rose-500">
-            -{formatCurrency(snapshot.remise)}
+            -{formatPrice(snapshot.remise)}
           </span>
         </div>
         <div>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Montant final</span>
-          <span className="font-bold text-xs text-primary">{formatCurrency(snapshot.montantTotal)}</span>
+          <span className="font-bold text-xs text-primary">{formatPrice(snapshot.montantTotal)}</span>
         </div>
       </div>
 
@@ -650,35 +654,35 @@ function ReadOnlyReport({
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Circuit de base ({snapshot.nombreVoyageurs} pers)</span>
-            <span>{formatCurrency(snapshot.prixBaseCircuit)}</span>
+            <span>{formatPrice(snapshot.prixBaseCircuit)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Supplément hébergement</span>
-            <span>{formatCurrency(snapshot.hebergementSuppl)}</span>
+            <span>{formatPrice(snapshot.hebergementSuppl)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Supplément transport</span>
-            <span>{formatCurrency(snapshot.transportSuppl)}</span>
+            <span>{formatPrice(snapshot.transportSuppl)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Activités incluses</span>
-            <span>{formatCurrency(snapshot.activitesSuppl)}</span>
+            <span>{formatPrice(snapshot.activitesSuppl)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Taxes & prestations extra</span>
-            <span>{formatCurrency(snapshot.prestationsExtra)}</span>
+            <span>{formatPrice(snapshot.prestationsExtra)}</span>
           </div>
           <div className="flex justify-between border-t border-border/40 pt-1.5">
             <span className="text-muted-foreground">Sous-total prestations</span>
-            <span>{formatCurrency(sousTotal)}</span>
+            <span>{formatPrice(sousTotal)}</span>
           </div>
           <div className="flex justify-between text-rose-500">
             <span>Remise accordée</span>
-            <span>-{formatCurrency(snapshot.remise)}</span>
+            <span>-{formatPrice(snapshot.remise)}</span>
           </div>
           <div className="flex justify-between font-bold text-primary border-t pt-1.5 mt-1.5">
             <span>Montant facturé</span>
-            <span>{formatCurrency(snapshot.montantTotal)}</span>
+            <span>{formatPrice(snapshot.montantTotal)}</span>
           </div>
         </div>
       </div>
@@ -692,7 +696,7 @@ function ReadOnlyReport({
             : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
         )}>
           <div className="flex items-center justify-between font-bold text-xs">
-            <span>Budget client : {formatCurrency(snapshot.budgetMax)}</span>
+            <span>Budget client : <PriceDisplay amount={snapshot.budgetMax} size="xs" /></span>
             <Badge className={cn(
               "text-[10px] uppercase font-bold",
               snapshot.budgetStatut === "depasse"
@@ -704,8 +708,8 @@ function ReadOnlyReport({
           </div>
           <p className="text-[11px] text-muted-foreground">
             {snapshot.budgetStatut === "depasse"
-              ? `Au moment de la validation, le montant dépassait le budget maximal de ${formatCurrency(snapshot.budgetDifference)}.`
-              : `Marge restante par rapport au budget maximal : ${formatCurrency(snapshot.budgetDifference)}.`}
+              ? <>Au moment de la validation, le montant dépassait le budget maximal de <PriceDisplay amount={snapshot.budgetDifference} size="xs" />.</>
+              : <>Marge restante par rapport au budget maximal : <PriceDisplay amount={snapshot.budgetDifference} size="xs" />.</>}
           </p>
         </div>
       )}

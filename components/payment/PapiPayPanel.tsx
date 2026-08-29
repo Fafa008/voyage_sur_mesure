@@ -22,7 +22,8 @@ import {
 import { checkPaymentStatusAction } from "@/actions/payments.actions";
 import { useRouter } from "next/navigation";
 
-import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
+
 
 interface PapiPayPanelProps {
   paymentResult: PaymentResult;
@@ -113,9 +114,6 @@ export function PapiPayPanel({
     );
   }
 
-  const { currency, formatPrice } = useCurrency();
-  const numericAmount = parseFloat(amount.replace(/\s+/g, "").replace(",", "."));
-
   return (
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader className="pb-3 text-center">
@@ -124,13 +122,11 @@ export function PapiPayPanel({
           Paiement en ligne via Papi
         </div>
         <CardTitle className="text-2xl font-extrabold text-primary">
-          {amount} MGA
+          <PriceDisplay amount={amount} size="lg" priceClassName="text-primary" />
         </CardTitle>
-        {currency !== "MGA" && !isNaN(numericAmount) && (
-          <div className="text-xs font-medium text-muted-foreground mt-0.5">
-            Soit environ <strong className="text-foreground">{formatPrice(numericAmount)}</strong> (taux indicatif)
-          </div>
-        )}
+        <div className="text-xs font-medium text-muted-foreground mt-0.5">
+          (facturation en Ariary)
+        </div>
         <CardDescription className="mt-1">
           Payez en toute sécurité via MVola, Orange Money, Airtel Money ou Carte
           bancaire (facturation en Ariary)

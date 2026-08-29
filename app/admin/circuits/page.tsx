@@ -1,8 +1,9 @@
 // app/admin/circuits/page.tsx
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/format";
+import { CircuitPriceDisplay } from "@/components/admin/circuits/CircuitPriceDisplay";
 import { Plus } from "lucide-react";
 import {
   Table,
@@ -13,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { deleteCircuit } from "@/app/admin/circuits/actions/delete-circuit.action";
 import DeleteCircuitForm from "@/components/admin/circuits/DeleteCircuitForm";
 
 export default async function AdminCircuitsPage() {
@@ -30,13 +30,19 @@ export default async function AdminCircuitsPage() {
     orderBy: { titre: "asc" },
   });
 
+  // Convert Decimal fields to numbers for client component compatibility
+  const circuitsWithNumbers = circuits.map(circuit => ({
+    ...circuit,
+    prixEstime: circuit.prixEstime ? Number(circuit.prixEstime) : null,
+  }));
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">Circuits</h1>
           <p className="text-muted-foreground text-sm">
-            {circuits.length} circuit(s) au total
+            {circuitsWithNumbers.length} circuit(s) au total
           </p>
         </div>
         <Link
@@ -69,7 +75,7 @@ export default async function AdminCircuitsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {circuits.length === 0 ? (
+              {circuitsWithNumbers.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -79,14 +85,16 @@ export default async function AdminCircuitsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                circuits.map((circuit) => (
+                circuitsWithNumbers.map((circuit) => (
                   <TableRow key={circuit.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         {circuit.images[0] && (
-                          <img
+                          <Image
                             src={circuit.images[0].url}
                             alt=""
+                            width={40}
+                            height={40}
                             className="w-10 h-10 rounded object-cover"
                           />
                         )}
@@ -97,9 +105,9 @@ export default async function AdminCircuitsPage() {
                     <TableCell>{circuit.region?.nom || "-"}</TableCell>
                     <TableCell>{circuit.dureeJours} j</TableCell>
                     <TableCell>
-                      {circuit.prixEstime
-                        ? formatCurrency(circuit.prixEstime)
-                        : "-"}
+                      <CircuitPriceDisplay 
+                        amount={circuit.prixEstime} 
+                      />
                     </TableCell>
                     <TableCell>{circuit._count.etapes}</TableCell>
                     <TableCell className="text-right space-x-2">

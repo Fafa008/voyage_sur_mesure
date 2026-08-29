@@ -331,16 +331,13 @@ export default function CircuitRouteMapPicker({
     return null;
   }, [departLat, departLng, arriveeLat, arriveeLng]);
 
-  // Initial bounds setup on mount for edit mode
-  const hasInitializedBounds = useRef(false);
-  useEffect(() => {
-    if (!hasInitializedBounds.current) {
-      if (mapBounds) {
-        setRecenterTrigger((prev) => prev + 1);
-        hasInitializedBounds.current = true;
-      }
-    }
-  }, [mapBounds]);
+  // Initial bounds setup on mount for edit mode :
+// ajustement d'état pendant le rendu (une seule fois), pas d'effet.
+const [boundsInitialized, setBoundsInitialized] = useState(false);
+  if (!boundsInitialized && mapBounds) {
+    setBoundsInitialized(true);
+    setRecenterTrigger((prev) => prev + 1);
+  }
 
   const hasBothPoints =
     departLat !== null &&

@@ -20,7 +20,7 @@ import {
   X,
   Clock,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
@@ -104,7 +104,7 @@ export async function generateStaticParams() {
     where: { deletedAt: null },
     select: { slug: true },
   });
-  return circuits.map((circuit) => ({ slug: circuit.slug }));
+  return circuits.map((circuit) => ({ slug: encodeURIComponent(circuit.slug) }));
 }
 
 // ---------- Métadonnées ----------
@@ -114,7 +114,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const circuit = await getCircuitBySlug(slug);
+  const decodedSlug = decodeURIComponent(slug);
+  const circuit = await getCircuitBySlug(decodedSlug);
 
   if (!circuit) {
     return { title: "Circuit introuvable" };
@@ -151,8 +152,11 @@ export default async function CircuitDetailPage({
   params,
 }: CircuitDetailPageProps) {
   const { slug } = await params;
+  
+  // Decode URL-encoded slug (e.g., "Fianarantsoa%20Tamatave" -> "Fianarantsoa Tamatave")
+  const decodedSlug = decodeURIComponent(slug);
 
-  const circuit = await getCircuitBySlug(slug);
+  const circuit = await getCircuitBySlug(decodedSlug);
   if (!circuit) notFound();
 
   const session = await auth.api.getSession({ headers: await headers() });
@@ -190,7 +194,7 @@ export default async function CircuitDetailPage({
     },
   ];
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://monvoyage.com"}/circuits/${circuit.slug}`;
+  const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://monvoyage.com"}/circuits/${encodeURIComponent(circuit.slug)}`;
   const shareText = `Découvrez le circuit "${circuit.titre}" sur Mon Voyage !`;
 
   return (
@@ -341,11 +345,16 @@ export default async function CircuitDetailPage({
               <span className="text-sm text-muted-foreground block">
                 Prix indicatif par personne
               </span>
-              <span className="text-2xl font-bold text-primary">
-                {circuit.prixEstime
-                  ? formatCurrency(circuit.prixEstime)
-                  : "Sur mesure"}
-              </span>
+              {circuit.prixEstime ? (
+                <PriceDisplay
+                  amount={circuit.prixEstime?.toString()}
+                  fallback="Sur devis"
+                  label="À partir de"
+                  size="md"
+                />
+              ) : (
+                <span className="text-2xl font-bold text-primary">Sur mesure</span>
+              )}
             </div>
             <Link
               href={`/devis/nouveau?circuitId=${circuit.id}`}
@@ -424,12 +433,12 @@ export default async function CircuitDetailPage({
                 description: etape.description,
                 hebergement: etape.hebergement
                   ? {
-                      id: etape.hebergement.id,
-                      nom: etape.hebergement.nom,
-                      type: etape.hebergement.type,
-                      etoiles: etape.hebergement.etoiles,
-                      adresse: etape.hebergement.adresse,
-                    }
+                    id: etape.hebergement.id,
+                    nom: etape.hebergement.nom,
+                    type: etape.hebergement.type,
+                    etoiles: etape.hebergement.etoiles,
+                    adresse: etape.hebergement.adresse,
+                  }
                   : null,
                 activites: etape.activites.map((act) => ({
                   id: act.id,
@@ -547,7 +556,7 @@ export default async function CircuitDetailPage({
             ))}
           </div>
           <Link
-            href={`/circuits/${circuit.slug}/avis`}
+            href={`/circuits/${encodeURIComponent(circuit.slug)}/avis`}
             className="text-sm text-primary hover:underline"
           >
             Voir tous les avis →
@@ -560,7 +569,7 @@ export default async function CircuitDetailPage({
             <h2 className="text-2xl font-bold">Vous pourriez aussi aimer</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {similarCircuits.map((c) => (
-                <Link href={`/circuits/${c.slug}`} key={c.id} className="group">
+                <Link href={`/circuits/${encodeURIComponent(c.slug)}`} key={c.id} className="group">
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
                     <div className="relative h-48 w-full">
                       {c.images[0] ? (
@@ -584,14 +593,17 @@ export default async function CircuitDetailPage({
                           {c.region.nom}
                         </p>
                       )}
-                      <p className="text-sm font-bold mt-1">
-                        {c.prixEstime
-                          ? formatCurrency(c.prixEstime)
-                          : "Sur devis"}
-                        <span className="text-xs font-normal text-muted-foreground ml-1">
+                      <div className="flex items-baseline gap-0.5 text-sm font-bold mt-1">
+                        <PriceDisplay
+                          amount={c.prixEstime?.toString()}
+                          fallback="Sur devis"
+                          size="sm"
+                          priceClassName="text-sm font-bold"
+                        />
+                        <span className="text-xs font-normal text-muted-foreground">
                           /pers.
                         </span>
-                      </p>
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>

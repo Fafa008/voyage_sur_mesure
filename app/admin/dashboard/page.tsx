@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { StatutDevis, StatutReservation } from "@prisma/client";
 import {
   Card,
   CardContent,
@@ -10,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Users,
   Compass,
@@ -21,8 +19,13 @@ import {
   AlertCircle,
   PlusCircle,
   Tag,
-  ShieldCheck,
 } from "lucide-react";
+import {
+  statutDevisColors,
+  statutDevisLabels,
+  statutReservationColors,
+  statutReservationLabels,
+} from "@/lib/statut-config";
 
 export default async function AdminDashboardPage() {
   const [
@@ -83,60 +86,68 @@ export default async function AdminDashboardPage() {
 
       {/* Grid de 4 statistiques principales */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Utilisateurs
             </CardTitle>
-            <Users className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <Users className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{totalUsers}</div>
+            <div className="text-2xl font-bold text-foreground">{totalUsers}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Comptes inscrits
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Circuits
             </CardTitle>
-            <Compass className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Compass className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{totalCircuits}</div>
+            <div className="text-2xl font-bold text-foreground">{totalCircuits}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Itinéraires au catalogue
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Devis Reçus
             </CardTitle>
-            <FileText className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <FileText className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{totalDevis}</div>
+            <div className="text-2xl font-bold text-foreground">{totalDevis}</div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Demandes enregistrées
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Réservations
             </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <CalendarCheck className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">
+            <div className="text-2xl font-bold text-foreground">
               {totalReservations}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -220,18 +231,23 @@ export default async function AdminDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {devisParStatut.map((item) => (
                 <li
                   key={item.statut}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border/50"
                 >
-                  <span className="capitalize text-sm font-medium text-foreground">
-                    {item.statut.replace("_", " ")}
+                  <span
+                    className={cn(
+                      "px-2.5 py-1 rounded-full text-xs font-semibold border",
+                      statutDevisColors[item.statut] || "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {statutDevisLabels[item.statut] || item.statut}
                   </span>
-                  <Badge variant="outline" className="font-bold">
+                  <span className="font-bold text-sm text-foreground">
                     {item._count}
-                  </Badge>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -248,7 +264,7 @@ export default async function AdminDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {reservationsParStatut.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
                   Aucune réservation pour le moment.
@@ -257,14 +273,20 @@ export default async function AdminDashboardPage() {
                 reservationsParStatut.map((item) => (
                   <li
                     key={item.statut}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50"
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40 border border-border/50"
                   >
-                    <span className="capitalize text-sm font-medium text-foreground">
-                      {item.statut}
+                    <span
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-xs font-semibold border",
+                        statutReservationColors[item.statut] ||
+                          "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {statutReservationLabels[item.statut] || item.statut}
                     </span>
-                    <Badge variant="outline" className="font-bold">
+                    <span className="font-bold text-sm text-foreground">
                       {item._count}
-                    </Badge>
+                    </span>
                   </li>
                 ))
               )}

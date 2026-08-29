@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/favori/FavoriteButton";
 
 import { getUserFavoriteCircuitIds } from "@/lib/favoris-utils";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 import {
   ArrowRight,
@@ -343,22 +343,12 @@ export default async function CircuitsPage({
                     </h2>
 
                     <div className="shrink-0 text-right">
-                      <span className="block text-[10px] text-muted-foreground">
-                        À partir de
-                      </span>
-
-                      <span
-                        className="
-                          whitespace-nowrap
-                          text-lg
-                          font-bold
-                          text-foreground
-                        "
-                      >
-                        {circuit.prixEstime
-                          ? formatCurrency(circuit.prixEstime)
-                          : "Sur devis"}
-                      </span>
+                      <PriceDisplay
+                        amount={circuit.prixEstime?.toString()}
+                        fallback="Sur devis"
+                        label="À partir de"
+                        size="md"
+                      />
                     </div>
                   </div>
 
@@ -405,7 +395,7 @@ export default async function CircuitsPage({
                       BOUTON VOIR LE CIRCUIT
                       ================================================= */}
                   <Link
-                    href={`/circuits/${circuit.slug}`}
+                    href={`/circuits/${encodeURIComponent(circuit.slug)}`}
                     className="
                       mt-auto
                       flex

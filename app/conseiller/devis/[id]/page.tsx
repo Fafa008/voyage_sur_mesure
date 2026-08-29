@@ -14,7 +14,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { DevisCalculator } from "@/components/devis/DevisCalculator";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 import { parseDetailsCalcul } from "@/lib/services/devis-calculator.service";
 import {
   ArrowLeft,
@@ -228,7 +228,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                   <p className="text-xs text-muted-foreground">
                     Statut : <span className="font-medium capitalize text-foreground">{devis.reservation.status}</span>
                     {" · "}
-                    Montant : <span className="font-bold text-primary">{formatCurrency(devis.reservation.montantFinal)}</span>
+                    Montant : <PriceDisplay amount={devis.reservation.montantFinal?.toString()} size="xs" priceClassName="font-bold text-primary" />
                   </p>
                 </div>
               </div>
@@ -364,9 +364,9 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                   <div>
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Budget client</p>
                     <p className="text-[13px] font-bold text-primary">
-                      {devis.budgetMin ? formatCurrency(devis.budgetMin) : "—"}
+                      {devis.budgetMin ? <PriceDisplay amount={devis.budgetMin} size="xs" /> : "—"}
                       {" – "}
-                      {devis.budgetMax ? formatCurrency(devis.budgetMax) : "Illimité"}
+                      {devis.budgetMax ? <PriceDisplay amount={devis.budgetMax} size="xs" /> : "Illimité"}
                     </p>
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export default async function ConseillerDevisDetailPage({ params }: Props) {
                                       {act.nom}
                                       {act.prix && (
                                         <span className="text-muted-foreground ml-0.5">
-                                          ({formatCurrency(Number(act.prix))})
+                                          (<PriceDisplay amount={Number(act.prix)} size="xs" />)
                                         </span>
                                       )}
                                     </Badge>

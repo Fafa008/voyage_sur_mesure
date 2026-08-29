@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
-import { CurrencyService, SUPPORTED_CURRENCIES } from "../currency.service";
+import { CurrencyService } from "../currency.service";
 import { formatCurrency } from "@/lib/format";
 
 describe("P1.6.4 — CurrencyService & Multi-Currency Tests", () => {

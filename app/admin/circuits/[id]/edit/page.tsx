@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { CircuitRouteMapPickerWrapper } from "@/components/admin/circuits/CircuitRouteMapPickerWrapper";
+import { CurrencyInput } from "@/components/admin/circuits/CurrencyInput";
 import { updateCircuit } from "@/app/admin/circuits/actions/update-circuit.action";
 
 interface EditCircuitPageProps {
@@ -62,50 +63,62 @@ export default async function EditCircuitPage({
         <div className="grid gap-6 md:grid-cols-2">
           <InputField
             id="titre"
-            label="Titre"
+            label="Titre du circuit"
+            placeholder="Ex: Circuit Baobabs et Lémuriens"
             defaultValue={circuit.titre}
             required
           />
           <InputField
             id="slug"
-            label="Slug"
+            label="Slug (URL)"
+            placeholder="Ex: circuit-baobabs-lemuriens"
             defaultValue={circuit.slug}
             required
           />
           <InputField
             id="dureeJours"
-            label="Durée (jours)"
+            label="Durée du circuit"
+            placeholder="Ex: 7"
             type="number"
             min={1}
             defaultValue={circuit.dureeJours?.toString() ?? ""}
+            sublabel="en jours"
             required
           />
-          <InputField
+          <CurrencyInput
             id="prixEstime"
+            name="prixEstime"
             label="Prix estimé"
+            placeholder="Ex: 1500"
             type="number"
             min={0}
             step="0.01"
             defaultValue={circuit.prixEstime?.toString() ?? ""}
+            sublabel="devise de référence"
+            defaultCurrency="EUR"
           />
           <InputField
             id="nbPlacesDisponibles"
-            label="Nombre de places"
+            label="Places disponibles"
+            placeholder="Ex: 12"
             type="number"
             min={0}
             defaultValue={circuit.nbPlacesDisponibles.toString()}
+            sublabel="nombre de participants maximum"
           />
           <InputField
             id="dateDebut"
-            label="Date de début estimée"
+            label="Date de départ"
             type="date"
             defaultValue={formatDateInput(circuit.dateDebut)}
+            sublabel="date estimée de début du circuit"
           />
           <InputField
             id="dateFin"
-            label="Date de retour estimée"
+            label="Date de retour"
             type="date"
             defaultValue={formatDateInput(circuit.dateFin)}
+            sublabel="date estimée de fin du circuit"
           />
         </div>
 

@@ -14,18 +14,18 @@ export class BankTransferProvider implements IPaymentProvider {
     };
   }
 
-  async verifyPayment(providerRef: string): Promise<{ status: PaymentStatus; amount?: number }> {
+  async verifyPayment(_providerRef: string): Promise<{ status: PaymentStatus; amount?: number }> {
     // Dans le cas d'un virement, la vérification est manuelle (ou via API bancaire asynchrone).
     // On retourne PENDING par défaut.
     return { status: PaymentStatus.PENDING };
   }
 
-  async handleWebhook(payload: Record<string, unknown>, headers: Record<string, string>): Promise<WebhookResult> {
+  async handleWebhook(_payload: Record<string, unknown>, _headers: Record<string, string>): Promise<WebhookResult> {
     // Normalement pas de webhook pour un virement manuel pur.
     throw new Error("Webhook not supported for Bank Transfer");
   }
 
-  async refund(providerRef: string, amount: number): Promise<boolean> {
+  async refund(_providerRef: string, _amount: number): Promise<boolean> {
     // Le remboursement se fait manuellement
     return true;
   }

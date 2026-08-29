@@ -3,10 +3,10 @@
 import React, {
   createContext,
   useContext,
-  useState,
-  useEffect,
+  useReducer,
   useCallback,
   useMemo,
+  useSyncExternalStore,
 } from "react";
 import {
   CurrencyCode,
@@ -62,26 +62,19 @@ export function CurrencyProvider({
   children: React.ReactNode;
   initialCurrency?: CurrencyCode;
 }) {
-  const [currency, setCurrencyState] = useState<CurrencyCode>(initialCurrency);
-  const [rates, setRates] = useState<Record<CurrencyCode, number>>(() =>
-    CurrencyService.getRates()
-  );
-  const [lastUpdated, setLastUpdated] = useState<Date>(() =>
-    CurrencyService.getLastUpdated()
-  );
+  const [, forceRender] = useReducer((count: number) => count + 1, 0);
 
-  // Synchronisation côté client au montage
-  useEffect(() => {
-    const detected = getInitialCurrency(initialCurrency);
-    if (detected !== currency) {
-      setCurrencyState(detected);
-    }
-  }, [initialCurrency]);
+  // Lecture hydratation-safe de la devise choisie (localStorage + cookie).
+  // Au premier rendu on utilise la snapshot serveur (initialCurrency),
+  // puis React bascule sur la snapshot client sans erreur d'hydratation.
+  const currency = useSyncExternalStore<CurrencyCode>(
+    () => () => {},
+    () => getInitialCurrency(initialCurrency),
+    () => initialCurrency,
+  );
 
   const setCurrency = useCallback((newCurrency: CurrencyCode) => {
     if (!CurrencyService.isSupportedCurrency(newCurrency)) return;
-
-    setCurrencyState(newCurrency);
 
     try {
       if (typeof window !== "undefined") {
@@ -93,7 +86,13 @@ export function CurrencyProvider({
     } catch {
       // Ignore storage errors
     }
+
+    // Déclenche un nouveau rendu : useSyncExternalStore relit la valeur stockée.
+    forceRender();
   }, []);
+
+  const rates = useMemo(() => CurrencyService.getRates(), []);
+  const lastUpdated = useMemo(() => CurrencyService.getLastUpdated(), []);
 
   const formatPrice = useCallback(
     (

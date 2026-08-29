@@ -13,6 +13,31 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Le contenu est en français : les apostrophes et guillemets sont
+      // légitimes dans le texte JSX. On ne signale que les caractères qui
+      // modifient réellement la syntaxe JSX (> et }).
+      "react/no-unescaped-entities": ["error", { forbid: [">", "}"] }],
+      // Paramètres/variables préfixés "_" = volontairement non utilisés
+      // (ex. implémentation d'interface, signature imposée par le framework).
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  // Scripts Node en CommonJS (localtunnel, checks) : require() y est voulu.
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

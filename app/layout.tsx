@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
@@ -18,6 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://monvoyage.com"),
   title: "Mon Voyage | Voyages Sur Mesure à Madagascar",
   description:
     "Agence de voyage d'exception spécialisée dans la création de circuits personnalisés et séjours sur mesure à Madagascar.",
@@ -46,6 +48,7 @@ export default function RootLayout({
             <SmoothScrollProvider>
               <Header />
               <div className="flex-1">{children}</div>
+            <CurrencySelector variant="fixed" />
             </SmoothScrollProvider>
           </CurrencyProvider>
         </ThemeProvider>

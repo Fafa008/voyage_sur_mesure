@@ -438,8 +438,9 @@ export async function runExpirationTests() {
 
       // Première transaction (expirée)
       const tx1 = await createTestTransaction(reservation.id, testUser.id, provider!.id, past);
-      // Deuxième transaction (sœur active encore valide)
-      const tx2 = await createTestTransaction(reservation.id, testUser.id, provider!.id, future);
+      // Deuxième transaction (sœur active encore valide) : on la crée mais on
+      // n'en a pas besoin ensuite, elle maintient la réservation vivante
+      await createTestTransaction(reservation.id, testUser.id, provider!.id, future);
 
       // Expirer tx1 → tx1 passe à EXPIRED, mais la réservation et les places RESTENT réservées pour tx2
       const result = await expirationService.expireReservation(reservation.id, tx1.id);
@@ -471,8 +472,8 @@ export async function runExpirationTests() {
       let rejectedPayee = false;
       try {
         await paymentService.initiatePayment(reservationPayee.id, PaymentMethod.PAPI, testUser.id);
-      } catch (e: any) {
-        rejectedPayee = e.message.includes("déjà été réglée");
+      } catch (e) {
+        rejectedPayee = e instanceof Error && e.message.includes("déjà été réglée");
       }
       console.assert(rejectedPayee, "TEST 10: initiatePayment sur PAYEE doit lever une erreur");
 
@@ -482,8 +483,8 @@ export async function runExpirationTests() {
       let rejectedAnnulee = false;
       try {
         await paymentService.initiatePayment(reservationAnnulee.id, PaymentMethod.PAPI, testUser.id);
-      } catch (e: any) {
-        rejectedAnnulee = e.message.includes("annulée");
+      } catch (e) {
+        rejectedAnnulee = e instanceof Error && e.message.includes("annulée");
       }
       console.assert(rejectedAnnulee, "TEST 10: initiatePayment sur ANNULEE doit lever une erreur");
 

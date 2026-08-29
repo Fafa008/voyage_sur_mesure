@@ -95,9 +95,9 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         "group/dropdown-menu-item relative flex min-h-8 cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-popover-foreground outline-hidden transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        "focus:bg-accent focus:text-accent-foreground",
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "hover:bg-accent/80 hover:backdrop-blur-sm hover:text-accent-foreground",
+        "focus:bg-accent/80 focus:backdrop-blur-sm focus:text-accent-foreground",
+        "data-highlighted:bg-accent/80 data-highlighted:backdrop-blur-sm data-highlighted:text-accent-foreground",
         "data-inset:pl-7.5",
         "data-[variant=destructive]:text-destructive data-[variant=destructive]:data-highlighted:bg-destructive/10 data-[variant=destructive]:data-highlighted:text-destructive",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
@@ -127,11 +127,11 @@ function DropdownMenuSubTrigger({
       data-inset={inset}
       className={cn(
         "flex min-h-8 cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-popover-foreground outline-hidden transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        "focus:bg-accent focus:text-accent-foreground",
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "hover:bg-accent/80 hover:backdrop-blur-sm hover:text-accent-foreground",
+        "focus:bg-accent/80 focus:backdrop-blur-sm focus:text-accent-foreground",
+        "data-highlighted:bg-accent/80 data-highlighted:backdrop-blur-sm data-highlighted:text-accent-foreground",
         "data-inset:pl-7.5",
-        "data-popup-open:bg-accent data-popup-open:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground",
+        "data-popup-open:bg-accent/80 data-popup-open:backdrop-blur-sm data-popup-open:text-accent-foreground data-open:bg-accent/80 data-open:backdrop-blur-sm data-open:text-accent-foreground",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
@@ -179,9 +179,9 @@ function DropdownMenuCheckboxItem({
       data-inset={inset}
       className={cn(
         "relative flex min-h-8 cursor-pointer select-none items-center gap-2 rounded-lg py-1.5 pr-8 pl-2.5 text-xs font-medium text-popover-foreground outline-hidden transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        "focus:bg-accent focus:text-accent-foreground",
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "hover:bg-accent/80 hover:backdrop-blur-sm hover:text-accent-foreground",
+        "focus:bg-accent/80 focus:backdrop-blur-sm focus:text-accent-foreground",
+        "data-highlighted:bg-accent/80 data-highlighted:backdrop-blur-sm data-highlighted:text-accent-foreground",
         "data-inset:pl-7.5 data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
@@ -225,9 +225,9 @@ function DropdownMenuRadioItem({
       data-inset={inset}
       className={cn(
         "relative flex min-h-8 cursor-pointer select-none items-center gap-2 rounded-lg py-1.5 pr-8 pl-2.5 text-xs font-medium text-popover-foreground outline-hidden transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        "focus:bg-accent focus:text-accent-foreground",
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "hover:bg-accent/80 hover:backdrop-blur-sm hover:text-accent-foreground",
+        "focus:bg-accent/80 focus:backdrop-blur-sm focus:text-accent-foreground",
+        "data-highlighted:bg-accent/80 data-highlighted:backdrop-blur-sm data-highlighted:text-accent-foreground",
         "data-inset:pl-7.5 data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className

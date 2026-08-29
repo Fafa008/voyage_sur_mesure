@@ -58,7 +58,8 @@ export class PapiProvider implements IPaymentProvider {
     const appUrl =
       process.env.APP_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000";
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      "https://monvoyage.com";
 
     const successUrl =
       options.returnUrl ||
@@ -202,14 +203,6 @@ export class PapiProvider implements IPaymentProvider {
       const providerRef = orderId;
 
       /**
-       * Référence interne Papi (diagnostic uniquement).
-       */
-      const papiPaymentReference =
-        typeof papiData.paymentReference === "string"
-          ? papiData.paymentReference
-          : undefined;
-
-      /**
        * Token utilisé pour les notifications/webhooks.
        */
       const notificationToken =
@@ -268,7 +261,7 @@ export class PapiProvider implements IPaymentProvider {
    * Le statut final est normalement reçu via webhook Papi.
    */
   async verifyPayment(
-    providerRef: string
+    _providerRef: string
   ): Promise<{
     status: PaymentStatus;
     amount?: number;
@@ -284,7 +277,7 @@ export class PapiProvider implements IPaymentProvider {
    */
   async handleWebhook(
     payload: Record<string, unknown>,
-    headers: Record<string, string>
+    _headers: Record<string, string>
   ): Promise<WebhookResult> {
     const paymentStatus =
       typeof payload.paymentStatus === "string"
@@ -364,8 +357,8 @@ export class PapiProvider implements IPaymentProvider {
    * automatisés dans cette intégration.
    */
   async refund(
-    providerRef: string,
-    amount: number
+    _providerRef: string,
+    _amount: number
   ): Promise<boolean> {
     throw new Error(
       "Papi does not support automated refunds. " +

@@ -6,13 +6,13 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, MapPin, Calendar, Users, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Calendar, Users, ArrowLeft } from "lucide-react";
 import { PaymentCheckoutForm } from "./PaymentCheckoutForm";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 interface Props {
   params: Promise<{ reservationId: string }>;
@@ -121,9 +121,11 @@ export default async function PaymentTunnelPage({ params }: Props) {
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                   Montant à régler
                 </p>
-                <p className="text-xl font-bold text-primary mt-1">
-                  {amount} MGA
-                </p>
+                <PriceDisplay
+                  amount={amount}
+                  size="lg"
+                  priceClassName="text-xl font-bold text-primary mt-1"
+                />
               </div>
             </CardContent>
           </Card>

@@ -30,13 +30,12 @@ import {
   PlusCircle,
   ArrowRight,
   Sparkles,
-  MapPin,
   CalendarCheck,
 } from "lucide-react";
 import { MarkNotificationReadButton } from "@/components/notifications/MarkNotificationReadButton";
 import { DeleteDevisButton } from "@/components/devis/DeleteDevisButton";
 import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
-import { formatCurrency } from "@/lib/format";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 import { statutDevisColors, statutDevisLabels } from "@/lib/statut-config";
 
 export default async function DashboardPage() {
@@ -52,7 +51,8 @@ export default async function DashboardPage() {
     include: { role: true },
   });
   const roleNom = user?.role?.nom;
-  const showConseillerLink = roleNom === RoleNom.conseiller || roleNom === RoleNom.admin;
+  const showConseillerLink =
+    roleNom === RoleNom.conseiller || roleNom === RoleNom.admin;
   const showAdminLink = roleNom === RoleNom.admin;
 
   // Récupérer les devis du client
@@ -108,7 +108,9 @@ export default async function DashboardPage() {
     take: 3,
   });
   // Statistiques
-  const totalDevis = await prisma.devis.count({ where: { deletedAt: null, userId } });
+  const totalDevis = await prisma.devis.count({
+    where: { deletedAt: null, userId },
+  });
   const devisEnAttente = await prisma.devis.count({
     where: { deletedAt: null, userId, statut: StatutDevis.en_cours },
   });
@@ -133,15 +135,22 @@ export default async function DashboardPage() {
               <Sparkles className="w-4.5 h-4.5 text-primary animate-pulse" />
             </div>
             <div>
-              <p className="font-semibold text-sm text-foreground">Accès Professionnel / Administration</p>
-              <p className="text-xs text-muted-foreground">Vous disposez d'un accès aux espaces de gestion de l'agence.</p>
+              <p className="font-semibold text-sm text-foreground">
+                Accès Professionnel / Administration
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Vous disposez d'un accès aux espaces de gestion de l'agence.
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2.5">
             {showConseillerLink && (
               <Link
                 href="/conseiller/dashboard"
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "gap-1.5",
+                )}
               >
                 Espace Conseiller
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -150,7 +159,10 @@ export default async function DashboardPage() {
             {showAdminLink && (
               <Link
                 href="/admin/dashboard"
-                className={cn(buttonVariants({ variant: "default", size: "sm" }), "gap-1.5")}
+                className={cn(
+                  buttonVariants({ variant: "default", size: "sm" }),
+                  "gap-1.5",
+                )}
               >
                 Espace Admin
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -178,7 +190,7 @@ export default async function DashboardPage() {
           href="/devis/nouveau"
           className={cn(
             buttonVariants({ variant: "default", size: "lg" }),
-            "shrink-0 shadow-sm"
+            "shrink-0 shadow-sm",
           )}
         >
           <PlusCircle className="w-4 h-4 mr-2" />
@@ -188,30 +200,36 @@ export default async function DashboardPage() {
 
       {/* Cartes de statistiques */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total Devis
             </CardTitle>
-            <FileText className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <FileText className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{totalDevis}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {totalDevis}
+            </div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Demande(s) soumise(s)
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               En Étude
             </CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Clock className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold text-amber-600">
+            <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
               {devisEnAttente}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -220,15 +238,17 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Réservations
             </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-emerald-500" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <CalendarCheck className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold text-emerald-600">
+            <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
               {totalReservations}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
@@ -239,32 +259,38 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Favoris
             </CardTitle>
-            <Star className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <Star className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">{totalFavoris}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {totalFavoris}
+            </div>
             <p className="text-[11px] text-muted-foreground mt-1">
               Circuits sauvegardés
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:border-primary/30 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Alertes
             </CardTitle>
-            <Bell className="h-4 w-4 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+              <Bell className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold">
+            <div className="text-2xl font-bold">
               {notificationsNonLues > 0 ? (
-                <span className="text-rose-500 font-bold">
+                <span className="text-rose-600 dark:text-rose-400 font-bold">
                   {notificationsNonLues}
                 </span>
               ) : (
@@ -312,12 +338,18 @@ export default async function DashboardPage() {
                           ? `Devis #${res.devis.id}`
                           : `Réservation #${res.id}`)}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(res.dateReservation).toLocaleDateString(
-                        "fr-FR",
-                      )}{" "}
-                      — {formatCurrency(res.montantFinal)}
-                    </p>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span>
+                        {new Date(res.dateReservation).toLocaleDateString(
+                          "fr-FR",
+                        )}
+                      </span>
+                      <span>—</span>
+                      <PriceDisplay
+                        amount={res.montantFinal?.toString()}
+                        size="xs"
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Link
@@ -483,12 +515,6 @@ export default async function DashboardPage() {
                       >
                         {fav.circuit.titre}
                       </Link>
-                      <span className="text-xs text-muted-foreground">
-                        À partir de{" "}
-                        {fav.circuit.prixEstime
-                          ? formatCurrency(fav.circuit.prixEstime)
-                          : "Sur devis"}
-                      </span>
                     </div>
                     <Link
                       href={`/circuits/${fav.circuit.slug}`}

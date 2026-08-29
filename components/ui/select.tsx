@@ -80,11 +80,11 @@ function SelectItem({
       className={cn(
         "relative flex w-full cursor-pointer select-none items-center gap-2 rounded-lg py-2 pl-8 pr-3 text-sm text-popover-foreground outline-hidden transition-colors",
         // Hover et focus clairs
-        "hover:bg-accent hover:text-accent-foreground",
-        "focus:bg-accent focus:text-accent-foreground",
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+        "hover:bg-accent/80 hover:backdrop-blur-sm hover:text-accent-foreground",
+        "focus:bg-accent/80 focus:backdrop-blur-sm focus:text-accent-foreground",
+        "data-highlighted:bg-accent/80 data-highlighted:backdrop-blur-sm data-highlighted:text-accent-foreground",
         // État sélectionné clairement visible
-        "data-selected:bg-primary/10 data-selected:text-primary data-selected:font-semibold",
+        "data-selected:bg-primary/10 data-selected:text-primary data-selected:font-semibold data-selected:backdrop-blur-sm",
         "data-disabled:pointer-events-none data-disabled:opacity-50",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
         className

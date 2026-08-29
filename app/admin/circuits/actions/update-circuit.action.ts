@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
+import { CurrencyService, CurrencyCode } from '@/lib/services/currency.service';
 
 const updateCircuitSchema = z.object({
   id: z.number().int(),
@@ -98,6 +99,7 @@ export async function updateCircuit(formData: FormData) {
     description: formData.get('description')?.toString() || undefined,
     dureeJours: parseInt(formData.get('dureeJours')?.toString() || '0'),
     prixEstime: parseFloat(formData.get('prixEstime')?.toString() || '0'),
+    prixEstimeCurrency: (formData.get('prixEstimeCurrency')?.toString() || 'EUR') as CurrencyCode,
     nbPlacesDisponibles: parseInt(formData.get('nbPlacesDisponibles')?.toString() || '0'),
     dateDebut: (() => {
       const raw = formData.get('dateDebut')?.toString()?.trim();
@@ -137,6 +139,16 @@ export async function updateCircuit(formData: FormData) {
 
   const data = parsed.data;
 
+  // Convert price from selected currency to MGA for database storage
+  let prixEstimeMGA = data.prixEstime;
+  if (rawData.prixEstimeCurrency && rawData.prixEstimeCurrency !== 'MGA') {
+    // Convert from selected currency to MGA
+    // If user entered 800 EUR, we need to convert to MGA
+    // 1 EUR = 4900 MGA, so 800 EUR = 800 * 4900 = 3,920,000 MGA
+    const rate = CurrencyService.getRate(rawData.prixEstimeCurrency, 'MGA');
+    prixEstimeMGA = data.prixEstime * rate;
+  }
+
   let urlsToDelete: string[] = [];
 
   // 3. Mise à jour du circuit + remplacement complet des images
@@ -160,7 +172,7 @@ export async function updateCircuit(formData: FormData) {
         slug: data.slug,
         description: data.description || null,
         dureeJours: data.dureeJours,
-        prixEstime: data.prixEstime,
+        prixEstime: prixEstimeMGA,
         nbPlacesDisponibles: data.nbPlacesDisponibles,
         dateDebut: (() => {
           if (!data.dateDebut) return null;
@@ -210,7 +222,7 @@ export async function updateCircuit(formData: FormData) {
       const filePath = path.join(process.cwd(), 'public', url);
       try {
         await fs.unlink(filePath);
-      } catch (err) {
+      } catch {
       }
     }
   }

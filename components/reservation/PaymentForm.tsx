@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2, ShieldCheck, ArrowRight, Smartphone, Coins, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
+
 
 interface PaymentFormProps {
   devisId: number;
@@ -15,11 +17,9 @@ interface PaymentFormProps {
 
 export function PaymentForm({ devisId, montant }: PaymentFormProps) {
   const router = useRouter();
-  const { currency, formatPrice } = useCurrency();
+  const { currency } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const numericAmount = parseFloat(montant.replace(/\s+/g, "").replace(",", "."));
 
   const handleProceed = async () => {
     setLoading(true);
@@ -46,15 +46,17 @@ export function PaymentForm({ devisId, montant }: PaymentFormProps) {
       {/* En-tête Montant Total */}
       <div className="rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 p-5 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-            Montant total de la réservation
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+              Montant total de la réservation
+            </p>
+          </div>
           <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
-            {montant} MGA
+            <PriceDisplay amount={montant} size="xl" priceClassName="text-emerald-700 dark:text-emerald-400" />
           </p>
-          {currency !== "MGA" && !isNaN(numericAmount) && (
+          {currency !== "MGA" && (
             <p className="text-xs font-medium text-emerald-600/90 dark:text-emerald-300/90 mt-0.5">
-              Soit environ <strong>{formatPrice(numericAmount)}</strong> (taux indicatif)
+              (facturation en Ariary)
             </p>
           )}
         </div>

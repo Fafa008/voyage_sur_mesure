@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { StatutReservation } from "@prisma/client";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { CalendarCheck, ArrowRight, MapPin } from "lucide-react";
 import { DeleteReservationButton } from "@/components/reservation/DeleteReservationButton";
+import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 const statutColors: Record<StatutReservation, string> = {
   [StatutReservation.confirmee]:
@@ -121,9 +121,11 @@ export default async function ReservationsPage() {
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">
                       Montant
                     </p>
-                    <p className="text-xl font-bold text-primary">
-                      {res.montantFinal?.toString()} MGA
-                    </p>
+                    <PriceDisplay
+                      amount={res.montantFinal?.toString()}
+                      size="lg"
+                      priceClassName="text-xl font-bold text-primary"
+                    />
                   </div>
                   {res.paiement && (
                     <div className="text-right">

@@ -1,4 +1,5 @@
 import { POST } from "@/app/api/payment/webhook/papi/route";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, ReservationStatus, PaymentMethod } from "@prisma/client";
 
@@ -71,7 +72,7 @@ export async function runPapiWebhookTests() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      }) as any;
+      }) as unknown as NextRequest;
 
     // Test 1: Token absent + SUCCESS -> Rejet 401
     {
