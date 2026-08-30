@@ -56,8 +56,8 @@ export class PapiProvider implements IPaymentProvider {
     const orderId = `RES-${options.reservationId}-${Date.now()}`;
 
     const appUrl =
-      process.env.APP_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.APP_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       "https://monvoyage.com";
 
@@ -69,6 +69,8 @@ export class PapiProvider implements IPaymentProvider {
       options.cancelUrl ||
       `${appUrl}/paiement/${options.reservationId}`;
 
+    // Pour le webhook, utiliser l'URL publique en production
+    // En développement, utiliser ngrok ou similaire pour le callback externe
     const notificationUrl =
       process.env.PAPI_WEBHOOK_URL ||
       `${appUrl}/api/payment/webhook/papi`;

@@ -159,11 +159,12 @@ export default async function CircuitsPage({
 
                   shadow-[0_8px_30px_rgba(0,0,0,0.06)]
 
-                  transition-shadow
+                  transition-all
                   duration-300
 
                   hover:border-border
                   hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]
+                  hover:-translate-y-0.5
 
                   dark:shadow-[0_8px_30px_rgba(0,0,0,0.20)]
                   dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.30)]
@@ -241,8 +242,8 @@ export default async function CircuitsPage({
                           gap-1.5
                           rounded-lg
                           border
-                          border-white/30
-                          bg-black/55
+                          border-white/20
+                          bg-black/60
                           px-2.5
                           py-1.5
                           text-xs
@@ -368,6 +369,9 @@ export default async function CircuitsPage({
                           text-xs
                           font-medium
                           text-primary
+                          hover:bg-primary/15
+                          transition-colors
+                          duration-200
                         "
                       >
                         {circuit.theme.nom}
@@ -414,10 +418,12 @@ export default async function CircuitsPage({
 
                       shadow-sm
 
-                      transition-colors
+                      transition-all
                       duration-200
 
                       hover:bg-primary/90
+                      hover:shadow-md
+                      hover:-translate-y-0.5
 
                       focus-visible:outline-none
                       focus-visible:ring-2

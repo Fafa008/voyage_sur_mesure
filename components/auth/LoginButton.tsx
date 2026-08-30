@@ -9,9 +9,9 @@ export default function LoginButton() {
     <Link
       href="/login"
       className={buttonVariants({
-        variant: "outline",
+        variant: "default",
         size: "sm",
-        className: "text-muted-foreground hover:text-primary",
+        className: "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm",
       })}
     >
       Se connecter

@@ -311,6 +311,7 @@ export async function POST(req: NextRequest) {
               numeroFacture: `FAC-${transaction.reservationId}-${Date.now()}`,
               status: "PAID",
               amount: transaction.amount,
+              currency: transaction.currency,
               totalAmount: transaction.amount,
               reservationId: transaction.reservationId,
               userId: transaction.userId,

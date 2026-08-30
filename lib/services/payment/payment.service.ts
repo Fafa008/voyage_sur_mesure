@@ -64,8 +64,8 @@ export class PaymentService {
 
     // 3. Initiate Charge on Provider
     const appUrl =
-      process.env.APP_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.APP_URL ||
       process.env.NEXT_PUBLIC_BASE_URL ||
       "https://monvoyage.com";
 
@@ -268,6 +268,7 @@ export class PaymentService {
             numeroFacture: numFacture,
             status: "PAID",
             amount: reservation.montantFinal,
+            currency: "MGA",
             totalAmount: reservation.montantFinal,
             reservationId,
             userId,

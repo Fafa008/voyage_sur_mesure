@@ -109,6 +109,7 @@ export default function Hero() {
                 className="object-cover"
                 priority
                 sizes="(max-width: 1024px) 50vw, 50vw"
+                unoptimized
               />
               {/* Subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
@@ -124,6 +125,7 @@ export default function Hero() {
                     width={56}
                     height={56}
                     className="object-cover w-full h-full"
+                    unoptimized
                   />
                 </div>
                 <div className="min-w-0">

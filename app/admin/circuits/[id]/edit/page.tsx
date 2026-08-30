@@ -10,6 +10,7 @@ import { ImageManager } from "@/components/admin/circuits/ImageManager";
 import { CircuitRouteMapPickerWrapper } from "@/components/admin/circuits/CircuitRouteMapPickerWrapper";
 import { CurrencyInput } from "@/components/admin/circuits/CurrencyInput";
 import { updateCircuit } from "@/app/admin/circuits/actions/update-circuit.action";
+import { CurrencyService, CurrencyCode } from "@/lib/services/currency.service";
 
 interface EditCircuitPageProps {
   params: Promise<{ id: string }>;
@@ -18,6 +19,12 @@ interface EditCircuitPageProps {
 function formatDateInput(value: Date | null | undefined) {
   if (!value) return "";
   return value.toISOString().slice(0, 10);
+}
+
+function convertMgaToDisplayCurrency(amountMga: number | null | undefined, targetCurrency: CurrencyCode): string {
+  if (!amountMga) return "";
+  const converted = CurrencyService.convert(amountMga, targetCurrency);
+  return converted.toString();
 }
 
 export default async function EditCircuitPage({
@@ -93,7 +100,7 @@ export default async function EditCircuitPage({
             type="number"
             min={0}
             step="0.01"
-            defaultValue={circuit.prixEstime?.toString() ?? ""}
+            defaultValue={convertMgaToDisplayCurrency(circuit.prixEstime?.toNumber(), "EUR")}
             sublabel="devise de référence"
             defaultCurrency="EUR"
           />

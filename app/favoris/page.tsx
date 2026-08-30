@@ -89,7 +89,7 @@ export default async function FavorisPage() {
                       </div>
                     )}
                     {circuit.region && (
-                      <Badge className="absolute top-3 left-3 bg-black/70 text-white">
+                      <Badge className="absolute top-3 left-3 bg-black/60 text-white border border-white/20">
                         {circuit.region.nom}
                       </Badge>
                     )}

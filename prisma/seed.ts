@@ -244,7 +244,7 @@ async function main() {
 
         images: {
           create: {
-            url: "/uploads/circuits/tsingy-placeholder.jpg",
+            url: "https://images.unsplash.com/photo-1518182170546-0766ba6f7578?w=800&q=80",
             legende: "Les Tsingy de Bemaraha",
             ordre: 1,
           },

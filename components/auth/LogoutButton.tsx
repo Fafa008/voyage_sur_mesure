@@ -35,7 +35,10 @@ export default function LogoutButton() {
         text-xs font-medium
         text-muted-foreground
         transition-colors duration-200
-        hover:text-destructive
+        hover:text-rose-600
+        hover:bg-rose-50
+        dark:hover:text-rose-400
+        dark:hover:bg-rose-950/20
         disabled:pointer-events-none
         disabled:opacity-50
       "

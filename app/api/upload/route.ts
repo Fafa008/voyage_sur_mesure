@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { RoleNom } from "@prisma/client";
+import { put } from '@vercel/blob';
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "circuits");
 
 export async function POST(request: Request) {
   // 1. Vérifier l'authentification et le rôle admin
@@ -57,20 +54,23 @@ export async function POST(request: Request) {
   }
 
   // 5. Générer un nom unique et sécurisé
-  const extension = path.extname(file.name) || ".jpg";
-  const safeName = `${Date.now()}-${randomUUID()}${extension.toLowerCase()}`;
-  const filePath = path.join(UPLOAD_DIR, safeName);
+  const extension = file.name.split('.').pop() || "jpg";
+  const safeName = `${Date.now()}-${randomUUID()}.${extension.toLowerCase()}`;
 
   try {
-    // 6. S'assurer que le dossier existe puis écrire le fichier
-    await mkdir(UPLOAD_DIR, { recursive: true });
+    // 6. Upload vers Vercel Blob (store privé)
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
+    const blob = await put(safeName, buffer, {
+      access: 'private',
+      contentType: file.type,
+    });
 
-    // 7. Renvoyer l'URL publique
-    const url = `/uploads/circuits/${safeName}`;
-    return NextResponse.json({ url });
-  } catch {
+    // 7. Renvoyer l'URL du proxy pour accéder à l'image privée
+    // Les URLs downloadUrl sont temporaires, donc on utilise un proxy local
+    const proxyUrl = `/api/images/${safeName}`;
+    return NextResponse.json({ url: proxyUrl, downloadUrl: blob.downloadUrl });
+  } catch (error) {
+    console.error('Blob upload error:', error);
     return NextResponse.json(
       { error: "Erreur lors de la sauvegarde du fichier" },
       { status: 500 }

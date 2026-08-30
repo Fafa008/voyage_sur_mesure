@@ -443,6 +443,7 @@ model Invoice {
   numeroFacture String        @unique
   status        InvoiceStatus @default(DRAFT)
   amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("MGA")
   taxAmount     Decimal?      @db.Decimal(10, 2)
   totalAmount   Decimal       @db.Decimal(10, 2)
 

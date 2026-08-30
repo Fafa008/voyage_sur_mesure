@@ -56,8 +56,8 @@ export function FavoriteButton({
         "rounded-full flex items-center justify-center transition-all shadow-sm disabled:opacity-70",
         buttonSize,
         isFavori
-          ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          : "bg-card text-muted-foreground hover:text-red-500 hover:bg-card",
+          ? "bg-rose-500 text-white hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700"
+          : "bg-white/90 text-muted-foreground hover:text-rose-500 hover:bg-white dark:bg-black/40 dark:hover:bg-black/60 dark:text-gray-300 dark:hover:text-rose-400",
         className
       )}
     >

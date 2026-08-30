@@ -17,6 +17,7 @@ export default function CTABanner() {
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-card/80 lg:to-card/60 hidden lg:block" />
               <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent lg:hidden" />

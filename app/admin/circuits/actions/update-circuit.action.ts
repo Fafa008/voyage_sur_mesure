@@ -7,8 +7,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import fs from 'fs/promises';
-import path from 'path';
+import { del } from '@vercel/blob';
 import { CurrencyService, CurrencyCode } from '@/lib/services/currency.service';
 
 const updateCircuitSchema = z.object({
@@ -147,6 +146,11 @@ export async function updateCircuit(formData: FormData) {
     // 1 EUR = 4900 MGA, so 800 EUR = 800 * 4900 = 3,920,000 MGA
     const rate = CurrencyService.getRate(rawData.prixEstimeCurrency, 'MGA');
     prixEstimeMGA = data.prixEstime * rate;
+    
+    // Validate that the converted price doesn't exceed database limits (Decimal(10,2) = max 99,999,999.99)
+    if (prixEstimeMGA > 99999999.99) {
+      throw new Error('Le prix converti dépasse la limite autorisée (99,999,999.99 MGA)');
+    }
   }
 
   let urlsToDelete: string[] = [];
@@ -216,14 +220,12 @@ export async function updateCircuit(formData: FormData) {
     }
   });
 
-  // 4. Supprimer physiquement les images orphelines du disque
+  // 4. Supprimer physiquement les images orphelines de Vercel Blob
   for (const url of urlsToDelete) {
-    if (url.startsWith('/uploads/circuits/')) {
-      const filePath = path.join(process.cwd(), 'public', url);
-      try {
-        await fs.unlink(filePath);
-      } catch {
-      }
+    try {
+      await del(url);
+    } catch (error) {
+      console.error('Error deleting blob:', url, error);
     }
   }
 

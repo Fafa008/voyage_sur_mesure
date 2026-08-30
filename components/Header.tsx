@@ -126,8 +126,8 @@ export default async function Header() {
               </Link>
 
               <div className="flex items-center gap-3 border-l border-border pl-3">
-                <Avatar className="h-9 w-9 border-2 border-border shadow-md shadow-muted/30 ring-2 ring-primary/10 transition-all hover:ring-primary/30">
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-xs font-bold text-primary-foreground">
+                <Avatar className="h-9 w-9 border-2 border-border shadow-md shadow-muted/30 ring-2 ring-primary/10 transition-all hover:ring-primary/30 hover:border-primary/50">
+                  <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary dark:bg-primary/20 dark:text-primary-foreground">
                     {getInitials(session.user.name)}
                   </AvatarFallback>
                 </Avatar>

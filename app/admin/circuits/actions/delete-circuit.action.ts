@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { del } from '@vercel/blob';
 
 export async function deleteCircuit(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -66,22 +67,17 @@ export async function deleteCircuit(formData: FormData) {
     });
   });
 
-  // 2. Supprimer les images du disque (données non financières)
+  // 2. Supprimer les images de Vercel Blob (données non financières)
   const circuitImages = await prisma.imageCircuit.findMany({
     where: { circuitId },
     select: { url: true },
   });
 
-  const fs = await import('fs/promises');
-  const path = await import('path');
-
   for (const img of circuitImages) {
-    if (img.url.startsWith('/uploads/circuits/')) {
-      const filePath = path.join(process.cwd(), 'public', img.url);
-      try {
-        await fs.unlink(filePath);
-      } catch {
-      }
+    try {
+      await del(img.url);
+    } catch (error) {
+      console.error('Error deleting blob:', img.url, error);
     }
   }
 

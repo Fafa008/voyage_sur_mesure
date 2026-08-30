@@ -15,7 +15,22 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: process.env.APP_URL ? new URL(process.env.APP_URL).hostname : "monvoyage.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.private.blob.vercel-storage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.blob.vercel-storage.com",
+      },
     ],
+    // Custom loader pour gérer les URLs de proxy local
+    loader: 'custom',
+    loaderFile: './lib/image-loader.ts',
   },
 };
 
