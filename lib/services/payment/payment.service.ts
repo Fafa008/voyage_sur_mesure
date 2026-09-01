@@ -1,6 +1,7 @@
 import { PaymentMethod, PaymentStatus, ReservationStatus, StatutDevis, StatutReservation, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PaymentFactory } from "./payment.factory";
+import { expirationService } from "./expiration.service";
 import { PaymentResult, WebhookResult } from "@/types/payment.types";
 
 export class PaymentService {
@@ -149,15 +150,28 @@ export class PaymentService {
         const reservation = await prisma.$transaction(async (tx) => {
           if (devis.circuit && devis.circuitId) {
             // P1.1 — Décrémentation atomique avec vérification SQL gte pour empêcher les valeurs négatives en cas de requêtes simultanées
-            const updatedCircuit = await tx.circuit.updateMany({
-              where: {
-                id: devis.circuitId,
-                nbPlacesDisponibles: { gte: devis.nombrePersonnes }
-              },
-              data: {
-                nbPlacesDisponibles: { decrement: devis.nombrePersonnes }
-              }
-            });
+            // P0.4 — Lazy expiration : si le stock semble insuffisant, on nettoie
+            // d'abord les réservations expirées du circuit puis on retente.
+            const decrementStock = async () => {
+              return tx.circuit.updateMany({
+                where: {
+                  id: devis.circuitId!,
+                  nbPlacesDisponibles: { gte: devis.nombrePersonnes }
+                },
+                data: {
+                  nbPlacesDisponibles: { decrement: devis.nombrePersonnes }
+                }
+              });
+            };
+
+            let updatedCircuit = await decrementStock();
+
+            if (updatedCircuit.count === 0) {
+              // Pas assez de places apparentes → libérer les réservations expirées du circuit
+              await expirationService.expireCircuitPending(devis.circuitId, tx);
+              // Réessayer la décrémentation atomique après nettoyage
+              updatedCircuit = await decrementStock();
+            }
 
             if (updatedCircuit.count === 0) {
               throw new Error("Plus assez de places disponibles pour ce circuit");

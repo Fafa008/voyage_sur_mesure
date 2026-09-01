@@ -14,6 +14,8 @@
 
 import { expirationService } from "@/lib/services/payment/expiration.service";
 import { prisma } from "@/lib/prisma";
+import { GET as expireReservationsGET } from "@/app/api/internal/expire-reservations/route";
+import type { NextRequest } from "next/server";
 import {
   PaymentMethod,
   PaymentStatus,
@@ -82,6 +84,16 @@ async function createTestTransaction(
       expiresAt,
     },
   });
+}
+
+/**
+ * Crée une requête GET vers l'endpoint interne d'expiration.
+ */
+function createInternalRequest(token: string | null): NextRequest {
+  return new Request("http://localhost:3000/api/internal/expire-reservations", {
+    method: "GET",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  }) as unknown as NextRequest;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -491,7 +503,162 @@ export async function runExpirationTests() {
       console.log("✅ TEST 10 réussi\n");
     }
 
-    console.log("🎉 Tous les tests d'expiration (P0.3 + P1.1) ont réussi !\n");
+    // ── TEST 11 (P0.4) ─────────────────────────────────────────────────────────
+    // Lazy expiration : stock saturé → nettoyage via expireCircuitPending → réessai → succès
+    {
+      console.log("TEST 11 : Lazy expiration — stock saturé puis débloqué par nettoyage");
+
+      const circuit = await createTestCircuit(2);
+      createdCircuits.push(circuit.id);
+
+      // Une réservation expirée occupe les 2 places du circuit
+      const staleReservation = await createTestReservation(testUser.id, circuit.id, 2);
+      createdReservations.push(staleReservation.id);
+
+      await prisma.circuit.update({
+        where: { id: circuit.id },
+        data: { nbPlacesDisponibles: { decrement: 2 } },
+      });
+
+      await createTestTransaction(staleReservation.id, testUser.id, provider!.id, past);
+
+      // 1) Première tentative de décrémentation → échec (stock saturé)
+      const firstAttempt = await prisma.circuit.updateMany({
+        where: {
+          id: circuit.id,
+          nbPlacesDisponibles: { gte: 2 },
+        },
+        data: { nbPlacesDisponibles: { decrement: 2 } },
+      });
+      console.assert(firstAttempt.count === 0, "TEST 11: première tentative doit échouer (0 places)");
+
+      // 2) Lazy expiration : nettoyage des réservations expirées du circuit
+      const placesRestored = await expirationService.expireCircuitPending(circuit.id);
+      console.assert(placesRestored === 2, `TEST 11: 2 places restituées, obtenu ${placesRestored}`);
+
+      const circuitMid = await prisma.circuit.findUnique({ where: { id: circuit.id } });
+      console.assert(circuitMid!.nbPlacesDisponibles === 2, "TEST 11: stock restauré à 2");
+
+      // 3) Réessai de la décrémentation → succès
+      const secondAttempt = await prisma.circuit.updateMany({
+        where: {
+          id: circuit.id,
+          nbPlacesDisponibles: { gte: 2 },
+        },
+        data: { nbPlacesDisponibles: { decrement: 2 } },
+      });
+      console.assert(secondAttempt.count === 1, "TEST 11: réessai après nettoyage doit réussir");
+
+      const staleAfter = await prisma.reservation.findUnique({ where: { id: staleReservation.id } });
+      console.assert(staleAfter!.status === ReservationStatus.ANNULEE, "TEST 11: réservation expirée annulée");
+
+      const staleTxAfter = await prisma.paymentTransaction.findMany({
+        where: { reservationId: staleReservation.id },
+      });
+      console.assert(
+        staleTxAfter.every((tx) => tx.status === PaymentStatus.EXPIRED),
+        "TEST 11: transactions expirées marquées EXPIRED",
+      );
+
+      console.log("✅ TEST 11 réussi\n");
+    }
+
+    // ── TEST 12 (P0.4) ─────────────────────────────────────────────────────────
+    // Concurrence : deux utilisateurs simultanés → aucune sur-réservation
+    {
+      console.log("TEST 12 : Deux utilisateurs simultanés → aucune sur-réservation");
+
+      const circuit = await createTestCircuit(2);
+      createdCircuits.push(circuit.id);
+
+      // Deux réservations expirées occupent chacune 1 place (2 places au total)
+      const stale1 = await createTestReservation(testUser.id, circuit.id, 1);
+      const stale2 = await createTestReservation(testUser.id, circuit.id, 1);
+      createdReservations.push(stale1.id, stale2.id);
+
+      await prisma.circuit.update({
+        where: { id: circuit.id },
+        data: { nbPlacesDisponibles: { decrement: 2 } },
+      });
+
+      await createTestTransaction(stale1.id, testUser.id, provider!.id, past);
+      await createTestTransaction(stale2.id, testUser.id, provider!.id, past);
+
+      const circuitBefore = await prisma.circuit.findUnique({ where: { id: circuit.id } });
+      console.assert(circuitBefore!.nbPlacesDisponibles === 0, "TEST 12: stock saturé (0 places)");
+
+      // Deux flux concurrents reproduisant le comportement de initiateFromDevis :
+      // essayer de décrémenter → si échec, nettoyer les réservations expirées → réessayer.
+      const reserveWithLazyExpiration = async () => {
+        let updated = await prisma.circuit.updateMany({
+          where: { id: circuit.id, nbPlacesDisponibles: { gte: 2 } },
+          data: { nbPlacesDisponibles: { decrement: 2 } },
+        });
+        if (updated.count === 0) {
+          await expirationService.expireCircuitPending(circuit.id);
+          updated = await prisma.circuit.updateMany({
+            where: { id: circuit.id, nbPlacesDisponibles: { gte: 2 } },
+            data: { nbPlacesDisponibles: { decrement: 2 } },
+          });
+        }
+        return updated.count;
+      };
+
+      const [winner1, winner2] = await Promise.all([
+        reserveWithLazyExpiration(),
+        reserveWithLazyExpiration(),
+      ]);
+
+      const nbGagnants = [winner1, winner2].filter((c) => c === 1).length;
+      console.assert(nbGagnants === 1, `TEST 12: un seul utilisateur doit gagner (obtenu ${nbGagnants})`);
+
+      const circuitAfter = await prisma.circuit.findUnique({ where: { id: circuit.id } });
+      console.assert(
+        circuitAfter!.nbPlacesDisponibles === 0,
+        `TEST 12: aucune sur-réservation — places à 0 (obtenu ${circuitAfter!.nbPlacesDisponibles})`,
+      );
+      console.assert(circuitAfter!.nbPlacesDisponibles >= 0, "TEST 12: pas de places négatives");
+
+      console.log("✅ TEST 12 réussi\n");
+    }
+
+    // ── TEST 13 (P0.4) ─────────────────────────────────────────────────────────
+    // Authentification de l'endpoint interne /api/internal/expire-reservations
+    {
+      console.log("TEST 13 : Auth endpoint interne — 503/401/200");
+
+      const originalSecret = process.env.CRON_SECRET;
+
+      try {
+        // a) Aucun secret configuré → 503
+        delete process.env.CRON_SECRET;
+        const resNoSecret = await expireReservationsGET(createInternalRequest(null));
+        console.assert(resNoSecret.status === 503, `TEST 13: 503 attendu sans secret, obtenu ${resNoSecret.status}`);
+
+        // b) Mauvais secret → 401
+        process.env.CRON_SECRET = "test-cron-secret-123";
+        const resBadToken = await expireReservationsGET(createInternalRequest("wrong-secret"));
+        console.assert(resBadToken.status === 401, `TEST 13: 401 attendu avec mauvais secret, obtenu ${resBadToken.status}`);
+
+        // c) Bon secret → 200
+        const resGoodToken = await expireReservationsGET(createInternalRequest("test-cron-secret-123"));
+        console.assert(resGoodToken.status === 200, `TEST 13: 200 attendu avec bon secret, obtenu ${resGoodToken.status}`);
+
+        const body = await resGoodToken.json();
+        console.assert(body.success === true, "TEST 13: réponse success=true");
+      } finally {
+        // Restaurer l'environnement d'origine
+        if (originalSecret === undefined) {
+          delete process.env.CRON_SECRET;
+        } else {
+          process.env.CRON_SECRET = originalSecret;
+        }
+      }
+
+      console.log("✅ TEST 13 réussi\n");
+    }
+
+    console.log("🎉 Tous les tests d'expiration (P0.3 + P1.1 + P0.4) ont réussi !\n");
   } catch (err) {
     console.error("❌ Erreur pendant les tests d'expiration:", err);
     throw err;

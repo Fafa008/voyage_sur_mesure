@@ -265,6 +265,68 @@ export class ExpirationService {
   }
 
   /**
+   * Expire toutes les transactions PENDING/PROCESSING périmées associées
+   * à un circuit donné, de façon à libérer ses places à la volée.
+   *
+   * Utilisé pour la "lazy expiration" applicative : avant de décider si une
+   * nouvelle réservation doit échouer faute de places, on nettoie d'abord
+   * les réservations expirées du circuit afin de récupérer éventuellement
+   * des places disponibles.
+   *
+   * Si un client Prisma de transaction externe est fourni (tx), l'opération
+   * s'exécute dans cette transaction parente (cas initiateFromDevis), sinon
+   * chaque expiration est traitée dans sa propre transaction.
+   *
+   * Retourne le nombre de places libérées au total.
+   */
+  async expireCircuitPending(
+    circuitId: number,
+    externalTx?: Prisma.TransactionClient,
+  ): Promise<number> {
+    const run = async (tx: Prisma.TransactionClient): Promise<number> => {
+      const now = new Date();
+
+      const expiredTransactions = await tx.paymentTransaction.findMany({
+        where: {
+          status: { in: [PaymentStatus.PENDING, PaymentStatus.PROCESSING] },
+          expiresAt: { lt: now, not: null },
+          reservation: {
+            circuitId,
+            status: { not: ReservationStatus.PAYEE },
+            placesReleasedAt: null,
+          },
+        },
+        select: { id: true, reservationId: true },
+        take: 100,
+      });
+
+      if (expiredTransactions.length === 0) return 0;
+
+      let placesRestored = 0;
+      for (const txEntry of expiredTransactions) {
+        try {
+          const result = await this.expireReservation(txEntry.reservationId, txEntry.id, tx);
+          placesRestored += result.placesRestored;
+        } catch (err) {
+          console.error(
+            `[RESERVATION EXPIRATION] Erreur lors de l'expiration lazy —` +
+            ` reservationId=${txEntry.reservationId} transactionId=${txEntry.id}:`,
+            err instanceof Error ? err.message : String(err),
+          );
+        }
+      }
+
+      return placesRestored;
+    };
+
+    if (externalTx) {
+      return run(externalTx);
+    }
+
+    return prisma.$transaction(run, { timeout: 30_000 });
+  }
+
+  /**
    * Traite en lot toutes les PaymentTransactions expirées.
    *
    * Critères d'expiration :

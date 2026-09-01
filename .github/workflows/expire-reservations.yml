@@ -1,0 +1,48 @@
+name: Expire Reservations (Cron 15min)
+
+on:
+  schedule:
+    # Toutes les 15 minutes — GitHub Actions est le cron externe principal
+    # (compatible Vercel Hobby où les crons < 5min sont indisponibles)
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  expire-reservations:
+    name: Appeler /api/internal/expire-reservations
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Appel de l'endpoint d'expiration
+        env:
+          APP_URL: ${{ vars.APP_URL || secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ]; then
+            echo "::error::La variable/secret APP_URL n'est pas configurée."
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::Le secret CRON_SECRET n'est pas configuré."
+            exit 1
+          fi
+
+          # Nettoyer un éventuel slash final dans l'URL
+          APP_URL="${APP_URL%/}"
+
+          echo "Appel de ${APP_URL}/api/internal/expire-reservations ..."
+
+          HTTP_CODE=$(curl --silent --output /tmp/expire-response.json --write-out "%{http_code}" \
+            --max-time 60 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL}/api/internal/expire-reservations")
+
+          echo "HTTP ${HTTP_CODE}"
+          cat /tmp/expire-response.json
+          echo ""
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::L'endpoint a répondu HTTP ${HTTP_CODE}."
+            exit 1
+          fi

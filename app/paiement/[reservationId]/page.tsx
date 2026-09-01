@@ -1,3 +1,4 @@
+import { PaymentStatus, ReservationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Calendar, Users, ArrowLeft } from "lucide-react";
+import { expirationService } from "@/lib/services/payment/expiration.service";
 import { PaymentCheckoutForm } from "./PaymentCheckoutForm";
+import { ExpiredPanel } from "./ExpiredPanel";
 import { PriceDisplay } from "@/components/currency/PriceDisplay";
 
 interface Props {
@@ -53,12 +56,58 @@ export default async function PaymentTunnelPage({ params }: Props) {
     redirect(`/paiement/${reservationId}/confirmation`);
   }
 
+  // ── P0.4 — Lazy expiration à l'ouverture de la page ─────────────────────────
+  // Si la réservation est EN_ATTENTE avec une transaction PENDING/PROCESSING
+  // périmée, on expire immédiatement pour libérer les places de façon transparente.
+  const latestTransaction = reservation.paiements[0] || null;
+
+  if (
+    reservation.status === ReservationStatus.EN_ATTENTE &&
+    latestTransaction &&
+    latestTransaction.expiresAt &&
+    latestTransaction.expiresAt < new Date() &&
+    latestTransaction.status !== PaymentStatus.PAID
+  ) {
+    await expirationService.expireReservation(
+      reservation.id,
+      latestTransaction.id,
+    );
+
+    // Recharger l'état réel de la réservation pour refléter l'expiration
+    // (ou sa conservation si une transaction sœur est encore active).
+    const refreshed = await prisma.reservation.findUnique({
+      where: { id: reservation.id },
+      select: { status: true },
+    });
+    if (refreshed) reservation.status = refreshed.status;
+  }
+
   const circuitTitle =
     reservation.circuit?.titre ||
     reservation.devis?.circuit?.titre ||
     "Voyage sur mesure";
   const amount = reservation.montantFinal?.toString() || "0";
-  const latestTransaction = reservation.paiements[0] || null;
+
+  // ── Interface délai expiré / réservation annulée ───────────────────────────
+  if (reservation.status === ReservationStatus.ANNULEE) {
+    return (
+      <ExpiredPanel
+        reservation={{
+          id: reservation.id,
+          nbVoyageurs: reservation.nbVoyageurs,
+          montantFinal: reservation.montantFinal
+            ? Number(reservation.montantFinal)
+            : null,
+          dateDebut: reservation.dateDebut,
+          dateFin: reservation.dateFin,
+          devis: reservation.devis
+            ? { id: reservation.devis.id }
+            : null,
+        }}
+        circuitTitle={circuitTitle}
+      />
+    );
+  }
 
   return (
     <main className="max-w-4xl mx-auto py-10 px-4 space-y-8">
