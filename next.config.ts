@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
-  serverExternalPackages: ["@prisma/client", "bcrypt"],
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "bcrypt"],
   images: {
     // Conversion automatique en AVIF puis WebP — réduit le poids des images de 40-60%
     formats: ["image/avif", "image/webp"],

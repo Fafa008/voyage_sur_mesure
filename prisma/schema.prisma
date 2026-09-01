@@ -13,38 +13,29 @@ model Role {
 }
 
 model User {
-  // 🔐 Champs Better Auth (obligatoires)
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique @db.VarChar(255)
-  emailVerified Boolean  @default(false)
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // 🧑‍💼 Champs métier (ex-`Utilisateur`)
+  id              String               @id @default(cuid())
+  name            String
+  email           String               @unique @db.VarChar(255)
+  emailVerified   Boolean              @default(false)
+  image           String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  dateInscription DateTime             @default(now())
   prenom          String?
-  telephone       String?  @unique
-  dateInscription DateTime @default(now())
-
-  // 🔗 Rôle (relation vers Role)
-  roleId Int?
-  role   Role? @relation(fields: [roleId], references: [id])
-
-  // 🔗 Relations métier
-  devis          Devis[]              @relation("ClientDevis")
+  roleId          Int?
+  telephone       String?              @unique
+  avis            Avis[]
   devisConseiller Devis[]              @relation("ConseillerDevis")
-  paiements      Paiement[]
-  avis          Avis[]
-  favoris       Favori[]
-  notifications Notification[]
-  reservations  Reservation[]
-  transactions  PaymentTransaction[]
-  factures      Invoice[]
-
-  // 🔗 Relations Better Auth
-  sessions Session[]
-  accounts Account[]
+  devis           Devis[]              @relation("ClientDevis")
+  favoris         Favori[]
+  factures        Invoice[]
+  notifications   Notification[]
+  paiements       Paiement[]
+  transactions    PaymentTransaction[]
+  reservations    Reservation[]
+  accounts        Account[]
+  sessions        Session[]
+  role            Role?                @relation(fields: [roleId], references: [id])
 
   @@map("user")
 }
@@ -64,26 +55,23 @@ model Region {
 model Circuit {
   id                  Int            @id @default(autoincrement())
   titre               String
-  slug                String         @unique
   description         String?
   dureeJours          Int?
   prixEstime          Decimal?       @db.Decimal(10, 2)
   nbPlacesDisponibles Int            @default(0)
   dateDebut           DateTime?
-  dateFin             DateTime?
   estGroupe           Boolean        @default(false)
-
-  // Lieu de départ (nom + coordonnées GPS)
+  themeId             Int?
+  regionId            Int?
+  slug                String         @unique
+  dateFin             DateTime?
   lieuDepartNom       String?
   lieuDepartLat       Decimal?       @db.Decimal(10, 7)
   lieuDepartLng       Decimal?       @db.Decimal(10, 7)
-
-  // Lieu d'arrivée (nom + coordonnées GPS)
   lieuArriveeNom      String?
   lieuArriveeLat      Decimal?       @db.Decimal(10, 7)
   lieuArriveeLng      Decimal?       @db.Decimal(10, 7)
-  themeId             Int?
-  regionId            Int?
+  deletedAt           DateTime?
   avis                Avis[]
   region              Region?        @relation(fields: [regionId], references: [id])
   theme               Theme?         @relation(fields: [themeId], references: [id])
@@ -92,8 +80,6 @@ model Circuit {
   favoris             Favori[]
   images              ImageCircuit[]
   reservations        Reservation[]
-
-  deletedAt           DateTime?
 }
 
 model ImageCircuit {
@@ -139,91 +125,70 @@ model Activite {
 }
 
 model Devis {
-  id        Int      @id @default(autoincrement())
-  userId       String
-  user         User        @relation("ClientDevis", fields: [userId], references: [id])
-  conseillerId String?
-  conseiller   User?       @relation("ConseillerDevis", fields: [conseillerId], references: [id])
-  circuitId    Int
-  circuit      Circuit     @relation(fields: [circuitId], references: [id], onDelete: Restrict)
-
-  // Champs existants
-  dateDemande           DateTime    @default(now())
-  statut                StatutDevis @default(en_cours)
-  nombrePersonnes       Int         @default(1)
+  id                    Int          @id @default(autoincrement())
+  dateDemande           DateTime     @default(now())
+  nombrePersonnes       Int          @default(1)
   commentaireClient     String?
   commentaireConseiller String?
-  montantTotal          Decimal?    @db.Decimal(10, 2)
-  // Snapshot du chiffrage serveur scellé lors de la validation (breakdown détaillé)
+  montantTotal          Decimal?     @db.Decimal(10, 2)
+  statut                StatutDevis  @default(en_cours)
+  circuitId             Int
+  userId                String
+  activites             String[]     @default([])
+  ados                  Int          @default(0)
+  adultes               Int          @default(1)
+  budgetMax             Decimal?     @db.Decimal(10, 2)
+  budgetMin             Decimal?     @db.Decimal(10, 2)
+  dateDebutSouhaitee    DateTime?
+  dateFinSouhaitee      DateTime?
+  dureeFlexible         Boolean?     @default(false)
+  enfants               Int          @default(0)
+  enfantsAge            String?
+  newsletter            Boolean?     @default(false)
+  nom                   String?
+  prenom                String?
+  regime                String?
+  regimePrecision       String?
+  regionIds             Int[]        @default([])
+  source                String?
+  telephone             String?
+  themeIds              Int[]        @default([])
+  transport             String[]     @default([])
+  typeHebergement       String?
+  typeVoyage            String[]     @default([])
+  conseillerId          String?
+  dateDebutConfirmee    DateTime?
+  dateFinConfirmee      DateTime?
+  deletedAt             DateTime?
   detailsCalcul         Json?
-
-  // Nouveaux champs pour le formulaire enrichi
-  prenom             String?
-  nom                String?
-  telephone          String?
-  dateDebutSouhaitee DateTime?
-  dateFinSouhaitee   DateTime?
-  dateDebutConfirmee DateTime?
-  dateFinConfirmee   DateTime?
-  dureeFlexible      Boolean?  @default(false)
-  adultes            Int       @default(1)
-  enfants            Int       @default(0)
-  ados               Int       @default(0)
-  enfantsAge         String? // ex: "4, 7, 10"
-  typeHebergement    String? // hotel, luxe, lodge, etc.
-  regime             String? // vegetarien, vegan, etc.
-  regimePrecision    String?
-  budgetMin          Decimal?  @db.Decimal(10, 2)
-  budgetMax          Decimal?  @db.Decimal(10, 2)
-  source             String? // moteur, reseau, ami, etc.
-  newsletter         Boolean?  @default(false)
-
-  // Pour stocker les listes (thèmes, régions, activités, transport, type voyage)
-  // PostgreSQL supporte les tableaux, on peut les utiliser
-  themeIds   Int[]    @default([])
-  regionIds  Int[]    @default([])
-  typeVoyage String[] @default([]) // ["Aventure", "Détente"]
-  activites  String[] @default([]) // ["Randonnée", "Plongée"]
-  transport  String[] @default([]) // ["4x4", "Avion"]
-
-  reservation Reservation?
-  deletedAt   DateTime?
+  circuit               Circuit      @relation(fields: [circuitId], references: [id])
+  conseiller            User?        @relation("ConseillerDevis", fields: [conseillerId], references: [id])
+  user                  User         @relation("ClientDevis", fields: [userId], references: [id])
+  reservation           Reservation?
 }
 
 model Reservation {
-  id              Int      @id @default(autoincrement())
-  dateReservation DateTime @default(now())
-  montantFinal    Decimal? @db.Decimal(10, 2)
-
-  // Compatibilité et Nouveaux statuts
-  status ReservationStatus @default(BROUILLON)
-  statut StatutReservation @default(confirmee)
-
-  // Devis optionnel
-  devisId Int?   @unique
-  devis   Devis? @relation(fields: [devisId], references: [id], onDelete: Restrict)
-
-  // Nouveaux champs
-  circuitId   Int?
-  circuit     Circuit?  @relation(fields: [circuitId], references: [id])
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id])
-  dateDebut   DateTime?
-  dateFin     DateTime?
-  nbVoyageurs Int       @default(1)
-
-  paiement  Paiement?
-  paiements PaymentTransaction[]
-  factures  Invoice[]
-
-  deletedAt        DateTime?
-  // Verrou idempotent : posé lors de la libération des places.
-  // Si non-null, les places ont déjà été restituées → toute tentative
-  // de double libération est rejetée atomiquement par Prisma.
+  id               Int                  @id @default(autoincrement())
+  dateReservation  DateTime             @default(now())
+  montantFinal     Decimal?             @db.Decimal(10, 2)
+  statut           StatutReservation    @default(confirmee)
+  devisId          Int?                 @unique
+  circuitId        Int?
+  createdAt        DateTime             @default(now())
+  dateDebut        DateTime?
+  dateFin          DateTime?
+  nbVoyageurs      Int                  @default(1)
+  status           ReservationStatus    @default(BROUILLON)
+  updatedAt        DateTime             @updatedAt
+  userId           String?
   placesReleasedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  deletedAt        DateTime?
+  factures         Invoice[]
+  paiement         Paiement?
+  paiements        PaymentTransaction[]
+  circuit          Circuit?             @relation(fields: [circuitId], references: [id])
+  devis            Devis?               @relation(fields: [devisId], references: [id], onDelete: Restrict)
+  user             User?                @relation(fields: [userId], references: [id])
 }
 
 model ModePaiement {
@@ -238,8 +203,8 @@ model Paiement {
   datePaiement         DateTime     @default(now())
   referenceTransaction String?      @unique
   reservationId        Int?         @unique
-  userId               String
   modeId               Int
+  userId               String
   mode                 ModePaiement @relation(fields: [modeId], references: [id])
   reservation          Reservation? @relation(fields: [reservationId], references: [id])
   user                 User         @relation(fields: [userId], references: [id])
@@ -251,8 +216,8 @@ model Avis {
   commentaire String?
   dateAvis    DateTime @default(now())
   estModere   Boolean  @default(false)
-  userId      String
   circuitId   Int
+  userId      String
   circuit     Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id])
 
@@ -263,8 +228,8 @@ model Avis {
 model Favori {
   id        Int      @id @default(autoincrement())
   dateAjout DateTime @default(now())
-  userId    String
   circuitId Int
+  userId    String
   circuit   Circuit  @relation(fields: [circuitId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
 
@@ -282,6 +247,141 @@ model Notification {
 
   @@index([userId])
   @@index([lu])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model PaymentProvider {
+  id           String               @id @default(cuid())
+  name         String               @unique
+  isActive     Boolean              @default(true)
+  config       Json?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  transactions PaymentTransaction[]
+}
+
+model PaymentTransaction {
+  id                    String           @id @default(cuid())
+  amount                Decimal          @db.Decimal(10, 2)
+  currency              String           @default("MGA")
+  status                PaymentStatus    @default(PENDING)
+  method                PaymentMethod
+  providerId            String
+  providerRef           String?          @unique
+  reservationId         Int
+  userId                String
+  expiresAt             DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  notificationToken     String?
+  providerPaymentMethod String?
+  logs                  PaymentLog[]
+  provider              PaymentProvider  @relation(fields: [providerId], references: [id])
+  reservation           Reservation      @relation(fields: [reservationId], references: [id])
+  user                  User             @relation(fields: [userId], references: [id])
+  webhooks              PaymentWebhook[]
+
+  @@index([reservationId])
+  @@index([providerRef])
+  @@index([status])
+  @@index([userId])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  numeroFacture String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  amount        Decimal       @db.Decimal(10, 2)
+  taxAmount     Decimal?      @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  reservationId Int
+  userId        String
+  fileUrl       String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  currency      String        @default("MGA")
+  reservation   Reservation   @relation(fields: [reservationId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Decimal?  @db.Decimal(5, 2)
+  discountAmount  Decimal?  @db.Decimal(10, 2)
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model PaymentLog {
+  id            String             @id @default(cuid())
+  transactionId String
+  action        String
+  data          Json?
+  createdAt     DateTime           @default(now())
+  transaction   PaymentTransaction @relation(fields: [transactionId], references: [id])
+}
+
+model PaymentWebhook {
+  id            String              @id @default(cuid())
+  transactionId String?
+  provider      String
+  payload       Json
+  isProcessed   Boolean             @default(false)
+  error         String?
+  createdAt     DateTime            @default(now())
+  transaction   PaymentTransaction? @relation(fields: [transactionId], references: [id])
 }
 
 enum RoleNom {
@@ -304,58 +404,6 @@ enum StatutReservation {
   annulee
   terminee
 }
-
-model Session {
-  id        String   @id @default(cuid())
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([token])
-  @@index([userId])
-  @@map("session")
-}
-
-model Account {
-  id                    String    @id @default(cuid())
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([identifier])
-  @@map("verification")
-}
-
-// ==========================================
-// NOUVEAUX MODÈLES (RESERVATION & PAIEMENT)
-// ==========================================
 
 enum ReservationStatus {
   BROUILLON
@@ -394,101 +442,4 @@ enum RefundStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-model PaymentProvider {
-  id           String               @id @default(cuid())
-  name         String               @unique // ex: 'binance', 'bank_transfer', 'stripe'
-  isActive     Boolean              @default(true)
-  config       Json?
-  transactions PaymentTransaction[]
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-}
-
-model PaymentTransaction {
-  id          String          @id @default(cuid())
-  amount      Decimal         @db.Decimal(10, 2)
-  currency    String          @default("MGA")
-  status      PaymentStatus   @default(PENDING)
-  method      PaymentMethod
-  providerId  String
-  provider    PaymentProvider @relation(fields: [providerId], references: [id])
-  providerRef String?         @unique
-
-  reservationId Int
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-
-  expiresAt DateTime?
-
-  notificationToken     String?
-  providerPaymentMethod String?
-
-  logs     PaymentLog[]
-  webhooks PaymentWebhook[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([reservationId])
-  @@index([providerRef])
-  @@index([status])
-  @@index([userId])
-}
-
-model Invoice {
-  id            String        @id @default(cuid())
-  numeroFacture String        @unique
-  status        InvoiceStatus @default(DRAFT)
-  amount        Decimal       @db.Decimal(10, 2)
-  currency      String        @default("MGA")
-  taxAmount     Decimal?      @db.Decimal(10, 2)
-  totalAmount   Decimal       @db.Decimal(10, 2)
-
-  reservationId Int
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-
-  fileUrl String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Coupon {
-  id              String    @id @default(cuid())
-  code            String    @unique
-  discountPercent Decimal?  @db.Decimal(5, 2)
-  discountAmount  Decimal?  @db.Decimal(10, 2)
-  maxUses         Int?
-  usedCount       Int       @default(0)
-  validFrom       DateTime?
-  validUntil      DateTime?
-  isActive        Boolean   @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PaymentLog {
-  id            String             @id @default(cuid())
-  transactionId String
-  transaction   PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
-  action        String
-  data          Json?
-  createdAt     DateTime           @default(now())
-}
-
-model PaymentWebhook {
-  id            String              @id @default(cuid())
-  transactionId String?
-  transaction   PaymentTransaction? @relation(fields: [transactionId], references: [id])
-  provider      String
-  payload       Json
-  isProcessed   Boolean             @default(false)
-  error         String?
-  createdAt     DateTime            @default(now())
 }
