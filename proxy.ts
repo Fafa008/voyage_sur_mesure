@@ -8,11 +8,12 @@ const PUBLIC_PATHS = ["/", "/home", "/circuits", "/login", "/register", "/contac
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Routes API et webhooks autonomes (Better Auth, Webhooks paiement, upload)
+  // Routes API et webhooks autonomes (Better Auth, Webhooks paiement, upload, cron interne)
   if (
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/payment/webhook") ||
-    pathname.startsWith("/api/upload")
+    pathname.startsWith("/api/upload") ||
+    pathname.startsWith("/api/internal")
   ) {
     return NextResponse.next();
   }
